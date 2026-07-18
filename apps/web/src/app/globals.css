@@ -1,0 +1,146 @@
+@import "tailwindcss";
+
+/*
+ * SocialSphear Design Tokens — Minimalist Light Theme (Reference: Whale Loans Aesthetic)
+ * Pure white canvas, light gray sidebars, flat black buttons, and contrast dark-box metrics.
+ */
+
+:root {
+  /* ─── Premium Monochromatic Palette ────────────── */
+  --color-primary: #18181b;          /* Solid Charcoal/Black for Actions */
+  --color-primary-hover: #27272a;
+  --color-primary-light: #52525b;
+  --color-accent: #18181b;
+  --color-accent-hover: #27272a;
+
+  /* ─── Clean Light Surfaces & Backgrounds ───────── */
+  --color-background: #ffffff;       /* Pure white canvas content area */
+  --color-surface: #ffffff;          /* White cards */
+  --color-surface-hover: #f4f4f5;    /* Subtle grey hover (zinc-100) */
+  --color-surface-elevated: #ffffff;
+  
+  --color-border: #e4e4e7;           /* Very thin grey border (zinc-200) */
+  --color-border-hover: #d4d4d8;     /* zinc-300 */
+
+  /* ─── High Contrast Typography ────────────────── */
+  --color-text: #18181b;             /* Pure black text (zinc-900) */
+  --color-text-secondary: #52525b;   /* Mid grey secondary text (zinc-600) */
+  --color-text-muted: #8e8e93;       /* Desaturated grey (zinc-400) */
+  --color-text-inverse: #ffffff;     /* White text for dark overlays */
+
+  /* ─── Platform / Status Colors (Clean Muted) ───── */
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+  --color-info: #3B82F6;
+
+  --color-instagram: #18181b;
+  --color-facebook: #18181b;
+  --color-twitter: #18181b;
+  --color-linkedin: #18181b;
+  --color-tiktok: #18181b;
+  --color-pinterest: #18181b;
+  --color-youtube: #18181b;
+  --color-threads: #18181b;
+
+  /* ─── Spacing ───────────────────────────────── */
+  --sidebar-width: 260px;
+  --sidebar-collapsed-width: 72px;
+  --header-height: 64px;
+
+  /* ─── Modern Friendly Corner Radii ──────────── */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  /* ─── Minimal Shadows ───────────────────────── */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.04), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+  --shadow-glow: none;
+
+  /* ─── Transitions ───────────────────────────── */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─── Base Styles ─────────────────────── */
+* {
+  border-color: var(--color-border);
+}
+
+body {
+  color: var(--color-text);
+  background-color: var(--color-background);
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Sidebar Custom Theme override ────── */
+aside {
+  background-color: #fafafa !important;
+  border-right: 1px solid #e4e4e7 !important;
+}
+
+aside * {
+  border-color: #e4e4e7 !important;
+}
+
+/* Active sidebar item offset styling */
+aside .bg-primary\/10 {
+  background-color: #f4f4f5 !important;
+  color: #18181b !important;
+  border: 1px solid #e4e4e7 !important;
+}
+
+/* ─── Header Override ─────────────────── */
+header {
+  background-color: #ffffff !important;
+  border-bottom: 1px solid #e4e4e7 !important;
+}
+
+/* ─── Cards & Containers ──────────────── */
+.glass {
+  background-color: #ffffff;
+  backdrop-filter: none;
+  border: 1px solid #e4e4e7;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.04);
+  border-radius: var(--radius-lg);
+}
+
+/* KPI Metrics cards with solid dark contrast container style (matches right panels of reference design) */
+.glass-dark {
+  background-color: #18181b;
+  border: 1px solid #27272a;
+  color: #ffffff;
+  border-radius: var(--radius-lg);
+}
+
+.gradient-text {
+  color: var(--color-text);
+  background: none;
+  -webkit-text-fill-color: initial;
+}
+
+/* ─── Scrollbar ───────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-hover);
+}

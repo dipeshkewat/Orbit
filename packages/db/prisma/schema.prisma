@@ -1,0 +1,356 @@
+// SocialSphear — Prisma Schema v1.0
+// All 14 tables defined per tech spec + implementation plan.
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  directUrl  = env("DIRECT_DATABASE_URL")
+  extensions = [pgvector(map: "vector", schema: "extensions")]
+}
+
+// ─── Users ────────────────────────────────────────────────────
+// Mirrored from Clerk. Clerk webhook syncs user data here.
+model User {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clerkId   String   @unique @map("clerk_id")
+  email     String   @unique
+  name      String?
+  avatarUrl String?  @map("avatar_url")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  ownedWorkspaces Workspace[]    @relation("WorkspaceOwner")
+  teamMemberships TeamMember[]
+  createdPosts    Post[]
+  activityLogs    ActivityLog[]
+
+  @@map("users")
+}
+
+// ─── Workspaces ───────────────────────────────────────────────
+// One per brand or client. Container for accounts, posts, team.
+model Workspace {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String
+  slug      String   @unique
+  logoUrl   String?  @map("logo_url")
+  plan      String   @default("free")
+  ownerId   String   @map("owner_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Stripe
+  stripeCustomerId     String? @unique @map("stripe_customer_id")
+  stripeSubscriptionId String? @unique @map("stripe_subscription_id")
+
+  // Relations
+  owner            User              @relation("WorkspaceOwner", fields: [ownerId], references: [id])
+  teamMembers      TeamMember[]
+  socialAccounts   SocialAccount[]
+  posts            Post[]
+  mediaFiles       MediaFile[]
+  aiCredits        AiCredit[]
+  brandVoices      BrandVoiceExample[]
+  activityLogs     ActivityLog[]
+  webhooks         Webhook[]
+  apiKeys          ApiKey[]
+  rssFeeds         RssFeed[]
+
+  @@map("workspaces")
+}
+
+// ─── Team Members ─────────────────────────────────────────────
+// Workspace membership with RBAC roles.
+model TeamMember {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId  String   @map("workspace_id") @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  role         String   @default("editor") // owner, admin, editor, viewer
+  inviteStatus String   @default("pending") @map("invite_status") // pending, accepted, expired
+  inviteEmail  String?  @map("invite_email")
+  joinedAt     DateTime? @map("joined_at") @db.Timestamptz
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@map("team_members")
+}
+
+// ─── Social Accounts ──────────────────────────────────────────
+// Connected OAuth accounts. Tokens stored as encrypted BYTEA.
+model SocialAccount {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId     String    @map("workspace_id") @db.Uuid
+  platform        String    // instagram, facebook, twitter, linkedin, etc.
+  platformUserId  String    @map("platform_user_id")
+  username        String?
+  displayName     String?   @map("display_name")
+  avatarUrl       String?   @map("avatar_url")
+  accessToken     Bytes     @map("access_token")    // AES-256-GCM encrypted
+  refreshToken    Bytes?    @map("refresh_token")   // AES-256-GCM encrypted
+  tokenExpiresAt  DateTime? @map("token_expires_at") @db.Timestamptz
+  status          String    @default("active") // active, expiring, disconnected, error
+  metadata        Json?     @default("{}") // Platform-specific data (page IDs, etc.)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  postJobs  PostJob[]
+
+  @@unique([workspaceId, platform, platformUserId])
+  @@index([workspaceId, platform])
+  @@map("social_accounts")
+}
+
+// ─── Posts ─────────────────────────────────────────────────────
+// Core content unit. Can target multiple platforms.
+model Post {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId       String    @map("workspace_id") @db.Uuid
+  createdById       String    @map("created_by") @db.Uuid
+  content           String?   @db.Text
+  mediaUrls         Json      @default("[]") @map("media_urls") // string[]
+  platformOverrides Json      @default("{}") @map("platform_overrides") // Record<platform, {content}>
+  platforms         String[]  @default([]) // target platforms
+  scheduledAt       DateTime? @map("scheduled_at") @db.Timestamptz
+  publishedAt       DateTime? @map("published_at") @db.Timestamptz
+  status            String    @default("draft") // draft, scheduled, queued, publishing, published, retrying, failed, cancelled
+  approvalStatus    String    @default("none") @map("approval_status") // none, pending, approved, rejected
+  approvalNote      String?   @map("approval_note") @db.Text
+  isRecurring       Boolean   @default(false) @map("is_recurring")
+  recurringRule     String?   @map("recurring_rule") // cron expression for recurring
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdBy User      @relation(fields: [createdById], references: [id])
+  postJobs  PostJob[]
+  metrics   PostMetric[]
+  mediaAssets MediaFile[] @relation("PostMedia")
+
+  @@index([workspaceId, scheduledAt])
+  @@index([workspaceId, status])
+  @@map("posts")
+}
+
+// ─── Post Jobs ────────────────────────────────────────────────
+// One row per platform per post. Tracks delivery status.
+model PostJob {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  postId          String    @map("post_id") @db.Uuid
+  socialAccountId String    @map("social_account_id") @db.Uuid
+  platform        String
+  status          String    @default("pending") // pending, publishing, published, retrying, failed
+  platformPostId  String?   @map("platform_post_id")
+  platformUrl     String?   @map("platform_url")
+  publishedAt     DateTime? @map("published_at") @db.Timestamptz
+  errorMessage    String?   @map("error_message") @db.Text
+  retryCount      Int       @default(0) @map("retry_count")
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  post          Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
+  socialAccount SocialAccount @relation(fields: [socialAccountId], references: [id])
+
+  @@index([postId])
+  @@index([status])
+  @@map("post_jobs")
+}
+
+// ─── Media Files ──────────────────────────────────────────────
+// Uploaded images and videos in Cloudflare R2.
+model MediaFile {
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId        String   @map("workspace_id") @db.Uuid
+  uploadedById       String?  @map("uploaded_by") @db.Uuid
+  postId             String?  @map("post_id") @db.Uuid
+  filename           String
+  contentType        String   @map("content_type")
+  sizeBytes          Int      @map("size_bytes")
+  r2Key              String   @map("r2_key")
+  cdnUrl             String   @map("cdn_url")
+  cloudinaryPublicId String?  @map("cloudinary_public_id")
+  variants           Json     @default("{}") // {instagram_square: "url", twitter_landscape: "url", ...}
+  status             String   @default("processing") // processing, ready, error
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  post      Post?     @relation("PostMedia", fields: [postId], references: [id])
+
+  @@index([workspaceId])
+  @@map("media_files")
+}
+
+// ─── AI Credits ───────────────────────────────────────────────
+// Monthly usage ledger per workspace.
+model AiCredit {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId   String   @map("workspace_id") @db.Uuid
+  month         String   // "2026-07" format
+  creditsUsed   Int      @default(0) @map("credits_used")
+  planAllowance Int      @map("plan_allowance")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, month])
+  @@map("ai_credits")
+}
+
+// ─── Brand Voice Examples ─────────────────────────────────────
+// Training posts for brand voice AI with pgvector embeddings.
+model BrandVoiceExample {
+  id          String                       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId String                       @map("workspace_id") @db.Uuid
+  content     String                       @db.Text
+  embedding   Unsupported("vector(1536)")?
+  createdAt   DateTime                     @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@map("brand_voice_examples")
+}
+
+// ─── Activity Log ─────────────────────────────────────────────
+// Append-only audit log of all workspace actions.
+model ActivityLog {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId String   @map("workspace_id") @db.Uuid
+  userId      String?  @map("user_id") @db.Uuid
+  action      String   // post.created, post.scheduled, member.invited, etc.
+  entityType  String?  @map("entity_type") // post, social_account, member, etc.
+  entityId    String?  @map("entity_id") @db.Uuid
+  metadata    Json     @default("{}") // additional context
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User?     @relation(fields: [userId], references: [id])
+
+  @@index([workspaceId, createdAt])
+  @@map("activity_log")
+}
+
+// ─── Webhooks ─────────────────────────────────────────────────
+// User-configured webhook endpoints for event notifications.
+model Webhook {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId String   @map("workspace_id") @db.Uuid
+  url         String
+  events      String[] // post.scheduled, post.published, post.failed, etc.
+  secretHash  String   @map("secret_hash") // HMAC signing secret hash
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  workspace  Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  deliveries WebhookDelivery[]
+
+  @@index([workspaceId])
+  @@map("webhooks")
+}
+
+// ─── Webhook Deliveries ───────────────────────────────────────
+// Delivery log for webhook event dispatches.
+model WebhookDelivery {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  webhookId    String   @map("webhook_id") @db.Uuid
+  event        String
+  payload      Json
+  status       String   @default("pending") // pending, success, failed
+  responseCode Int?     @map("response_code")
+  responseBody String?  @map("response_body") @db.Text
+  attempts     Int      @default(0)
+  deliveredAt  DateTime? @map("delivered_at") @db.Timestamptz
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  webhook Webhook @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+
+  @@index([webhookId, createdAt])
+  @@map("webhook_deliveries")
+}
+
+// ─── API Keys ─────────────────────────────────────────────────
+// Developer API keys for the public REST API.
+model ApiKey {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId String    @map("workspace_id") @db.Uuid
+  name        String
+  keyPrefix   String    @map("key_prefix") // first 8 chars for display (sk_live_...)
+  keyHash     String    @unique @map("key_hash") // SHA-256 hash of full key
+  lastUsedAt  DateTime? @map("last_used_at") @db.Timestamptz
+  expiresAt   DateTime? @map("expires_at") @db.Timestamptz
+  isActive    Boolean   @default(true) @map("is_active")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@map("api_keys")
+}
+
+// ─── RSS Feeds ────────────────────────────────────────────────
+// RSS auto-posting sources (P1 feature).
+model RssFeed {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId   String    @map("workspace_id") @db.Uuid
+  url           String
+  name          String?
+  isActive      Boolean   @default(true) @map("is_active")
+  lastFetchedAt DateTime? @map("last_fetched_at") @db.Timestamptz
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@map("rss_feeds")
+}
+
+// ─── Post Metrics ─────────────────────────────────────────────
+// Per-post, per-platform engagement metrics. Upserted by the analytics module.
+model PostMetric {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  postId         String   @map("post_id") @db.Uuid
+  platform       String
+  externalId     String?  @map("external_id") // platform post ID
+  likes          Int      @default(0)
+  comments       Int      @default(0)
+  shares         Int      @default(0)
+  impressions    Int      @default(0)
+  reach          Int      @default(0)
+  clicks         Int      @default(0)
+  saves          Int      @default(0)
+  engagementRate Float    @default(0) @map("engagement_rate")
+  fetchedAt      DateTime @default(now()) @map("fetched_at") @db.Timestamptz
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, platform], name: "postId_platform")
+  @@index([postId])
+  @@map("post_metrics")
+}
