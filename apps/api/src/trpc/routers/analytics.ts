@@ -72,7 +72,7 @@ export function createAnalyticsRouter(trpc: TrpcService) {
       .mutation(async ({ input }) => {
         void input;
         return {
-          csvUrl: "https://cdn.socialsphear.com/exports/analytics_mock.csv",
+          csvUrl: "https://cdn.orbit.com/exports/analytics_mock.csv",
         };
       }),
   });

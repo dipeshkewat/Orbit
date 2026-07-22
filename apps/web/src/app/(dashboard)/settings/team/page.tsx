@@ -23,9 +23,9 @@ interface Member {
 }
 
 const INITIAL_MEMBERS: Member[] = [
-  { id: "m-1", name: "Dipes", email: "dipes@socialsphear.com", role: "owner", status: "joined" },
-  { id: "m-2", name: "Jane Doe", email: "jane@socialsphear.com", role: "admin", status: "joined" },
-  { id: "m-3", name: "Bob Smith", email: "bob@socialsphear.com", role: "editor", status: "pending" }
+  { id: "m-1", name: "Dipes", email: "dipes@orbit.com", role: "owner", status: "joined" },
+  { id: "m-2", name: "Jane Doe", email: "jane@orbit.com", role: "admin", status: "joined" },
+  { id: "m-3", name: "Bob Smith", email: "bob@orbit.com", role: "editor", status: "pending" }
 ];
 
 export default function SettingsTeamPage() {

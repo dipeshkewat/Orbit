@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "ai": "^4.1.61",
-    "@ai-sdk/anthropic": "^1.1.6"
+    "@ai-sdk/anthropic": "^1.1.6",
+    "@ai-sdk/provider": "^1.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

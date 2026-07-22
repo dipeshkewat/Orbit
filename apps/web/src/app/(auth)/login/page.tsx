@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAuthStore } from "@/lib/store";
+import { OrbitLogo } from "@/components/logo";
 import { useRouter } from "next/navigation";
 import {
   Shield,
@@ -32,10 +33,11 @@ export default function LoginPage() {
   const handleDemoAccess = () => {
     setIsLoading(true);
     setTimeout(() => {
-      login("demo@socialsphear.com", "Demo User");
-      useAuthStore.getState().setOnboardingStep(0);
+      document.cookie = "sb_bypass=true; path=/; max-age=86400";
+      login("demo@orbit.com", "Demo User");
+      useAuthStore.getState().setOnboardingStep(1);
       setIsLoading(false);
-      router.push("/");
+      router.push("/dashboard");
     }, 500);
   };
 
@@ -51,12 +53,12 @@ export default function LoginPage() {
         <div className="lg:col-span-7 flex flex-col justify-between space-y-8 p-4">
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <span className="h-2.5 w-2.5 bg-[#18181b] rounded-full" />
+              <OrbitLogo size={16} className="text-[#18181b] shrink-0" />
               <span className="text-[10px] uppercase font-bold tracking-wider text-[#71717a]">SYSTEM STATUS // SECURE</span>
             </div>
             
             <h1 className="text-4xl sm:text-6xl font-extrabold uppercase tracking-tighter leading-none text-[#18181b] select-none">
-              SOCIALSPHEAR
+              ORBIT
               <span className="block text-[#71717a]">
                 CAMPAIGN CONSOLE
               </span>

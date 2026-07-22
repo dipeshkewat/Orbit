@@ -15,7 +15,7 @@ export function createMediaRouter(trpc: TrpcService) {
         void input;
         return {
           uploadId: "upl_mock_id",
-          uploadUrl: "https://upload.socialsphear.com/presigned/mock_upload_key",
+          uploadUrl: "https://upload.orbit.com/presigned/mock_upload_key",
           expiresAt: new Date(Date.now() + 3600000).toISOString(),
         };
       }),
@@ -26,10 +26,10 @@ export function createMediaRouter(trpc: TrpcService) {
         void input;
         return {
           id: "med_mock_id",
-          url: "https://cdn.socialsphear.com/media/ws_mock/uploaded-image.jpg",
+          url: "https://cdn.orbit.com/media/ws_mock/uploaded-image.jpg",
           variants: {
-            instagram_square: "https://cdn.socialsphear.com/media/ws_mock/uploaded-image_1080x1080.jpg",
-            twitter_landscape: "https://cdn.socialsphear.com/media/ws_mock/uploaded-image_1200x675.jpg",
+            instagram_square: "https://cdn.orbit.com/media/ws_mock/uploaded-image_1080x1080.jpg",
+            twitter_landscape: "https://cdn.orbit.com/media/ws_mock/uploaded-image_1200x675.jpg",
           },
         };
       }),

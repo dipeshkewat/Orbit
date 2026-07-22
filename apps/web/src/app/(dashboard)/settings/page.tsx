@@ -91,7 +91,7 @@ export default function SettingsGeneralPage() {
             <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Workspace Slug (URL)</label>
             <div className="flex rounded-[var(--radius-md)] overflow-hidden border border-[var(--color-border)]">
               <span className="px-3 bg-[var(--color-surface)] text-xs text-[var(--color-text-muted)] flex items-center select-none border-r border-[var(--color-border)]">
-                app.socialsphear.com/
+                app.orbit.com/
               </span>
               <input
                 type="text"

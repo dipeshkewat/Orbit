@@ -93,7 +93,7 @@ export default function OnboardingPage() {
 
       setOnboardingStep(0); // Mark complete
       toast.success("Welcome aboard! Your first post has been scheduled.");
-      router.push("/");
+      router.push("/dashboard");
       return;
     }
     setCurrentStep((prev) => prev + 1);
@@ -117,7 +117,7 @@ export default function OnboardingPage() {
 
   // AI Assistant caption help
   const handleAiAssist = () => {
-    setPostContent("🚀 Kickstarting our journey with SocialSphear today! Designing, scheduling, and mastering social reach all from a single premium, dark-mode workspace. Looking forward to connecting with everyone here! 🌌 #launch #marketing #tech");
+    setPostContent("🚀 Kickstarting our journey with Orbit today! Designing, scheduling, and mastering social reach all from a single premium, dark-mode workspace. Looking forward to connecting with everyone here! 🌌 #launch #marketing #tech");
     toast.success("AI Caption suggested!");
   };
 

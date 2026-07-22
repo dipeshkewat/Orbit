@@ -27,7 +27,7 @@ const DEFAULT_LINKS: LinkItem[] = [
   { id: "1", title: "Official Website Portfolio", url: "https://dipes.dev", iconType: "globe" },
   { id: "2", title: "Open Source Code repository", url: "https://github.com/dipes", iconType: "github" },
   { id: "3", title: "Follow professional updates", url: "https://linkedin.com/in/dipes", iconType: "linkedin" },
-  { id: "4", title: "Join Weekly Tech Newsletter", url: "mailto:newsletter@socialsphear.com", iconType: "mail" },
+  { id: "4", title: "Join Weekly Tech Newsletter", url: "mailto:newsletter@orbit.com", iconType: "mail" },
 ];
 
 export default function LinkInBioPage() {
@@ -106,7 +106,7 @@ export default function LinkInBioPage() {
         <div className="pt-6 border-t border-[var(--color-border)]/40 flex flex-col items-center gap-1.5">
           <span className="text-[9px] uppercase font-bold tracking-wider text-[var(--color-text-muted)] flex items-center gap-1">
             <Sparkles className="h-3.5 w-3.5 text-[var(--color-accent)] animate-pulse" />
-            Powered by SocialSphear
+            Powered by Orbit
           </span>
         </div>
 

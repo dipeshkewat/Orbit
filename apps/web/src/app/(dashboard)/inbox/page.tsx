@@ -76,7 +76,7 @@ const INITIAL_CONVERSATIONS: MockMessage[] = [
     time: "Yesterday",
     unread: false,
     messages: [
-      { text: "Our marketing team has been testing SocialSphear for the last few days.", sender: "them", time: "Yesterday" },
+      { text: "Our marketing team has been testing Orbit for the last few days.", sender: "them", time: "Yesterday" },
       { text: "Thank you, this will save our team hours every week.", sender: "them", time: "Yesterday" },
       { text: "That is wonderful to hear, David! Let us know if you need anything.", sender: "me", time: "Yesterday" }
     ]

@@ -14,6 +14,11 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     setIsMounted(true);
+    // Sync Zustand state with sandbox cookie
+    const hasBypassCookie = document.cookie.includes("sb_bypass=true");
+    if (useAuthStore.getState().isAuthenticated && !hasBypassCookie) {
+      useAuthStore.getState().logout();
+    }
   }, []);
 
   useEffect(() => {
@@ -21,9 +26,10 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
 
     const isAuthRoute = pathname === "/login";
     const isOnboardingRoute = pathname === "/onboarding";
+    const isPublicRoute = pathname === "/";
 
     if (!isAuthenticated) {
-      if (!isAuthRoute) {
+      if (!isAuthRoute && !isPublicRoute) {
         router.replace("/login");
       }
     } else {
@@ -33,7 +39,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
         }
       } else {
         if (isAuthRoute || isOnboardingRoute) {
-          router.replace("/");
+          router.replace("/dashboard");
         }
       }
     }
@@ -51,8 +57,9 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   // Check auth path visibility
   const isAuthRoute = pathname === "/login";
   const isOnboardingRoute = pathname === "/onboarding";
+  const isPublicRoute = pathname === "/";
 
-  if (!isAuthenticated && !isAuthRoute) {
+  if (!isAuthenticated && !isAuthRoute && !isPublicRoute) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-[var(--color-background)]">
         <Sparkles className="h-8 w-8 text-[var(--color-primary)] animate-spin" />

@@ -237,7 +237,7 @@ export default function SettingsDeveloperPage() {
                   required
                   value={webhookUrl}
                   onChange={(e) => setWebhookUrl(e.target.value)}
-                  placeholder="https://api.yourbrand.com/socialsphear-receive"
+                  placeholder="https://api.yourbrand.com/orbit-receive"
                   className="w-full px-3 py-2 bg-[var(--color-background)] border border-[var(--color-border)] text-xs text-[var(--color-text)] outline-none rounded placeholder:text-[var(--color-text-muted)] focus:bg-[var(--color-surface-hover)] transition-colors"
                 />
               </div>

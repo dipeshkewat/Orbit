@@ -33,7 +33,7 @@ export function createAiRouter(trpc: TrpcService) {
       .mutation(async ({ input }) => {
         void input;
         return {
-          imageUrl: "https://cdn.socialsphear.com/media/ai_mock_generated.png",
+          imageUrl: "https://cdn.orbit.com/media/ai_mock_generated.png",
           creditsUsed: 10,
         };
       }),
@@ -58,7 +58,7 @@ export function createAiRouter(trpc: TrpcService) {
       .query(async ({ input }) => {
         void input;
         return {
-          hashtags: ["#socialsphear", "#marketing", "#contentcreator", "#socialmedia"],
+          hashtags: ["#orbit", "#marketing", "#contentcreator", "#socialmedia"],
         };
       }),
 

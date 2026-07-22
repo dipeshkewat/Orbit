@@ -66,7 +66,7 @@ export default function AiStudioPage() {
     const fullResult = `🤖 Generated Caption for target: ${platforms.join(", ")}
 🎨 Selected Tone: ${tone}
 
-"🚀 Let's transform how you schedule your social updates! With SocialSphear, we design your brand presence and track engagement with a beautiful dark-mode interface. Automate drafts, customize per-channel, and build consistency easily. #branding #socialmedia #productivity"`;
+"🚀 Let's transform how you schedule your social updates! With Orbit, we design your brand presence and track engagement with a beautiful dark-mode interface. Automate drafts, customize per-channel, and build consistency easily. #branding #socialmedia #productivity"`;
 
     let currentLen = 0;
     const timer = setInterval(() => {

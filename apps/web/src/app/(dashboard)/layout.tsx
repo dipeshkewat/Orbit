@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@socialsphear/ui";
+import { OrbitLogo } from "@/components/logo";
 import { useAuthStore, useNotificationStore } from "@/lib/store";
 import {
   LayoutDashboard,
@@ -28,9 +29,10 @@ import {
   Brain
 } from "lucide-react";
 import { toast } from "sonner";
+import { SignedIn, SignedOut, UserButton, SignInButton, ClerkLoaded, useClerk } from "@clerk/nextjs";
 
 const NAV_ITEMS = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/composer", label: "Composer", icon: PenSquare },
   { href: "/calendar", label: "Calendar", icon: Calendar },
   { href: "/analytics", label: "Analytics", icon: BarChart3 },
@@ -64,7 +66,15 @@ function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => 
     setShowNewWsModal(false);
   };
 
-  const handleLogout = () => {
+  const { signOut } = useClerk();
+
+  const handleLogout = async () => {
+    document.cookie = "sb_bypass=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+    try {
+      await signOut();
+    } catch (err) {
+      // Ignore if clerk context is not ready
+    }
     logout();
     toast.success("Logged out successfully");
     router.push("/login");
@@ -79,12 +89,12 @@ function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => 
     >
       {/* Brand Logo */}
       <div className="flex h-[var(--header-height)] items-center gap-3 border-b border-[var(--color-border)] px-4 shrink-0">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-accent)] shadow-[var(--shadow-glow)]">
-          <span className="text-lg font-bold text-white">S</span>
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-primary)]">
+          <OrbitLogo size={20} className="text-white" />
         </div>
         {!collapsed && (
-          <span className="gradient-text text-lg font-bold tracking-tight">
-            SocialSphear
+          <span className="text-lg font-bold tracking-tight text-[var(--color-text)]">
+            Orbit
           </span>
         )}
       </div>
@@ -146,7 +156,7 @@ function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => 
         <Link
           href="/composer"
           className={cn(
-            "flex items-center justify-center gap-2 rounded-[var(--radius-md)] bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-white shadow-[var(--shadow-glow)] transition-all hover:opacity-90 active:scale-[0.98]",
+            "flex items-center justify-center gap-2 rounded-[var(--radius-md)] bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[var(--color-primary-hover)] active:scale-[0.98]",
             collapsed && "px-2",
           )}
         >
@@ -158,19 +168,23 @@ function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => 
       {/* Navigation */}
       <nav className="mt-4 flex flex-1 flex-col gap-1 px-3 overflow-y-auto">
         {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-          const isActive = pathname === href || (href !== "/" && pathname.startsWith(href));
+          const isActive = pathname === href || pathname.startsWith(href);
           return (
             <Link
               key={href}
               href={href}
               className={cn(
-                "flex items-center gap-3 rounded-[var(--radius-md)] px-3 py-2.5 text-sm font-medium transition-all",
+                "relative flex items-center gap-3 rounded-[var(--radius-md)] px-3 py-2.5 text-sm font-medium transition-all",
                 isActive
                   ? "bg-[var(--color-primary)]/10 text-[var(--color-primary-light)]"
                   : "text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-text)]",
                 collapsed && "justify-center px-2",
               )}
+              aria-current={isActive ? "page" : undefined}
             >
+              {isActive && !collapsed && (
+                <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-[var(--color-primary)]" />
+              )}
               <Icon className="h-5 w-5 shrink-0" />
               {!collapsed && <span>{label}</span>}
             </Link>
@@ -222,7 +236,7 @@ function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => 
             />
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-accent)] text-white font-semibold text-xs py-2.5 rounded shadow-[var(--shadow-glow)] hover:opacity-90"
+              className="w-full bg-[var(--color-primary)] text-white font-semibold text-xs py-2.5 rounded hover:bg-[var(--color-primary-hover)] transition-colors"
             >
               Confirm Create
             </button>
@@ -321,13 +335,22 @@ function Header() {
 
         {/* User profile details */}
         <div className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-accent)] shrink-0">
-            <span className="text-sm font-bold text-white uppercase">{user?.name.charAt(0) || "U"}</span>
-          </div>
-          <div className="hidden sm:block text-left max-w-[80px]">
-            <span className="block text-[10px] font-bold text-[var(--color-text)] truncate">{user?.name}</span>
-            <span className="block text-[8px] text-[var(--color-text-muted)] font-semibold truncate capitalize">{user?.email}</span>
-          </div>
+          <ClerkLoaded>
+            <SignedIn>
+              <UserButton />
+              <div className="hidden sm:block text-left max-w-[80px]">
+                <span className="block text-[10px] font-bold text-[var(--color-text)] truncate">{user?.name}</span>
+                <span className="block text-[8px] text-[var(--color-text-muted)] font-semibold truncate capitalize">{user?.email}</span>
+              </div>
+            </SignedIn>
+            <SignedOut>
+              <SignInButton mode="modal">
+                <button className="text-xs font-semibold px-2.5 py-1.5 bg-[#18181b] text-white rounded-[var(--radius-md)] hover:bg-[#27272a] transition-colors">
+                  Sign In
+                </button>
+              </SignInButton>
+            </SignedOut>
+          </ClerkLoaded>
         </div>
       </div>
     </header>

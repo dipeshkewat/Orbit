@@ -28,8 +28,8 @@ interface RssFeed {
 const MOCK_FEEDS: RssFeed[] = [
   {
     id: "1",
-    url: "https://blog.socialsphear.com/feed.xml",
-    name: "SocialSphear Engineering Blog",
+    url: "https://blog.orbit.com/feed.xml",
+    name: "Orbit Engineering Blog",
     platforms: ["twitter", "linkedin"],
     autoPost: true,
     lastChecked: "2026-07-17T10:30:00Z",

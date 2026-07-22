@@ -9,7 +9,7 @@ export class MediaService {
   private bucketName: string;
 
   constructor() {
-    this.bucketName = process.env.R2_BUCKET_NAME || "socialsphear-media";
+    this.bucketName = process.env.R2_BUCKET_NAME || "orbit-media";
     this.s3Client = new S3Client({
       region: "auto",
       endpoint: `https://${process.env.R2_ACCOUNT_ID || "mock-account-id"}.r2.cloudflarestorage.com`,
@@ -54,7 +54,7 @@ export class MediaService {
         contentType,
         sizeBytes,
         r2Key: key,
-        cdnUrl: `${process.env.R2_PUBLIC_URL || "https://media.socialsphear.com"}/${key}`,
+        cdnUrl: `${process.env.R2_PUBLIC_URL || "https://media.orbit.com"}/${key}`,
         status: "processing",
       },
     });

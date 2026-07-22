@@ -97,8 +97,8 @@ export class WebhooksService {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "X-SocialSphear-Signature": `sha256=${signature}`,
-            "X-SocialSphear-Event": eventType,
+            "X-Orbit-Signature": `sha256=${signature}`,
+            "X-Orbit-Event": eventType,
           },
           body,
           signal: AbortSignal.timeout(10000), // 10s timeout

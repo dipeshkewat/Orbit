@@ -23,7 +23,7 @@ export class NotificationsService {
     if (this.resend) {
       try {
         const response = await this.resend.emails.send({
-          from: "SocialSphear <notifications@mail.socialsphear.com>",
+          from: "Orbit <notifications@mail.orbit.com>",
           to,
           subject,
           html: htmlContent,

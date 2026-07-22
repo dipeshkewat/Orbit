@@ -160,7 +160,7 @@ const INITIAL_SOCIAL_ACCOUNTS: MockSocialAccount[] = [
 const INITIAL_POSTS: MockPost[] = [
   {
     id: "post-1",
-    content: "🚀 Excited to announce that SocialSphear is launching next week! Automate, customize, and design your entire brand feed from one simple dashboard. #saas #marketing",
+    content: "🚀 Excited to announce that Orbit is launching next week! Automate, customize, and design your entire brand feed from one simple dashboard. #saas #marketing",
     platforms: ["instagram", "twitter", "linkedin"],
     status: "published",
     scheduledAt: new Date(Date.now() - 2 * 86400000).toISOString(),
@@ -175,7 +175,7 @@ const INITIAL_POSTS: MockPost[] = [
   },
   {
     id: "post-2",
-    content: "Design systems are the glue that keeps teams together. In our latest blog post, we break down why we chose Tailwind v4 and CSS variables for our premium dashboard design. 🎨 Read now: link.socialsphear.com/ds",
+    content: "Design systems are the glue that keeps teams together. In our latest blog post, we break down why we chose Tailwind v4 and CSS variables for our premium dashboard design. 🎨 Read now: link.orbit.com/ds",
     platforms: ["twitter", "linkedin"],
     status: "published",
     scheduledAt: new Date(Date.now() - 86400000).toISOString(),
@@ -238,13 +238,13 @@ export const useAuthStore = create<AuthState>()(
       user: {
         id: "usr-1",
         name: "Dipes",
-        email: "dipes@socialsphear.com",
+        email: "dipes@orbit.com",
         avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&h=100&q=80",
       },
       workspaces: INITIAL_WORKSPACES,
       activeWorkspaceId: "ws-1",
       isAuthenticated: true,
-      onboardingStep: 0, // 0 = onboarding finished. Set default to 0 for bypass.
+      onboardingStep: 1, // 1 = onboarding active. Set to 1 to enable onboarding flow.
 
       login: (email, name) =>
         set({
@@ -299,7 +299,7 @@ export const useAuthStore = create<AuthState>()(
         return true;
       },
     }),
-    { name: "socialsphear-auth" }
+    { name: "orbit-auth" }
   )
 );
 
@@ -326,7 +326,7 @@ export const useSocialAccountStore = create<SocialAccountState>()(
           accounts: state.accounts.filter((a) => a.id !== id),
         })),
     }),
-    { name: "socialsphear-social-accounts" }
+    { name: "orbit-social-accounts" }
   )
 );
 
@@ -434,7 +434,7 @@ export const useCalendarStore = create<CalendarState>()(
           posts: state.posts.map((p) => (p.id === id ? { ...p, scheduledAt: date, status: "scheduled" } : p)),
         })),
     }),
-    { name: "socialsphear-calendar" }
+    { name: "orbit-calendar" }
   )
 );
 
@@ -482,6 +482,6 @@ export const useNotificationStore = create<NotificationState>()(
           unreadCount: 0,
         }),
     }),
-    { name: "socialsphear-notifications" }
+    { name: "orbit-notifications" }
   )
 );

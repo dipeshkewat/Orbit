@@ -25,8 +25,8 @@ async function bootstrap() {
 
   // Swagger (Public API docs)
   const swaggerConfig = new DocumentBuilder()
-    .setTitle("SocialSphear API")
-    .setDescription("SocialSphear Public REST API v1")
+    .setTitle("Orbit API")
+    .setDescription("Orbit Public REST API v1")
     .setVersion("1.0")
     .addBearerAuth(
       { type: "http", scheme: "bearer", bearerFormat: "API Key" },
@@ -38,7 +38,7 @@ async function bootstrap() {
 
   const port = process.env.PORT ?? 3001;
   await app.listen(port);
-  console.log(`🚀 SocialSphear API running on port ${port}`);
+  console.log(`🚀 Orbit API running on port ${port}`);
   console.log(`📚 Swagger docs at http://localhost:${port}/docs`);
 }
 
