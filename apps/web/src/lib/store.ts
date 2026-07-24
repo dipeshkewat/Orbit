@@ -244,7 +244,7 @@ export const useAuthStore = create<AuthState>()(
       workspaces: INITIAL_WORKSPACES,
       activeWorkspaceId: "ws-1",
       isAuthenticated: true,
-      onboardingStep: 1, // 1 = onboarding active. Set to 1 to enable onboarding flow.
+      onboardingStep: 0, // 0 = onboarding completed
 
       login: (email, name) =>
         set({
@@ -255,7 +255,7 @@ export const useAuthStore = create<AuthState>()(
             avatarUrl: `https://api.dicebear.com/7.x/adventurer/svg?seed=${name}`,
           },
           isAuthenticated: true,
-          onboardingStep: 1, // trigger onboarding flow
+          onboardingStep: 0, // onboarding completed
         }),
 
       logout: () =>

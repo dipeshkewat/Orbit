@@ -166,7 +166,7 @@ export default function SettingsDeveloperPage() {
                   />
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-accent)] text-white text-xs font-semibold rounded hover:opacity-90 active:scale-95 shadow-[var(--shadow-glow)]"
+                    className="px-4 py-2 bg-[var(--color-primary)] text-white text-xs font-semibold rounded hover:opacity-90 active:scale-95"
                   >
                     Generate Key
                   </button>

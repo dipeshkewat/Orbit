@@ -1,17 +1,34 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import { Moon, Sun } from "lucide-react";
 import { cn } from "@socialsphear/ui";
 
 type Theme = "dark" | "light";
 
 const STORAGE_KEY = "orbit-theme";
+const CHANGE_EVENT = "orbit-theme-change";
 
-/**
- * Applies the theme by toggling data-theme on <html>.
- * Dark is the default (no attribute); light sets data-theme="light".
- */
+/** Read the current theme from the DOM (set pre-paint by the boot script). */
+function getSnapshot(): Theme {
+  return document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
+}
+
+/** Server render + first paint default is dark. */
+function getServerSnapshot(): Theme {
+  return "dark";
+}
+
+function subscribe(callback: () => void) {
+  window.addEventListener(CHANGE_EVENT, callback);
+  window.addEventListener("storage", callback);
+  return () => {
+    window.removeEventListener(CHANGE_EVENT, callback);
+    window.removeEventListener("storage", callback);
+  };
+}
+
+/** Apply a theme: toggle the attribute, persist, and notify subscribers. */
 function applyTheme(theme: Theme) {
   const root = document.documentElement;
   if (theme === "light") {
@@ -19,28 +36,21 @@ function applyTheme(theme: Theme) {
   } else {
     root.removeAttribute("data-theme");
   }
+  try {
+    localStorage.setItem(STORAGE_KEY, theme);
+  } catch {
+    // storage may be unavailable (private mode) — theme still applies for the session
+  }
+  window.dispatchEvent(new Event(CHANGE_EVENT));
 }
 
 export function useTheme() {
-  const [theme, setThemeState] = useState<Theme>("dark");
-
-  useEffect(() => {
-    const stored = (localStorage.getItem(STORAGE_KEY) as Theme | null) ?? "dark";
-    setThemeState(stored);
-    applyTheme(stored);
-  }, []);
-
-  const setTheme = (next: Theme) => {
-    setThemeState(next);
-    applyTheme(next);
-    try {
-      localStorage.setItem(STORAGE_KEY, next);
-    } catch {
-      // storage may be unavailable (private mode) — theme still applies for the session
-    }
+  const theme = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  return {
+    theme,
+    setTheme: applyTheme,
+    toggle: () => applyTheme(theme === "dark" ? "light" : "dark"),
   };
-
-  return { theme, setTheme, toggle: () => setTheme(theme === "dark" ? "light" : "dark") };
 }
 
 export function ThemeToggle({ className }: { className?: string }) {

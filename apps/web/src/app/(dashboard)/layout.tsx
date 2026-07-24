@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@socialsphear/ui";
 import { OrbitLogo } from "@/components/logo";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuthStore, useNotificationStore } from "@/lib/store";
 import {
   LayoutDashboard,
@@ -26,7 +27,8 @@ import {
   X,
   ShieldCheck,
   AlertTriangle,
-  Brain
+  Brain,
+  HelpCircle
 } from "lucide-react";
 import { toast } from "sonner";
 import { SignedIn, SignedOut, UserButton, SignInButton, ClerkLoaded, useClerk } from "@clerk/nextjs";
@@ -280,8 +282,21 @@ function Header() {
       </div>
 
       {/* Right Side */}
-      <div className="flex items-center gap-4 relative">
-        
+      <div className="flex items-center gap-2 relative">
+
+        {/* Theme toggle */}
+        <ThemeToggle />
+
+        {/* Help */}
+        <Link
+          href="/help"
+          className="rounded-[var(--radius-md)] p-2 text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-text)]"
+          title="Help & support"
+          aria-label="Help and support"
+        >
+          <HelpCircle className="h-5 w-5" />
+        </Link>
+
         {/* Notifications Button */}
         <button
           onClick={() => setShowNotif(!showNotif)}
@@ -289,7 +304,7 @@ function Header() {
         >
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
-            <span className="absolute right-1 top-1 h-4 w-4 rounded-full bg-[var(--color-error)] text-[9px] font-bold text-white flex items-center justify-center animate-pulse">
+            <span className="absolute right-1 top-1 h-4 w-4 rounded-full bg-[var(--color-error)] text-[10px] font-bold text-white flex items-center justify-center ring-2 ring-[var(--color-background)]">
               {unreadCount}
             </span>
           )}
@@ -338,14 +353,14 @@ function Header() {
           <ClerkLoaded>
             <SignedIn>
               <UserButton />
-              <div className="hidden sm:block text-left max-w-[80px]">
-                <span className="block text-[10px] font-bold text-[var(--color-text)] truncate">{user?.name}</span>
-                <span className="block text-[8px] text-[var(--color-text-muted)] font-semibold truncate capitalize">{user?.email}</span>
+              <div className="hidden sm:block text-left max-w-[140px]">
+                <span className="block text-xs font-semibold text-[var(--color-text)] truncate">{user?.name}</span>
+                <span className="block text-xs text-[var(--color-text-muted)] truncate">{user?.email}</span>
               </div>
             </SignedIn>
             <SignedOut>
               <SignInButton mode="modal">
-                <button className="text-xs font-semibold px-2.5 py-1.5 bg-[#18181b] text-white rounded-[var(--radius-md)] hover:bg-[#27272a] transition-colors">
+                <button className="text-xs font-semibold px-3 py-1.5 bg-[var(--color-primary)] text-white rounded-[var(--radius-md)] hover:bg-[var(--color-primary-hover)] transition-colors">
                   Sign In
                 </button>
               </SignInButton>

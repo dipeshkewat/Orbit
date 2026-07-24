@@ -118,7 +118,7 @@ export default function SettingsTeamPage() {
               {members.map((member) => (
                 <div key={member.id} className="py-3.5 flex justify-between items-center first:pt-0 last:pb-0">
                   <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-accent)] flex items-center justify-center shrink-0">
+                    <div className="h-10 w-10 rounded-full bg-[var(--color-primary)] flex items-center justify-center shrink-0">
                       <span className="text-xs font-bold text-white uppercase">{member.name.charAt(0)}</span>
                     </div>
                     <div>
@@ -209,7 +209,7 @@ export default function SettingsTeamPage() {
               <button
                 type="submit"
                 disabled={isSending}
-                className="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-accent)] text-white text-xs font-semibold py-2.5 rounded-[var(--radius-md)] shadow-[var(--shadow-glow)] hover:opacity-90 active:scale-95 disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-1.5 bg-[var(--color-primary)] text-white text-xs font-semibold py-2.5 rounded-[var(--radius-md)] hover:opacity-90 active:scale-95 disabled:opacity-50"
               >
                 <UserCheck className="h-4 w-4" />
                 {isSending ? "Sending Invite..." : "Send Invitation"}

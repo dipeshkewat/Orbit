@@ -39,32 +39,30 @@ function MetricCard({
   change,
   changeType,
   icon: Icon,
-  dark = false,
 }: {
   title: string;
   value: string;
   change: string;
   changeType: "up" | "down";
   icon: React.ElementType;
-  dark?: boolean;
 }) {
   return (
-    <div className={`${dark ? 'glass-dark bg-[#18181b] border-[#27272a]' : 'glass bg-white border-[#e4e4e7]'} rounded-[var(--radius-lg)] p-5 transition-all hover:shadow-[var(--shadow-md)] hover:-translate-y-0.5 duration-200`}>
+    <div className="glass-dark rounded-[var(--radius-lg)] p-5 transition-all hover:shadow-[var(--shadow-md)] hover:-translate-y-0.5 duration-200">
       <div className="flex items-start justify-between">
         <div>
-          <p className={`text-xs font-semibold uppercase tracking-wider ${dark ? 'text-[#a1a1aa]' : 'text-[var(--color-text-secondary)]'}`}>{title}</p>
-          <p className={`mt-1.5 text-2xl font-bold tracking-tight ${dark ? 'text-white' : 'text-[var(--color-text)]'}`}>{value}</p>
+          <p className="text-xs font-semibold uppercase tracking-wider text-[var(--color-text-secondary)]">{title}</p>
+          <p className="mt-1.5 text-2xl font-bold tracking-tight text-[var(--color-text)]">{value}</p>
         </div>
-        <div className={`flex h-10 w-10 items-center justify-center rounded-[var(--radius-md)] ${dark ? 'bg-white/10' : 'bg-[var(--color-primary)]/10'}`}>
-          <Icon className={`h-5 w-5 ${dark ? 'text-white' : 'text-[var(--color-primary-light)]'}`} />
+        <div className="flex h-10 w-10 items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-primary)]/10">
+          <Icon className="h-5 w-5 text-[var(--color-primary-light)]" />
         </div>
       </div>
       <div className="mt-3 flex items-center gap-1 text-xs">
-        <ArrowUpRight className={`h-4 w-4 ${changeType === "up" ? "text-[#10B981]" : "text-[#EF4444]"}`} />
-        <span className={`${changeType === "up" ? "text-[#10B981] font-semibold" : "text-[#EF4444] font-semibold"}`}>
+        <ArrowUpRight className={`h-4 w-4 ${changeType === "up" ? "text-[var(--color-success)]" : "text-[var(--color-error)]"}`} />
+        <span className={`${changeType === "up" ? "text-[var(--color-success)] font-semibold" : "text-[var(--color-error)] font-semibold"}`}>
           {change}
         </span>
-        <span className={dark ? 'text-[#71717a]' : 'text-[var(--color-text-muted)]'}>vs last 7 days</span>
+        <span className="text-[var(--color-text-muted)]">vs last 7 days</span>
       </div>
     </div>
   );
@@ -148,7 +146,7 @@ export default function DashboardPage() {
         </div>
         <Link
           href="/composer"
-          className="inline-flex items-center justify-center gap-1.5 rounded-[var(--radius-md)] bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-accent)] px-4 py-2.5 text-sm font-semibold text-white shadow-[var(--shadow-glow)] transition-all hover:opacity-90 active:scale-95"
+          className="inline-flex items-center justify-center gap-1.5 rounded-[var(--radius-md)] bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-95"
         >
           <Plus className="h-4 w-4" />
           Create Post
@@ -170,7 +168,6 @@ export default function DashboardPage() {
           change="+14.2%"
           changeType="up"
           icon={TrendingUp}
-          dark
         />
         <MetricCard
           title="Engagement Rate"
@@ -178,7 +175,6 @@ export default function DashboardPage() {
           change="+0.8%"
           changeType="up"
           icon={Zap}
-          dark
         />
         <MetricCard
           title="Connected Channels"
@@ -276,7 +272,7 @@ export default function DashboardPage() {
 
             <button
               type="submit"
-              className="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-accent)] text-white text-xs font-semibold py-2.5 rounded-[var(--radius-md)] shadow-[var(--shadow-glow)] hover:opacity-90 active:scale-95"
+              className="w-full flex items-center justify-center gap-1.5 bg-[var(--color-primary)] text-white text-xs font-semibold py-2.5 rounded-[var(--radius-md)] hover:opacity-90 active:scale-95"
             >
               <Send className="h-3 w-3" />
               Schedule Post

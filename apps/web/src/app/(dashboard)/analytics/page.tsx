@@ -46,7 +46,7 @@ const MONTHLY_REACH = [
 
 const PLATFORM_PIE = [
   { name: "Instagram", value: 45000, color: "var(--color-instagram)" },
-  { name: "Twitter / X", value: 28000, color: "#ffffff" },
+  { name: "Twitter / X", value: 28000, color: "var(--color-twitter)" },
   { name: "LinkedIn", value: 34000, color: "var(--color-linkedin)" },
   { name: "Facebook", value: 18000, color: "var(--color-facebook)" },
 ];
@@ -102,7 +102,7 @@ export default function AnalyticsPage() {
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportTitle, setReportTitle] = useState("Acme Social Media Performance");
   const [clientName, setClientName] = useState("Acme Corp");
-  const [brandColor, setBrandColor] = useState("#6366f1");
+  const [brandColor, setBrandColor] = useState("var(--color-primary)");
 
   const getPlatformIcon = (platform: string) => {
     switch (platform.toLowerCase()) {
@@ -145,7 +145,7 @@ export default function AnalyticsPage() {
         </div>
         <button
           onClick={() => setShowReportModal(true)}
-          className="flex items-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-accent)] text-white text-xs font-semibold rounded-[var(--radius-md)] hover:opacity-90 active:scale-95 shadow-[var(--shadow-glow)] shrink-0"
+          className="flex items-center gap-1.5 px-4 py-2.5 bg-[var(--color-primary)] text-white text-xs font-semibold rounded-[var(--radius-md)] hover:opacity-90 active:scale-95 shrink-0"
         >
           <FileText className="h-3.5 w-3.5" />
           Export White-Label Report
@@ -251,7 +251,7 @@ export default function AnalyticsPage() {
                     labelStyle={{ color: "var(--color-text)", fontWeight: "bold" }}
                   />
                   <Line type="monotone" dataKey="instagram" stroke="var(--color-instagram)" strokeWidth={2} dot={{ r: 4 }} />
-                  <Line type="monotone" dataKey="twitter" stroke="#ffffff" strokeWidth={2} dot={{ r: 4 }} />
+                  <Line type="monotone" dataKey="twitter" stroke="var(--color-twitter)" strokeWidth={2} dot={{ r: 4 }} />
                   <Line type="monotone" dataKey="linkedin" stroke="var(--color-linkedin)" strokeWidth={2} dot={{ r: 4 }} />
                 </LineChart>
               </ResponsiveContainer>
@@ -441,7 +441,7 @@ export default function AnalyticsPage() {
                   setShowReportModal(false);
                   import('sonner').then(({ toast }) => toast.success(`White-label PDF report generated for ${clientName}!`));
                 }}
-                className="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-accent)] text-white text-xs font-semibold py-3 rounded-[var(--radius-md)] shadow-[var(--shadow-glow)] hover:opacity-90 active:scale-95"
+                className="w-full flex items-center justify-center gap-1.5 bg-[var(--color-primary)] text-white text-xs font-semibold py-3 rounded-[var(--radius-md)] hover:opacity-90 active:scale-95"
               >
                 <FileText className="h-3.5 w-3.5" />
                 Generate & Download PDF

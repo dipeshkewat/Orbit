@@ -262,7 +262,7 @@ Let us know what platforms you want to build on! 👇 #socialmedia #marketing #t
                     onClick={() => togglePlatform(acc.platform)}
                     className={`flex items-center gap-2 px-4 py-2.5 rounded-[var(--radius-md)] border transition-all text-xs font-semibold uppercase tracking-wider ${
                       isSelected 
-                        ? "bg-[var(--color-primary)] border-transparent text-white shadow-[var(--shadow-glow)]" 
+                        ? "bg-[var(--color-primary)] border-transparent text-white" 
                         : "bg-[var(--color-surface)] border-[var(--color-border)] hover:bg-[var(--color-surface-hover)] text-[var(--color-text-secondary)]"
                     }`}
                   >
@@ -525,7 +525,7 @@ Let us know what platforms you want to build on! 👇 #socialmedia #marketing #t
                     type="button"
                     onClick={handleGenerateAiCaption}
                     disabled={isAiGenerating}
-                    className="px-3.5 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-accent)] text-white font-semibold text-xs rounded shadow-[var(--shadow-glow)] hover:opacity-90 active:scale-95 disabled:opacity-50"
+                    className="px-3.5 bg-[var(--color-primary)] text-white font-semibold text-xs rounded hover:opacity-90 active:scale-95 disabled:opacity-50"
                   >
                     Generate
                   </button>
@@ -620,10 +620,10 @@ Let us know what platforms you want to build on! 👇 #socialmedia #marketing #t
                 ))}
               </div>
             ) : (
-              <div className="p-4 rounded-[var(--radius-md)] bg-[#0b0c10] border border-[var(--color-border)] max-w-sm mx-auto overflow-hidden">
+              <div className="p-4 rounded-[var(--radius-md)] bg-[var(--color-background)] border border-[var(--color-border)] max-w-sm mx-auto overflow-hidden">
                 {/* Header */}
                 <div className="flex items-center gap-2">
-                  <div className="h-8 w-8 rounded-full bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-accent)] flex items-center justify-center shrink-0">
+                  <div className="h-8 w-8 rounded-full bg-[var(--color-primary)] flex items-center justify-center shrink-0">
                     <span className="text-[10px] font-bold text-white">D</span>
                   </div>
                   <div className="min-w-0">
@@ -687,7 +687,7 @@ Let us know what platforms you want to build on! 👇 #socialmedia #marketing #t
           {/* Large Action Panel */}
           <button
             onClick={handlePublishOrSchedule}
-            className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-accent)] text-white font-semibold py-3.5 px-4 rounded-[var(--radius-lg)] shadow-[var(--shadow-glow)] hover:opacity-90 active:scale-98 transition-all"
+            className="w-full flex items-center justify-center gap-2 bg-[var(--color-primary)] text-white font-semibold py-3.5 px-4 rounded-[var(--radius-lg)] hover:opacity-90 active:scale-98 transition-all"
           >
             {scheduleMode === "now" ? "Publish Campaign Now" : "Schedule Content Campaign"}
           </button>
@@ -754,7 +754,7 @@ Let us know what platforms you want to build on! 👇 #socialmedia #marketing #t
                 type="button"
                 onClick={handleAiImageGenerate}
                 disabled={isGeneratingImage}
-                className="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-accent)] text-white text-xs font-semibold py-3 rounded-[var(--radius-md)] shadow-[var(--shadow-glow)] hover:opacity-90 active:scale-95 disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-1.5 bg-[var(--color-primary)] text-white text-xs font-semibold py-3 rounded-[var(--radius-md)] hover:opacity-90 active:scale-95 disabled:opacity-50"
               >
                 <Zap className="h-3.5 w-3.5" />
                 {isGeneratingImage ? "Rendering flux image..." : "Start Generation"}

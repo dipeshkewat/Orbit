@@ -142,7 +142,7 @@ export default function OnboardingPage() {
                 <div 
                   className={`h-9 w-9 rounded-full flex items-center justify-center text-sm font-semibold transition-all border ${
                     isActive 
-                      ? "bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-accent)] border-transparent text-white shadow-[var(--shadow-glow)]" 
+                      ? "bg-[var(--color-primary)] border-transparent text-white" 
                       : "bg-[var(--color-background)] border-[var(--color-border)] text-[var(--color-text-muted)]"
                   } ${isCurrent ? "scale-110 ring-2 ring-[var(--color-primary)]/40" : ""}`}
                 >
@@ -497,7 +497,7 @@ export default function OnboardingPage() {
 
           <button
             onClick={handleNext}
-            className="flex items-center gap-1.5 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-accent)] text-white text-sm font-semibold py-2.5 px-5 rounded-[var(--radius-md)] shadow-[var(--shadow-glow)] hover:opacity-90 transition-opacity active:scale-[0.98] transition-transform"
+            className="flex items-center gap-1.5 bg-[var(--color-primary)] text-white text-sm font-semibold py-2.5 px-5 rounded-[var(--radius-md)] hover:opacity-90 transition-opacity active:scale-[0.98] transition-transform"
           >
             {currentStep === 5 ? "Complete Setup" : "Next Step"}
             <ArrowRight className="h-4 w-4" />

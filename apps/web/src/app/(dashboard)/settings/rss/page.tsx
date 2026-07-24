@@ -144,7 +144,7 @@ export default function RssAutoPostPage() {
         </div>
         <button
           onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-1.5 px-4 py-2.5 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-accent)] text-white text-xs font-semibold rounded-[var(--radius-md)] hover:opacity-90 active:scale-95 shadow-[var(--shadow-glow)] shrink-0"
+          className="flex items-center gap-1.5 px-4 py-2.5 bg-[var(--color-primary)] text-white text-xs font-semibold rounded-[var(--radius-md)] hover:opacity-90 active:scale-95 shrink-0"
         >
           <Plus className="h-3.5 w-3.5" />
           Connect RSS Feed
@@ -282,7 +282,7 @@ export default function RssAutoPostPage() {
               <button
                 type="button"
                 onClick={handleAddFeed}
-                className="w-full flex items-center justify-center gap-1.5 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-accent)] text-white text-xs font-semibold py-3 rounded-[var(--radius-md)] shadow-[var(--shadow-glow)] hover:opacity-90 active:scale-95"
+                className="w-full flex items-center justify-center gap-1.5 bg-[var(--color-primary)] text-white text-xs font-semibold py-3 rounded-[var(--radius-md)] hover:opacity-90 active:scale-95"
               >
                 <Rss className="h-3.5 w-3.5" />
                 Connect & Start Monitoring
