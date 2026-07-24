@@ -29,11 +29,16 @@ import {
   HelpCircle,
   MoreHorizontal,
   Users,
+  ShieldCheck,
+  CheckCircle2,
+  Globe,
+  Twitter,
+  Github,
 } from "lucide-react";
 import { toast } from "sonner";
 import { SignedIn, SignedOut, UserButton, SignInButton, ClerkLoaded, useClerk } from "@clerk/nextjs";
 
-/* ─── Nav structure per §4.1: 6 primary + More overflow ─── */
+/* ─── Primary Navigation ─── */
 const PRIMARY_NAV = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/composer", label: "Composer", icon: PenSquare },
@@ -48,18 +53,16 @@ const MORE_NAV = [
   { href: "/competitors", label: "Competitors", icon: Users },
 ] as const;
 
-/* Pinned utilities — bottom of sidebar, visually separated */
 const PINNED_NAV = [
   { href: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
-/* Mobile bottom tab bar — 5 slots per §4.7 */
 const MOBILE_TABS = [
-  { href: "/dashboard", label: "Home", icon: LayoutDashboard },
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/calendar", label: "Calendar", icon: Calendar },
-  { href: "/composer", label: "New", icon: Plus, accent: true },
+  { href: "/composer", label: "New Post", icon: Plus, accent: true },
   { href: "/analytics", label: "Analytics", icon: BarChart3 },
-  { href: "/settings", label: "More", icon: MoreHorizontal },
+  { href: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
 function NavItem({
@@ -79,19 +82,16 @@ function NavItem({
     <Link
       href={href}
       className={cn(
-        "relative flex items-center gap-3 rounded-[var(--radius-md)] px-3 py-2.5 text-sm font-medium transition-colors",
+        "relative flex items-center gap-3 rounded-[var(--radius-md)] px-3 py-2 text-xs font-semibold transition-all",
         isActive
-          ? "bg-[var(--color-primary)]/10 text-[var(--color-primary-light)]"
-          : "text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-text)]",
+          ? "bg-[#111318] text-white shadow-sm"
+          : "text-gray-600 hover:bg-gray-200/60 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white",
         collapsed && "justify-center px-2",
       )}
       aria-current={isActive ? "page" : undefined}
       title={collapsed ? label : undefined}
     >
-      {isActive && !collapsed && (
-        <span className="absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-full bg-[var(--color-primary)]" />
-      )}
-      <Icon className="h-5 w-5 shrink-0" />
+      <Icon className={cn("h-4 w-4 shrink-0", isActive ? "text-white" : "text-gray-500")} />
       {!collapsed && <span>{label}</span>}
     </Link>
   );
@@ -114,8 +114,6 @@ function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => 
   const activeWorkspace = workspaces.find((w) => w.id === activeWorkspaceId) || workspaces[0];
 
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + "/");
-
-  // Auto-expand "More" if a child route is active
   const moreChildActive = MORE_NAV.some((item) => isActive(item.href));
   const moreExpanded = moreOpen || moreChildActive;
 
@@ -135,7 +133,7 @@ function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => 
     try {
       await signOut();
     } catch {
-      // Ignore if clerk context is not ready
+      // Ignore
     }
     logout();
     toast.success("Logged out successfully");
@@ -145,17 +143,17 @@ function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => 
   return (
     <aside
       className={cn(
-        "fixed left-0 top-0 z-40 hidden md:flex h-screen flex-col border-r border-[var(--color-border)] bg-[var(--color-surface)] transition-all duration-300",
+        "fixed left-0 top-0 z-40 hidden md:flex h-screen flex-col border-r border-gray-200 bg-[#F8F9FA] dark:bg-[#131826] dark:border-gray-800 transition-all duration-300",
         collapsed ? "w-[var(--sidebar-collapsed-width)]" : "w-[var(--sidebar-width)]",
       )}
     >
-      {/* Brand Logo */}
-      <div className="flex h-[var(--header-height)] items-center gap-3 border-b border-[var(--color-border)] px-4 shrink-0">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-[var(--color-primary)]">
-          <OrbitLogo size={20} className="text-white" />
+      {/* Brand Header */}
+      <div className="flex h-[var(--header-height)] items-center gap-3 border-b border-gray-200 dark:border-gray-800 px-4 shrink-0">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#111318] text-white">
+          <OrbitLogo size={18} className="text-white" />
         </div>
         {!collapsed && (
-          <span className="text-lg font-bold tracking-tight text-[var(--color-text)]">
+          <span className="text-base font-bold tracking-tight text-gray-900 dark:text-white">
             Orbit
           </span>
         )}
@@ -166,44 +164,44 @@ function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => 
         <button
           onClick={() => !collapsed && setShowWsDropdown(!showWsDropdown)}
           className={cn(
-            "flex w-full items-center justify-between gap-2.5 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-background)] px-3 py-2 text-xs font-semibold text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-text)] transition-colors",
+            "flex w-full items-center justify-between gap-2 rounded-lg border border-gray-200 bg-white dark:bg-gray-900 dark:border-gray-800 px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 transition-colors",
             collapsed && "justify-center px-1"
           )}
         >
-          <Building className="h-4 w-4 shrink-0" />
+          <Building className="h-3.5 w-3.5 shrink-0 text-gray-500" />
           {!collapsed && (
             <>
               <span className="truncate max-w-[120px]">{activeWorkspace?.name}</span>
-              <ChevronRight className={cn("h-3 w-3 shrink-0 transition-transform", showWsDropdown && "rotate-90")} />
+              <ChevronRight className={cn("h-3 w-3 shrink-0 transition-transform text-gray-400", showWsDropdown && "rotate-90")} />
             </>
           )}
         </button>
 
         {showWsDropdown && !collapsed && (
-          <div className="absolute left-3 right-3 top-full mt-1.5 z-50 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-1.5 shadow-[var(--shadow-lg)] space-y-1">
+          <div className="absolute left-3 right-3 top-full mt-1 z-50 rounded-xl border border-gray-200 bg-white dark:bg-gray-900 dark:border-gray-800 p-1.5 shadow-lg space-y-1">
             {workspaces.map((ws) => (
               <button
                 key={ws.id}
                 onClick={() => {
                   setWorkspace(ws.id);
                   setShowWsDropdown(false);
-                  toast.success(`Switched to workspace: ${ws.name}`);
+                  toast.success(`Switched to: ${ws.name}`);
                 }}
                 className={cn(
-                  "w-full text-left px-2.5 py-1.5 rounded text-xs font-medium transition-colors hover:bg-[var(--color-surface-hover)]",
-                  ws.id === activeWorkspaceId ? "text-[var(--color-primary-light)] bg-[var(--color-primary)]/10" : "text-[var(--color-text-secondary)]"
+                  "w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors hover:bg-gray-100 dark:hover:bg-gray-800",
+                  ws.id === activeWorkspaceId ? "text-gray-900 font-bold bg-gray-100 dark:bg-gray-800 dark:text-white" : "text-gray-600 dark:text-gray-400"
                 )}
               >
                 {ws.name}
               </button>
             ))}
-            <div className="h-px bg-[var(--color-border)]/50 my-1" />
+            <div className="h-px bg-gray-200 dark:bg-gray-800 my-1" />
             <button
               onClick={() => {
                 setShowWsDropdown(false);
                 setShowNewWsModal(true);
               }}
-              className="w-full text-left px-2.5 py-1.5 rounded text-xs font-semibold text-[var(--color-accent)] hover:bg-[var(--color-surface-hover)] flex items-center gap-1"
+              className="w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-semibold text-emerald-600 hover:bg-emerald-50 dark:hover:bg-gray-800 flex items-center gap-1"
             >
               <Plus className="h-3.5 w-3.5" />
               Create Workspace
@@ -212,21 +210,7 @@ function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => 
         )}
       </div>
 
-      {/* New Post Button */}
-      <div className="px-3 pt-3 shrink-0">
-        <Link
-          href="/composer"
-          className={cn(
-            "flex items-center justify-center gap-2 rounded-[var(--radius-md)] bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[var(--color-primary-hover)] active:scale-[0.98]",
-            collapsed && "px-2",
-          )}
-        >
-          <Plus className="h-4.5 w-4.5 shrink-0" />
-          {!collapsed && <span>New Post</span>}
-        </Link>
-      </div>
-
-      {/* Primary Navigation — capped at 6 items */}
+      {/* Primary Navigation */}
       <nav className="mt-4 flex flex-col gap-1 px-3">
         {PRIMARY_NAV.map((item) => (
           <NavItem
@@ -239,24 +223,23 @@ function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => 
           />
         ))}
 
-        {/* More overflow group */}
         {!collapsed ? (
           <div>
             <button
               onClick={() => setMoreOpen(!moreOpen)}
               className={cn(
-                "flex w-full items-center gap-3 rounded-[var(--radius-md)] px-3 py-2.5 text-sm font-medium transition-colors",
+                "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-xs font-semibold transition-colors",
                 moreChildActive
-                  ? "text-[var(--color-primary-light)]"
-                  : "text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-text)]",
+                  ? "text-gray-900 font-bold"
+                  : "text-gray-600 hover:bg-gray-200/60 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white",
               )}
             >
-              <MoreHorizontal className="h-5 w-5 shrink-0" />
+              <MoreHorizontal className="h-4 w-4 shrink-0 text-gray-500" />
               <span>More</span>
-              <ChevronDown className={cn("h-3.5 w-3.5 ml-auto transition-transform", moreExpanded && "rotate-180")} />
+              <ChevronDown className={cn("h-3 w-3 ml-auto transition-transform text-gray-400", moreExpanded && "rotate-180")} />
             </button>
             {moreExpanded && (
-              <div className="ml-3 mt-1 space-y-1 border-l border-[var(--color-border)] pl-3">
+              <div className="ml-3 mt-1 space-y-1 border-l border-gray-200 dark:border-gray-800 pl-3">
                 {MORE_NAV.map((item) => (
                   <NavItem
                     key={item.href}
@@ -271,7 +254,6 @@ function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => 
             )}
           </div>
         ) : (
-          /* In collapsed mode, show More items as direct icon links */
           MORE_NAV.map((item) => (
             <NavItem
               key={item.href}
@@ -285,11 +267,11 @@ function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => 
         )}
       </nav>
 
-      {/* Spacer */}
+      {/* Flexible Spacer */}
       <div className="flex-1" />
 
-      {/* Pinned bottom: Settings + Help + Sign Out */}
-      <div className="border-t border-[var(--color-border)] p-3 shrink-0 space-y-1">
+      {/* Pinned Footer & Metadata — Matching Inspiration */}
+      <div className="border-t border-gray-200 dark:border-gray-800 p-3 shrink-0 space-y-2">
         {PINNED_NAV.map((item) => (
           <NavItem
             key={item.href}
@@ -304,18 +286,41 @@ function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => 
         <button
           onClick={handleLogout}
           className={cn(
-            "flex w-full items-center gap-3 rounded-[var(--radius-md)] px-3 py-2 text-sm font-medium text-[var(--color-error)] hover:bg-[var(--color-error)]/10 transition-colors",
+            "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors",
             collapsed && "justify-center px-2"
           )}
           title="Sign Out"
         >
-          <LogOut className="h-4.5 w-4.5 shrink-0" />
+          <LogOut className="h-4 w-4 shrink-0" />
           {!collapsed && <span>Sign Out</span>}
         </button>
 
+        {!collapsed && (
+          <div className="pt-2 border-t border-gray-200/80 dark:border-gray-800/80 space-y-2 text-[11px] text-gray-400">
+            <div className="flex items-center justify-between px-1">
+              <div className="flex items-center gap-1.5 text-gray-500">
+                <CheckCircle2 className="h-3 w-3 text-emerald-500" />
+                <span>Verified</span>
+              </div>
+              <div className="flex items-center gap-1.5 text-gray-500">
+                <ShieldCheck className="h-3 w-3 text-blue-500" />
+                <span>Encrypted</span>
+              </div>
+            </div>
+            <div className="flex items-center justify-between px-1 pt-1 border-t border-gray-100 dark:border-gray-800">
+              <span>© 2026 Orbit</span>
+              <div className="flex items-center gap-2 text-gray-400">
+                <Github className="h-3 w-3 hover:text-gray-600 transition-colors" />
+                <Twitter className="h-3 w-3 hover:text-gray-600 transition-colors" />
+                <Globe className="h-3 w-3 hover:text-gray-600 transition-colors" />
+              </div>
+            </div>
+          </div>
+        )}
+
         <button
           onClick={onToggle}
-          className="flex w-full items-center justify-center rounded-[var(--radius-md)] py-2 text-[var(--color-text-muted)] transition-colors hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-text)]"
+          className="flex w-full items-center justify-center rounded-lg py-1.5 text-gray-400 hover:bg-gray-200/60 hover:text-gray-700 transition-colors"
         >
           {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </button>
@@ -323,27 +328,27 @@ function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => 
 
       {/* Create Workspace Modal */}
       {showNewWsModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <form onSubmit={handleCreateWorkspaceSubmit} className="w-full max-w-[360px] glass rounded-[var(--radius-xl)] p-6 relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <form onSubmit={handleCreateWorkspaceSubmit} className="w-full max-w-[360px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 relative shadow-xl">
             <button
               type="button"
               onClick={() => setShowNewWsModal(false)}
-              className="absolute top-4 right-4 text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
             >
               <X className="h-4 w-4" />
             </button>
-            <h3 className="text-sm font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-4">Create Workspace</h3>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-4">Create Workspace</h3>
             <input
               type="text"
               required
               placeholder="Workspace Name"
               value={newWsName}
               onChange={(e) => setNewWsName(e.target.value)}
-              className="w-full px-3 py-2 bg-[var(--color-background)] border border-[var(--color-border)] rounded text-xs text-[var(--color-text)] outline-none focus:border-[var(--color-primary)] transition-colors mb-4"
+              className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-xs text-gray-900 dark:text-white outline-none focus:border-gray-900 transition-colors mb-4"
             />
             <button
               type="submit"
-              className="w-full bg-[var(--color-primary)] text-white font-semibold text-xs py-2.5 rounded hover:bg-[var(--color-primary-hover)] transition-colors"
+              className="w-full bg-[#111318] text-white font-semibold text-xs py-2.5 rounded-lg hover:bg-gray-800 transition-colors"
             >
               Confirm Create
             </button>
@@ -361,7 +366,7 @@ function Header() {
 
   const handleMarkRead = (id: string) => {
     markAsRead(id);
-    toast.success("Notification marked as read");
+    toast.success("Marked as read");
   };
 
   const handleMarkAllRead = () => {
@@ -370,33 +375,38 @@ function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-30 flex h-[var(--header-height)] items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-surface)]/85 px-4 md:px-6 backdrop-blur-md shrink-0">
-      {/* ⌘K search trigger */}
-      <CommandPaletteTrigger />
+    <header className="sticky top-0 z-30 flex h-[var(--header-height)] items-center justify-between border-b border-gray-200 dark:border-gray-800 bg-[#F4F5F8]/80 dark:bg-[#0B0F19]/80 px-4 md:px-6 backdrop-blur-md shrink-0">
+      {/* Search & Status Pill */}
+      <div className="flex items-center gap-3">
+        <CommandPaletteTrigger />
+        <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-xs font-medium text-gray-600 dark:text-gray-400 shadow-sm">
+          <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span>Orbit v2.0 • Operational</span>
+        </div>
+      </div>
 
-      {/* Right Side */}
-      <div className="flex items-center gap-2 relative">
+      {/* Right Controls */}
+      <div className="flex items-center gap-3 relative">
+        {/* Solid Dark Pill Primary CTA — Matching Inspiration */}
+        <Link
+          href="/composer"
+          className="flex items-center gap-1.5 bg-[#111318] hover:bg-gray-800 text-white text-xs font-bold px-4 py-2 rounded-lg shadow-sm transition-all active:scale-95"
+        >
+          <Plus className="h-3.5 w-3.5" />
+          New Post
+        </Link>
+
         {/* Theme toggle */}
         <ThemeToggle />
-
-        {/* Help */}
-        <Link
-          href="/settings"
-          className="rounded-[var(--radius-md)] p-2 text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-text)]"
-          title="Help & support"
-          aria-label="Help and support"
-        >
-          <HelpCircle className="h-5 w-5" />
-        </Link>
 
         {/* Notifications Button */}
         <button
           onClick={() => setShowNotif(!showNotif)}
-          className="relative rounded-[var(--radius-md)] p-2 text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-text)]"
+          className="relative rounded-lg p-2 text-gray-500 hover:bg-gray-200/60 dark:hover:bg-gray-800 transition-colors"
         >
-          <Bell className="h-5 w-5" />
+          <Bell className="h-4.5 w-4.5" />
           {unreadCount > 0 && (
-            <span className="absolute right-1 top-1 h-4 w-4 rounded-full bg-[var(--color-error)] text-xs font-bold text-white flex items-center justify-center ring-2 ring-[var(--color-background)]">
+            <span className="absolute right-1 top-1 h-4 w-4 rounded-full bg-rose-500 text-[10px] font-bold text-white flex items-center justify-center ring-2 ring-white">
               {unreadCount}
             </span>
           )}
@@ -404,55 +414,51 @@ function Header() {
 
         {/* Notifications Dropdown */}
         {showNotif && (
-          <div className="absolute right-12 top-full mt-2 w-80 rounded-[var(--radius-lg)] border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-4 shadow-[var(--shadow-lg)] z-50 space-y-3">
-            <div className="flex justify-between items-center border-b border-[var(--color-border)] pb-2 shrink-0">
-              <span className="text-xs font-bold text-[var(--color-text)]">Recent Alerts</span>
+          <div className="absolute right-12 top-full mt-2 w-80 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 shadow-xl z-50 space-y-3">
+            <div className="flex justify-between items-center border-b border-gray-100 dark:border-gray-800 pb-2">
+              <span className="text-xs font-bold text-gray-900 dark:text-white">Recent Alerts</span>
               {unreadCount > 0 && (
-                <button onClick={handleMarkAllRead} className="text-xs font-bold text-[var(--color-primary-light)] hover:underline">
+                <button onClick={handleMarkAllRead} className="text-xs font-semibold text-emerald-600 hover:underline">
                   Mark all read
                 </button>
               )}
             </div>
 
-            <div className="space-y-2.5 max-h-60 overflow-y-auto">
+            <div className="space-y-2 max-h-60 overflow-y-auto">
               {notifications.map((n) => (
                 <div
                   key={n.id}
                   onClick={() => !n.read && handleMarkRead(n.id)}
                   className={cn(
-                    "p-2.5 rounded border text-xs cursor-pointer transition-colors relative",
+                    "p-2.5 rounded-lg border text-xs cursor-pointer transition-colors relative",
                     n.read
-                      ? "bg-transparent border-transparent text-[var(--color-text-muted)]"
-                      : "bg-[var(--color-background)] border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface-hover)]"
+                      ? "bg-transparent border-transparent text-gray-400"
+                      : "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white"
                   )}
                 >
                   {!n.read && (
-                    <span className="absolute left-1 top-1.5 h-1.5 w-1.5 rounded-full bg-[var(--color-primary)]" />
+                    <span className="absolute left-1 top-1.5 h-1.5 w-1.5 rounded-full bg-emerald-500" />
                   )}
                   <span className="block font-bold">{n.title}</span>
-                  <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">{n.message}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">{n.message}</p>
                 </div>
               ))}
               {notifications.length === 0 && (
-                <p className="py-4 text-center text-xs text-[var(--color-text-muted)]">No recent alerts.</p>
+                <p className="py-4 text-center text-xs text-gray-400">No recent alerts.</p>
               )}
             </div>
           </div>
         )}
 
-        {/* User profile */}
+        {/* User button */}
         <div className="flex items-center gap-2">
           <ClerkLoaded>
             <SignedIn>
               <UserButton />
-              <div className="hidden sm:block text-left max-w-[140px]">
-                <span className="block text-xs font-semibold text-[var(--color-text)] truncate">{user?.name}</span>
-                <span className="block text-xs text-[var(--color-text-muted)] truncate">{user?.email}</span>
-              </div>
             </SignedIn>
             <SignedOut>
               <SignInButton mode="modal">
-                <button className="text-xs font-semibold px-3 py-1.5 bg-[var(--color-primary)] text-white rounded-[var(--radius-md)] hover:bg-[var(--color-primary-hover)] transition-colors">
+                <button className="text-xs font-bold px-3.5 py-2 bg-[#111318] text-white rounded-lg hover:bg-gray-800 transition-colors">
                   Sign In
                 </button>
               </SignInButton>
@@ -464,13 +470,12 @@ function Header() {
   );
 }
 
-/** Mobile bottom tab bar — 5 slots per §4.7 */
 function MobileTabBar() {
   const pathname = usePathname();
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + "/");
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-40 flex md:hidden items-center justify-around border-t border-[var(--color-border)] bg-[var(--color-surface)] h-16 px-2 safe-area-pb">
+    <nav className="fixed bottom-0 inset-x-0 z-40 flex md:hidden items-center justify-around border-t border-gray-200 bg-white dark:bg-gray-900 dark:border-gray-800 h-16 px-2 safe-area-pb">
       {MOBILE_TABS.map((tab) => {
         const active = isActive(tab.href);
         const isAccent = "accent" in tab && tab.accent;
@@ -484,18 +489,18 @@ function MobileTabBar() {
               isAccent
                 ? "text-white"
                 : active
-                  ? "text-[var(--color-primary)]"
-                  : "text-[var(--color-text-muted)]",
+                  ? "text-gray-900 font-bold dark:text-white"
+                  : "text-gray-400",
             )}
           >
             {isAccent ? (
-              <div className="flex items-center justify-center h-10 w-10 rounded-full bg-[var(--color-primary)] -mt-5 shadow-[var(--shadow-md)]">
+              <div className="flex items-center justify-center h-10 w-10 rounded-full bg-[#111318] text-white -mt-5 shadow-md">
                 <tab.icon className="h-5 w-5" />
               </div>
             ) : (
               <tab.icon className="h-5 w-5" />
             )}
-            <span className={cn("text-xs font-medium", isAccent && "mt-0.5")}>{tab.label}</span>
+            <span className="text-[10px] font-medium">{tab.label}</span>
           </Link>
         );
       })}
@@ -512,7 +517,6 @@ export default function DashboardLayout({
 
   return (
     <div className="flex min-h-screen bg-[var(--color-background)]">
-      {/* Command palette — renders globally, listens for ⌘K */}
       <CommandPalette />
 
       <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
@@ -520,7 +524,6 @@ export default function DashboardLayout({
       <div
         className={cn(
           "flex flex-1 flex-col transition-all duration-300 min-w-0",
-          /* Desktop: offset by sidebar width. Mobile: no offset (sidebar hidden) */
           collapsed ? "md:ml-[var(--sidebar-collapsed-width)]" : "md:ml-[var(--sidebar-width)]",
         )}
       >
@@ -528,7 +531,6 @@ export default function DashboardLayout({
         <main className="flex-1 p-4 md:p-6 overflow-y-auto pb-20 md:pb-6">{children}</main>
       </div>
 
-      {/* Mobile bottom tab bar */}
       <MobileTabBar />
     </div>
   );
