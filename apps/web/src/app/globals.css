@@ -1,34 +1,35 @@
 @import "tailwindcss";
 
 /*
- * Orbit Design Tokens — High-Contrast Minimal Aesthetic
- * Inspired by ultra-clean financial & SaaS consoles (Whale Loans / Linear style).
- * Soft light-grey canvas (#F4F5F8), crisp white cards, obsidian dark metric containers (#111318),
- * dark obsidian pill buttons, and emerald green growth badges (#10B981).
+ * Orbit Design Tokens — Modern SaaS Aesthetic (Light & Dark)
+ * Light Mode uses moderate off-white canvas (#F3F4F6), crisp white cards (#FFFFFF),
+ * and moderate darker white secondary surfaces (#EAECF0) with deep slate accents.
+ * Dark Mode uses blue-undertoned charcoal canvas (#0B0F19) and rich card surfaces.
  */
 
-:root {
-  /* ─── Primary — Obsidian Dark (solid action color) ─────── */
-  --color-primary: #111318;          /* Solid obsidian dark */
-  --color-primary-hover: #222533;
-  --color-primary-light: #374151;
-  --color-accent: #10B981;           /* Emerald green — growth & metrics */
+:root,
+[data-theme="light"] {
+  /* ─── Primary Action ───────────────────────────────────── */
+  --color-primary: #0F172A;          /* Deep dark slate CTA */
+  --color-primary-hover: #1E293B;
+  --color-primary-light: #334155;
+  --color-accent: #10B981;           /* Emerald green — metrics & status */
   --color-accent-hover: #059669;
 
   /* ─── Surfaces & Backgrounds ────────────────────────────── */
-  --color-background: #F4F5F8;       /* Soft cool light-grey canvas */
+  --color-background: #F3F4F6;       /* Moderate off-white canvas */
   --color-surface: #FFFFFF;          /* Pure white card surface */
-  --color-surface-hover: #F1F3F7;    /* Subtle hover tint */
-  --color-surface-elevated: #FFFFFF; /* Popovers / dropdowns */
-  --color-surface-dark: #111318;     /* Obsidian dark card surface */
+  --color-surface-secondary: #EAECF0; /* Moderate darker shade of white */
+  --color-surface-hover: #F1F5F9;    /* Hover surface */
+  --color-surface-elevated: #FFFFFF; /* Popovers & modals */
 
-  --color-border: #E5E7EB;
-  --color-border-hover: #D1D5DB;
+  --color-border: #E2E8F0;
+  --color-border-hover: #CBD5E1;
 
   /* ─── Typography ──────────────────────────────────────── */
-  --color-text: #111318;
-  --color-text-secondary: #4B5563;
-  --color-text-muted: #9CA3AF;
+  --color-text: #0F172A;
+  --color-text-secondary: #475569;
+  --color-text-muted: #94A3B8;
   --color-text-inverse: #FFFFFF;
 
   /* ─── Semantic ────────────────────────────────────────── */
@@ -42,53 +43,50 @@
   --color-facebook: #1877F2;
   --color-twitter: #1DA1F2;
   --color-linkedin: #0077B5;
-  --color-tiktok: #000000;
+  --color-tiktok: #0F172A;
   --color-pinterest: #BD081C;
   --color-youtube: #FF0000;
-  --color-threads: #111318;
+  --color-threads: #0F172A;
 
-  /* ─── Layout ──────────────────────────────────────────── */
+  /* ─── Layout & Radii ──────────────────────────────────── */
   --sidebar-width: 240px;
   --sidebar-collapsed-width: 72px;
   --header-height: 64px;
 
-  /* ─── Corner Radii ────────────────────────────────────── */
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-xl: 20px;
   --radius-full: 9999px;
 
-  /* ─── Shadows ─────────────────────────────────────────── */
-  --shadow-sm: 0 1px 2px rgba(17, 19, 24, 0.04);
-  --shadow-md: 0 4px 12px rgba(17, 19, 24, 0.06);
-  --shadow-lg: 0 12px 32px rgba(17, 19, 24, 0.08);
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.07);
+  --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.09);
   --shadow-glow: none;
 
-  /* ─── Transitions ─────────────────────────────────────── */
   --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ─── DARK THEME (opt-in toggle) ─────────────────────────── */
-[data-theme="dark"] {
-  --color-primary: #6366F1;
+/* ─── DARK THEME ─────────────────────────────────────────── */
+[data-theme="dark"],
+.dark {
+  --color-primary: #6366F1;          /* Indigo CTA on dark */
   --color-primary-hover: #818CF8;
   --color-primary-light: #A5B4FC;
   --color-accent: #10B981;
 
-  --color-background: #0B0F19;
-  --color-surface: #131826;
-  --color-surface-hover: #1B2233;
+  --color-background: #0B0F19;       /* Deep dark canvas */
+  --color-surface: #131826;          /* Dark card surface */
+  --color-surface-secondary: #1B2233; /* Dark secondary surface */
+  --color-surface-hover: #1E293B;
   --color-surface-elevated: #1B2233;
-  --color-surface-dark: #090C14;
 
   --color-border: #232A3B;
   --color-border-hover: #334155;
 
-  --color-text: #E6E9F0;
-  --color-text-secondary: #9AA4B8;
+  --color-text: #F8FAFC;
+  --color-text-secondary: #94A3B8;
   --color-text-muted: #64748B;
   --color-text-inverse: #0B0F19;
 
@@ -100,7 +98,7 @@
   --shadow-glow: none;
 }
 
-/* ─── Base Styles ─────────────────────────────────────────── */
+/* ─── Base & Utility Classes ─────────────────────────────── */
 * {
   border-color: var(--color-border);
 }
@@ -114,49 +112,35 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Sidebar styling */
+/* Sidebar theme styles */
 aside {
-  background-color: #F8F9FA;
-  border-right: 1px solid var(--color-border);
-}
-
-[data-theme="dark"] aside {
   background-color: var(--color-surface);
+  border-right: 1px solid var(--color-border);
 }
 
 /* Header translucent bar */
 header {
-  background-color: rgba(244, 245, 248, 0.85);
+  background-color: color-mix(in srgb, var(--color-background) 85%, transparent);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--color-border);
 }
 
-[data-theme="dark"] header {
-  background-color: rgba(11, 15, 25, 0.85);
-}
-
-/* White card styling */
+/* Standard Card */
 .glass {
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
   border-radius: var(--radius-xl);
+  color: var(--color-text);
 }
 
-/* High-contrast obsidian dark container */
-.card-dark,
-.glass-dark {
-  background-color: #111318;
-  border: 1px solid #1F232D;
-  color: #FFFFFF;
+/* Secondary Surface Container (moderate darker shade of white in light mode) */
+.glass-secondary,
+.card-secondary {
+  background-color: var(--color-surface-secondary);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
-  box-shadow: 0 10px 30px rgba(17, 19, 24, 0.12);
-}
-
-[data-theme="dark"] .card-dark,
-[data-theme="dark"] .glass-dark {
-  background-color: #131826;
-  border-color: #232A3B;
+  color: var(--color-text);
 }
 
 /* Scrollbar */
@@ -178,7 +162,6 @@ header {
   background: var(--color-border-hover);
 }
 
-/* Animations */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

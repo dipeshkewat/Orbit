@@ -23,13 +23,11 @@ import {
   Plus,
   LogOut,
   Building,
-  User,
   X,
   Brain,
   HelpCircle,
   MoreHorizontal,
   Users,
-  ShieldCheck,
   CheckCircle2,
   Globe,
   Twitter,
@@ -84,14 +82,14 @@ function NavItem({
       className={cn(
         "relative flex items-center gap-3 rounded-[var(--radius-md)] px-3 py-2 text-xs font-semibold transition-all",
         isActive
-          ? "bg-[#111318] text-white shadow-sm"
-          : "text-gray-600 hover:bg-gray-200/60 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white",
+          ? "bg-[var(--color-primary)] text-[var(--color-text-inverse)] shadow-sm"
+          : "text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-text)]",
         collapsed && "justify-center px-2",
       )}
       aria-current={isActive ? "page" : undefined}
       title={collapsed ? label : undefined}
     >
-      <Icon className={cn("h-4 w-4 shrink-0", isActive ? "text-white" : "text-gray-500")} />
+      <Icon className={cn("h-4 w-4 shrink-0", isActive ? "text-[var(--color-text-inverse)]" : "text-[var(--color-text-muted)]")} />
       {!collapsed && <span>{label}</span>}
     </Link>
   );
@@ -143,17 +141,17 @@ function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => 
   return (
     <aside
       className={cn(
-        "fixed left-0 top-0 z-40 hidden md:flex h-screen flex-col border-r border-gray-200 bg-[#F8F9FA] dark:bg-[#131826] dark:border-gray-800 transition-all duration-300",
+        "fixed left-0 top-0 z-40 hidden md:flex h-screen flex-col border-r border-[var(--color-border)] bg-[var(--color-surface)] transition-all duration-300",
         collapsed ? "w-[var(--sidebar-collapsed-width)]" : "w-[var(--sidebar-width)]",
       )}
     >
       {/* Brand Header */}
-      <div className="flex h-[var(--header-height)] items-center gap-3 border-b border-gray-200 dark:border-gray-800 px-4 shrink-0">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#111318] text-white">
-          <OrbitLogo size={18} className="text-white" />
+      <div className="flex h-[var(--header-height)] items-center gap-3 border-b border-[var(--color-border)] px-4 shrink-0">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--color-primary)] text-[var(--color-text-inverse)]">
+          <OrbitLogo size={18} className="text-[var(--color-text-inverse)]" />
         </div>
         {!collapsed && (
-          <span className="text-base font-bold tracking-tight text-gray-900 dark:text-white">
+          <span className="text-base font-bold tracking-tight text-[var(--color-text)]">
             Orbit
           </span>
         )}
@@ -164,21 +162,21 @@ function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => 
         <button
           onClick={() => !collapsed && setShowWsDropdown(!showWsDropdown)}
           className={cn(
-            "flex w-full items-center justify-between gap-2 rounded-lg border border-gray-200 bg-white dark:bg-gray-900 dark:border-gray-800 px-3 py-2 text-xs font-semibold text-gray-700 dark:text-gray-300 hover:bg-gray-50 transition-colors",
+            "flex w-full items-center justify-between gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-background)] px-3 py-2 text-xs font-semibold text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-text)] transition-colors",
             collapsed && "justify-center px-1"
           )}
         >
-          <Building className="h-3.5 w-3.5 shrink-0 text-gray-500" />
+          <Building className="h-3.5 w-3.5 shrink-0 text-[var(--color-text-muted)]" />
           {!collapsed && (
             <>
               <span className="truncate max-w-[120px]">{activeWorkspace?.name}</span>
-              <ChevronRight className={cn("h-3 w-3 shrink-0 transition-transform text-gray-400", showWsDropdown && "rotate-90")} />
+              <ChevronRight className={cn("h-3 w-3 shrink-0 transition-transform text-[var(--color-text-muted)]", showWsDropdown && "rotate-90")} />
             </>
           )}
         </button>
 
         {showWsDropdown && !collapsed && (
-          <div className="absolute left-3 right-3 top-full mt-1 z-50 rounded-xl border border-gray-200 bg-white dark:bg-gray-900 dark:border-gray-800 p-1.5 shadow-lg space-y-1">
+          <div className="absolute left-3 right-3 top-full mt-1 z-50 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-1.5 shadow-lg space-y-1">
             {workspaces.map((ws) => (
               <button
                 key={ws.id}
@@ -188,20 +186,20 @@ function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => 
                   toast.success(`Switched to: ${ws.name}`);
                 }}
                 className={cn(
-                  "w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors hover:bg-gray-100 dark:hover:bg-gray-800",
-                  ws.id === activeWorkspaceId ? "text-gray-900 font-bold bg-gray-100 dark:bg-gray-800 dark:text-white" : "text-gray-600 dark:text-gray-400"
+                  "w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors hover:bg-[var(--color-surface-hover)]",
+                  ws.id === activeWorkspaceId ? "text-[var(--color-text)] font-bold bg-[var(--color-surface-secondary)]" : "text-[var(--color-text-secondary)]"
                 )}
               >
                 {ws.name}
               </button>
             ))}
-            <div className="h-px bg-gray-200 dark:bg-gray-800 my-1" />
+            <div className="h-px bg-[var(--color-border)] my-1" />
             <button
               onClick={() => {
                 setShowWsDropdown(false);
                 setShowNewWsModal(true);
               }}
-              className="w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-semibold text-emerald-600 hover:bg-emerald-50 dark:hover:bg-gray-800 flex items-center gap-1"
+              className="w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-semibold text-[var(--color-accent)] hover:bg-[var(--color-surface-hover)] flex items-center gap-1"
             >
               <Plus className="h-3.5 w-3.5" />
               Create Workspace
@@ -230,16 +228,16 @@ function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => 
               className={cn(
                 "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-xs font-semibold transition-colors",
                 moreChildActive
-                  ? "text-gray-900 font-bold"
-                  : "text-gray-600 hover:bg-gray-200/60 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white",
+                  ? "text-[var(--color-text)] font-bold"
+                  : "text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-text)]",
               )}
             >
-              <MoreHorizontal className="h-4 w-4 shrink-0 text-gray-500" />
+              <MoreHorizontal className="h-4 w-4 shrink-0 text-[var(--color-text-muted)]" />
               <span>More</span>
-              <ChevronDown className={cn("h-3 w-3 ml-auto transition-transform text-gray-400", moreExpanded && "rotate-180")} />
+              <ChevronDown className={cn("h-3 w-3 ml-auto transition-transform text-[var(--color-text-muted)]", moreExpanded && "rotate-180")} />
             </button>
             {moreExpanded && (
-              <div className="ml-3 mt-1 space-y-1 border-l border-gray-200 dark:border-gray-800 pl-3">
+              <div className="ml-3 mt-1 space-y-1 border-l border-[var(--color-border)] pl-3">
                 {MORE_NAV.map((item) => (
                   <NavItem
                     key={item.href}
@@ -267,11 +265,10 @@ function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => 
         )}
       </nav>
 
-      {/* Flexible Spacer */}
       <div className="flex-1" />
 
-      {/* Pinned Footer & Metadata — Matching Inspiration */}
-      <div className="border-t border-gray-200 dark:border-gray-800 p-3 shrink-0 space-y-2">
+      {/* Pinned Footer */}
+      <div className="border-t border-[var(--color-border)] p-3 shrink-0 space-y-2">
         {PINNED_NAV.map((item) => (
           <NavItem
             key={item.href}
@@ -286,7 +283,7 @@ function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => 
         <button
           onClick={handleLogout}
           className={cn(
-            "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors",
+            "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-xs font-semibold text-[var(--color-error)] hover:bg-[var(--color-error)]/10 transition-colors",
             collapsed && "justify-center px-2"
           )}
           title="Sign Out"
@@ -296,23 +293,22 @@ function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => 
         </button>
 
         {!collapsed && (
-          <div className="pt-2 border-t border-gray-200/80 dark:border-gray-800/80 space-y-2 text-[11px] text-gray-400">
+          <div className="pt-2 border-t border-[var(--color-border)] space-y-2 text-[11px] text-[var(--color-text-muted)]">
             <div className="flex items-center justify-between px-1">
-              <div className="flex items-center gap-1.5 text-gray-500">
-                <CheckCircle2 className="h-3 w-3 text-emerald-500" />
+              <div className="flex items-center gap-1.5">
+                <CheckCircle2 className="h-3 w-3 text-[var(--color-accent)]" />
                 <span>Verified</span>
               </div>
-              <div className="flex items-center gap-1.5 text-gray-500">
-                <ShieldCheck className="h-3 w-3 text-blue-500" />
-                <span>Encrypted</span>
+              <div className="flex items-center gap-1.5">
+                <Globe className="h-3 w-3 text-blue-500" />
+                <span>Global</span>
               </div>
             </div>
-            <div className="flex items-center justify-between px-1 pt-1 border-t border-gray-100 dark:border-gray-800">
+            <div className="flex items-center justify-between px-1 pt-1 border-t border-[var(--color-border)]">
               <span>© 2026 Orbit</span>
-              <div className="flex items-center gap-2 text-gray-400">
-                <Github className="h-3 w-3 hover:text-gray-600 transition-colors" />
-                <Twitter className="h-3 w-3 hover:text-gray-600 transition-colors" />
-                <Globe className="h-3 w-3 hover:text-gray-600 transition-colors" />
+              <div className="flex items-center gap-2">
+                <Github className="h-3 w-3 hover:text-[var(--color-text)] transition-colors cursor-pointer" />
+                <Twitter className="h-3 w-3 hover:text-[var(--color-text)] transition-colors cursor-pointer" />
               </div>
             </div>
           </div>
@@ -320,7 +316,7 @@ function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => 
 
         <button
           onClick={onToggle}
-          className="flex w-full items-center justify-center rounded-lg py-1.5 text-gray-400 hover:bg-gray-200/60 hover:text-gray-700 transition-colors"
+          className="flex w-full items-center justify-center rounded-lg py-1.5 text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-text)] transition-colors"
         >
           {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </button>
@@ -329,26 +325,26 @@ function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => 
       {/* Create Workspace Modal */}
       {showNewWsModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <form onSubmit={handleCreateWorkspaceSubmit} className="w-full max-w-[360px] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 relative shadow-xl">
+          <form onSubmit={handleCreateWorkspaceSubmit} className="w-full max-w-[360px] bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl p-6 relative shadow-xl text-[var(--color-text)]">
             <button
               type="button"
               onClick={() => setShowNewWsModal(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+              className="absolute top-4 right-4 text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
             >
               <X className="h-4 w-4" />
             </button>
-            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-4">Create Workspace</h3>
+            <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-4">Create Workspace</h3>
             <input
               type="text"
               required
               placeholder="Workspace Name"
               value={newWsName}
               onChange={(e) => setNewWsName(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-xs text-gray-900 dark:text-white outline-none focus:border-gray-900 transition-colors mb-4"
+              className="w-full px-3 py-2 bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg text-xs text-[var(--color-text)] outline-none focus:border-[var(--color-primary)] transition-colors mb-4"
             />
             <button
               type="submit"
-              className="w-full bg-[#111318] text-white font-semibold text-xs py-2.5 rounded-lg hover:bg-gray-800 transition-colors"
+              className="w-full bg-[var(--color-primary)] text-[var(--color-text-inverse)] font-semibold text-xs py-2.5 rounded-lg hover:bg-[var(--color-primary-hover)] transition-colors"
             >
               Confirm Create
             </button>
@@ -375,22 +371,22 @@ function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-30 flex h-[var(--header-height)] items-center justify-between border-b border-gray-200 dark:border-gray-800 bg-[#F4F5F8]/80 dark:bg-[#0B0F19]/80 px-4 md:px-6 backdrop-blur-md shrink-0">
+    <header className="sticky top-0 z-30 flex h-[var(--header-height)] items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-background)]/80 px-4 md:px-6 backdrop-blur-md shrink-0">
       {/* Search & Status Pill */}
       <div className="flex items-center gap-3">
         <CommandPaletteTrigger />
-        <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-xs font-medium text-gray-600 dark:text-gray-400 shadow-sm">
-          <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+        <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] text-xs font-medium text-[var(--color-text-secondary)] shadow-sm">
+          <span className="h-2 w-2 rounded-full bg-[var(--color-accent)] animate-pulse" />
           <span>Orbit v2.0 • Operational</span>
         </div>
       </div>
 
       {/* Right Controls */}
       <div className="flex items-center gap-3 relative">
-        {/* Solid Dark Pill Primary CTA — Matching Inspiration */}
+        {/* Solid Dark Pill Primary CTA */}
         <Link
           href="/composer"
-          className="flex items-center gap-1.5 bg-[#111318] hover:bg-gray-800 text-white text-xs font-bold px-4 py-2 rounded-lg shadow-sm transition-all active:scale-95"
+          className="flex items-center gap-1.5 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-[var(--color-text-inverse)] text-xs font-bold px-4 py-2 rounded-lg shadow-sm transition-all active:scale-95"
         >
           <Plus className="h-3.5 w-3.5" />
           New Post
@@ -402,11 +398,11 @@ function Header() {
         {/* Notifications Button */}
         <button
           onClick={() => setShowNotif(!showNotif)}
-          className="relative rounded-lg p-2 text-gray-500 hover:bg-gray-200/60 dark:hover:bg-gray-800 transition-colors"
+          className="relative rounded-lg p-2 text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)] transition-colors"
         >
           <Bell className="h-4.5 w-4.5" />
           {unreadCount > 0 && (
-            <span className="absolute right-1 top-1 h-4 w-4 rounded-full bg-rose-500 text-[10px] font-bold text-white flex items-center justify-center ring-2 ring-white">
+            <span className="absolute right-1 top-1 h-4 w-4 rounded-full bg-[var(--color-error)] text-[10px] font-bold text-white flex items-center justify-center ring-2 ring-[var(--color-surface)]">
               {unreadCount}
             </span>
           )}
@@ -414,11 +410,11 @@ function Header() {
 
         {/* Notifications Dropdown */}
         {showNotif && (
-          <div className="absolute right-12 top-full mt-2 w-80 rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 shadow-xl z-50 space-y-3">
-            <div className="flex justify-between items-center border-b border-gray-100 dark:border-gray-800 pb-2">
-              <span className="text-xs font-bold text-gray-900 dark:text-white">Recent Alerts</span>
+          <div className="absolute right-12 top-full mt-2 w-80 rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] p-4 shadow-xl z-50 space-y-3">
+            <div className="flex justify-between items-center border-b border-[var(--color-border)] pb-2">
+              <span className="text-xs font-bold text-[var(--color-text)]">Recent Alerts</span>
               {unreadCount > 0 && (
-                <button onClick={handleMarkAllRead} className="text-xs font-semibold text-emerald-600 hover:underline">
+                <button onClick={handleMarkAllRead} className="text-xs font-semibold text-[var(--color-accent)] hover:underline">
                   Mark all read
                 </button>
               )}
@@ -432,19 +428,19 @@ function Header() {
                   className={cn(
                     "p-2.5 rounded-lg border text-xs cursor-pointer transition-colors relative",
                     n.read
-                      ? "bg-transparent border-transparent text-gray-400"
-                      : "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white"
+                      ? "bg-transparent border-transparent text-[var(--color-text-muted)]"
+                      : "bg-[var(--color-background)] border-[var(--color-border)] text-[var(--color-text)]"
                   )}
                 >
                   {!n.read && (
-                    <span className="absolute left-1 top-1.5 h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    <span className="absolute left-1 top-1.5 h-1.5 w-1.5 rounded-full bg-[var(--color-accent)]" />
                   )}
                   <span className="block font-bold">{n.title}</span>
-                  <p className="text-xs text-gray-500 mt-0.5">{n.message}</p>
+                  <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">{n.message}</p>
                 </div>
               ))}
               {notifications.length === 0 && (
-                <p className="py-4 text-center text-xs text-gray-400">No recent alerts.</p>
+                <p className="py-4 text-center text-xs text-[var(--color-text-muted)]">No recent alerts.</p>
               )}
             </div>
           </div>
@@ -458,7 +454,7 @@ function Header() {
             </SignedIn>
             <SignedOut>
               <SignInButton mode="modal">
-                <button className="text-xs font-bold px-3.5 py-2 bg-[#111318] text-white rounded-lg hover:bg-gray-800 transition-colors">
+                <button className="text-xs font-bold px-3.5 py-2 bg-[var(--color-primary)] text-[var(--color-text-inverse)] rounded-lg hover:bg-[var(--color-primary-hover)] transition-colors">
                   Sign In
                 </button>
               </SignInButton>
@@ -475,7 +471,7 @@ function MobileTabBar() {
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + "/");
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-40 flex md:hidden items-center justify-around border-t border-gray-200 bg-white dark:bg-gray-900 dark:border-gray-800 h-16 px-2 safe-area-pb">
+    <nav className="fixed bottom-0 inset-x-0 z-40 flex md:hidden items-center justify-around border-t border-[var(--color-border)] bg-[var(--color-surface)] h-16 px-2 safe-area-pb">
       {MOBILE_TABS.map((tab) => {
         const active = isActive(tab.href);
         const isAccent = "accent" in tab && tab.accent;
@@ -487,14 +483,14 @@ function MobileTabBar() {
             className={cn(
               "flex flex-col items-center justify-center gap-0.5 flex-1 py-1 transition-colors",
               isAccent
-                ? "text-white"
+                ? "text-[var(--color-text-inverse)]"
                 : active
-                  ? "text-gray-900 font-bold dark:text-white"
-                  : "text-gray-400",
+                  ? "text-[var(--color-text)] font-bold"
+                  : "text-[var(--color-text-muted)]",
             )}
           >
             {isAccent ? (
-              <div className="flex items-center justify-center h-10 w-10 rounded-full bg-[#111318] text-white -mt-5 shadow-md">
+              <div className="flex items-center justify-center h-10 w-10 rounded-full bg-[var(--color-primary)] text-[var(--color-text-inverse)] -mt-5 shadow-md">
                 <tab.icon className="h-5 w-5" />
               </div>
             ) : (

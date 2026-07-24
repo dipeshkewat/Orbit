@@ -20,10 +20,10 @@ import {
   AlertTriangle,
   XCircle,
   RefreshCw,
-  ArrowUpRight as ArrowUpRightIcon,
-  Layers,
   ChevronRight,
   Share2,
+  BarChart2,
+  CheckCircle2,
 } from "lucide-react";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { toast } from "sonner";
@@ -38,6 +38,13 @@ const CHART_DATA = [
   { name: "Sat", reach: 3800, engagement: 2390 },
   { name: "Sun", reach: 4300, engagement: 3490 },
 ];
+
+function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 17) return "Good afternoon";
+  return "Good evening";
+}
 
 export default function DashboardPage() {
   const posts = useCalendarStore((state) => state.posts);
@@ -99,7 +106,7 @@ export default function DashboardPage() {
       case "twitter": return <Twitter className="h-4 w-4 text-[#1DA1F2]" />;
       case "linkedin": return <Linkedin className="h-4 w-4 text-[#0077B5]" />;
       case "facebook": return <Facebook className="h-4 w-4 text-[#1877F2]" />;
-      default: return <Share2 className="h-4 w-4 text-gray-400" />;
+      default: return <Share2 className="h-4 w-4 text-[var(--color-text-muted)]" />;
     }
   };
 
@@ -110,73 +117,73 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* ── Top Header Section (Inspiration Style) ── */}
+      {/* ── Top Header Section ── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-gray-900 dark:text-white">
-            Single Stake (3,3)
+          <h1 className="text-2xl font-bold tracking-tight text-[var(--color-text)]">
+            {getGreeting()}, {user?.name?.split(" ")[0] || "there"}
           </h1>
-          <p className="mt-0.5 text-xs font-semibold text-gray-500 flex items-center gap-1.5">
-            <Clock className="h-3.5 w-3.5 text-gray-400" />
-            <span>7 hrs, 8 min to next rebase schedule</span>
+          <p className="mt-0.5 text-xs text-[var(--color-text-secondary)] flex items-center gap-1.5">
+            <Clock className="h-3.5 w-3.5 text-[var(--color-text-muted)]" />
+            <span>Workspace: <strong className="text-[var(--color-text)]">{workspace?.name || "Personal Brand"}</strong></span>
           </p>
         </div>
 
-        {/* Top-Right Pill Metric Summary Badge */}
-        <div className="inline-flex items-center gap-3 bg-[#111318] text-white px-4 py-2 rounded-xl shadow-sm self-start sm:self-auto">
+        {/* Top Metric Summary Pill */}
+        <div className="inline-flex items-center gap-3 bg-[var(--color-surface)] border border-[var(--color-border)] text-[var(--color-text)] px-4 py-2 rounded-xl shadow-sm self-start sm:self-auto">
           <div className="flex items-center gap-2">
-            <div className="h-6 w-6 rounded-lg bg-gray-800 flex items-center justify-center text-emerald-400">
+            <div className="h-6 w-6 rounded-lg bg-[var(--color-surface-secondary)] flex items-center justify-center text-[var(--color-accent)]">
               <Zap className="h-3.5 w-3.5" />
             </div>
             <div>
-              <span className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">Scheduled Queue</span>
-              <span className="text-sm font-extrabold text-white">{scheduledCount} Posts Ready</span>
+              <span className="block text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">Scheduled Queue</span>
+              <span className="text-xs font-bold text-[var(--color-text)]">{scheduledCount} Posts Ready</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* ── Needs Attention Row (If Any Issues Exist) ── */}
+      {/* ── Needs Attention Row (If Issues Exist) ── */}
       {failedPosts.length > 0 && (
-        <div className="flex items-center justify-between p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900">
+        <div className="flex items-center justify-between p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900 text-rose-900 dark:text-rose-200">
           <div className="flex items-center gap-3">
             <XCircle className="h-5 w-5 text-rose-600 shrink-0" />
             <div>
               <span className="block text-xs font-bold">{failedPosts.length} post(s) failed to publish</span>
-              <span className="text-[11px] text-rose-700">Review your channel credentials and retry.</span>
+              <span className="text-[11px] text-rose-700 dark:text-rose-300">Review channel credentials and retry.</span>
             </div>
           </div>
-          <Link href="/calendar" className="text-xs font-bold text-rose-700 hover:underline">
+          <Link href="/calendar" className="text-xs font-bold text-rose-700 dark:text-rose-300 hover:underline">
             Fix issues →
           </Link>
         </div>
       )}
 
-      {/* ── Dual-Card Contrast Layout (Mirroring Whale Loans Inspiration) ── */}
+      {/* ── Dual-Card Contrast Layout ── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         {/* Left Action Card — Crisp Pure White Surface */}
-        <div className="lg:col-span-7 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 shadow-sm flex flex-col justify-between space-y-6">
+        <div className="lg:col-span-7 glass p-6 flex flex-col justify-between space-y-6">
           
           {/* Tab Selector Pill Bar */}
-          <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-4">
-            <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 p-1 rounded-xl">
+          <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-4">
+            <div className="flex items-center gap-2 bg-[var(--color-background)] p-1 rounded-xl">
               <button
                 onClick={() => setActiveTab("schedule")}
                 className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
                   activeTab === "schedule"
-                    ? "bg-[#111318] text-white shadow-sm"
-                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900"
+                    ? "bg-[var(--color-primary)] text-[var(--color-text-inverse)] shadow-sm"
+                    : "text-[var(--color-text-secondary)] hover:text-[var(--color-text)]"
                 }`}
               >
-                STAKE / SCHEDULE
+                QUICK SCHEDULE
               </button>
               <button
                 onClick={() => setActiveTab("ai")}
                 className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
                   activeTab === "ai"
-                    ? "bg-[#111318] text-white shadow-sm"
-                    : "text-gray-600 dark:text-gray-400 hover:text-gray-900"
+                    ? "bg-[var(--color-primary)] text-[var(--color-text-inverse)] shadow-sm"
+                    : "text-[var(--color-text-secondary)] hover:text-[var(--color-text)]"
                 }`}
               >
                 AI DRAFT
@@ -185,7 +192,7 @@ export default function DashboardPage() {
             
             <button
               onClick={handleAiSuggest}
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 hover:text-emerald-700 transition-colors"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--color-accent)] hover:underline transition-colors"
             >
               <Sparkles className="h-3.5 w-3.5" />
               Auto Fill
@@ -195,7 +202,7 @@ export default function DashboardPage() {
           {/* Action Form */}
           <form onSubmit={handleQuickCompose} className="space-y-4">
             <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-1.5">
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-1.5">
                 Campaign Message
               </label>
               <textarea
@@ -203,13 +210,13 @@ export default function DashboardPage() {
                 value={quickContent}
                 onChange={(e) => setQuickContent(e.target.value)}
                 placeholder="Enter post content or announcement..."
-                className="w-full p-4 text-xs font-medium bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-900 dark:text-white outline-none focus:border-gray-900 dark:focus:border-white transition-colors resize-none placeholder:text-gray-400"
+                className="w-full p-4 text-xs font-medium bg-[var(--color-background)] border border-[var(--color-border)] rounded-xl text-[var(--color-text)] outline-none focus:border-[var(--color-primary)] transition-colors resize-none placeholder:text-[var(--color-text-muted)]"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wider text-gray-500 mb-2">
-                Target Social Channels
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
+                Target Channels
               </label>
               <div className="flex gap-2 flex-wrap">
                 {accounts.map((acc) => {
@@ -221,8 +228,8 @@ export default function DashboardPage() {
                       onClick={() => toggleQuickPlatform(acc.platform)}
                       className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all ${
                         isSelected
-                          ? "bg-[#111318] border-[#111318] text-white shadow-sm"
-                          : "bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
+                          ? "bg-[var(--color-primary)] border-[var(--color-primary)] text-[var(--color-text-inverse)] shadow-sm"
+                          : "bg-[var(--color-background)] border-[var(--color-border)] text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)]"
                       }`}
                     >
                       {getPlatformIcon(acc.platform)}
@@ -233,83 +240,83 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* High-Contrast Obsidian Dark CTA Button */}
+            {/* Primary Action Button */}
             <button
               type="submit"
-              className="w-full flex items-center justify-center gap-2 bg-[#111318] hover:bg-gray-800 text-white text-xs font-bold uppercase tracking-wider py-3.5 rounded-xl transition-all shadow-md active:scale-[0.99]"
+              className="w-full flex items-center justify-center gap-2 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-[var(--color-text-inverse)] text-xs font-bold uppercase tracking-wider py-3.5 rounded-xl transition-all shadow-md active:scale-[0.99]"
             >
               <Send className="h-3.5 w-3.5" />
-              Schedule HUMP Post
+              Schedule Campaign Post
             </button>
           </form>
 
           {/* Quick Metrics Footer */}
-          <div className="pt-3 border-t border-gray-100 dark:border-gray-800 grid grid-cols-3 gap-2 text-center text-[11px]">
+          <div className="pt-3 border-t border-[var(--color-border)] grid grid-cols-3 gap-2 text-center text-[11px]">
             <div>
-              <span className="block text-gray-400 font-medium">Your Balance</span>
-              <span className="font-bold text-gray-900 dark:text-white">0.0 HUMP</span>
+              <span className="block text-[var(--color-text-muted)] font-medium">Published Today</span>
+              <span className="font-bold text-[var(--color-text)]">{publishedCount} Posts</span>
             </div>
             <div>
-              <span className="block text-gray-400 font-medium">Next Reward</span>
-              <span className="font-bold text-gray-900 dark:text-white">0.5378%</span>
+              <span className="block text-[var(--color-text-muted)] font-medium">Scheduled Queue</span>
+              <span className="font-bold text-[var(--color-text)]">{scheduledCount} Posts</span>
             </div>
             <div>
-              <span className="block text-gray-400 font-medium">ROI (5-Day Rate)</span>
-              <span className="font-bold text-emerald-600">8.3786%</span>
+              <span className="block text-[var(--color-text-muted)] font-medium">Weekly Growth</span>
+              <span className="font-bold text-[var(--color-accent)]">+14.2% Reach</span>
             </div>
           </div>
         </div>
 
-        {/* Right Metric Container — High-Contrast Obsidian Dark Card */}
-        <div className="lg:col-span-5 bg-[#111318] text-white rounded-2xl p-6 shadow-xl border border-gray-800 flex flex-col justify-between space-y-6">
+        {/* Right Metric Container — Moderate Darker Shade / Elevated Surface */}
+        <div className="lg:col-span-5 glass-secondary p-6 flex flex-col justify-between space-y-6">
           
           {/* Header Banner */}
-          <div className="flex items-center justify-between border-b border-gray-800 pb-4">
+          <div className="flex items-center justify-between border-b border-[var(--color-border)] pb-4">
             <div>
-              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Estimated Yield</span>
-              <span className="text-xs font-bold text-emerald-400">APY 257,900%</span>
+              <span className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider block">Estimated Growth</span>
+              <span className="text-xs font-bold text-[var(--color-accent)]">+14.2% Weekly Reach</span>
             </div>
-            <div className="h-10 w-10 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-              <ArrowUpRightIcon className="h-5 w-5" />
+            <div className="h-10 w-10 rounded-full bg-[var(--color-accent)]/15 border border-[var(--color-accent)]/30 flex items-center justify-center text-[var(--color-accent)]">
+              <ArrowUpRight className="h-5 w-5" />
             </div>
           </div>
 
-          {/* Big Stat Block 1 */}
+          {/* Big Stat Block */}
           <div className="space-y-1">
-            <span className="text-xs font-medium text-gray-400 block uppercase tracking-wider">Total Value Deposited</span>
-            <p className="text-4xl font-black text-white tracking-tight">$571,320</p>
-            <p className="text-xs text-emerald-400 font-semibold flex items-center gap-1 pt-1">
+            <span className="text-xs font-medium text-[var(--color-text-muted)] block uppercase tracking-wider">Total Impressions</span>
+            <p className="text-4xl font-black text-[var(--color-text)] tracking-tight">124,800</p>
+            <p className="text-xs text-[var(--color-accent)] font-semibold flex items-center gap-1 pt-1">
               <TrendingUp className="h-3.5 w-3.5" />
-              <span>+14.2% reach expansion this week</span>
+              <span>+14.2% expansion vs last 7 days</span>
             </p>
           </div>
 
-          <div className="h-px bg-gray-800" />
+          <div className="h-px bg-[var(--color-border)]" />
 
-          {/* Big Stat Block 2 */}
+          {/* Secondary Metric Grid */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Current Index</span>
-              <p className="text-xl font-bold text-white mt-1">1.99 HUMP</p>
+              <span className="text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider block">Engagement Rate</span>
+              <p className="text-xl font-bold text-[var(--color-text)] mt-1">5.62%</p>
             </div>
             <div>
-              <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block">Linked Channels</span>
-              <p className="text-xl font-bold text-white mt-1">{accounts.length} Active</p>
+              <span className="text-[11px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider block">Linked Accounts</span>
+              <p className="text-xl font-bold text-[var(--color-text)] mt-1">{accounts.length} Channels</p>
             </div>
           </div>
 
-          {/* Mini Sparkline Visualization */}
+          {/* Chart Preview */}
           <div className="pt-2">
             <div className="h-20 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={CHART_DATA} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="heroGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#10B981" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
+                      <stop offset="5%" stopColor="var(--color-accent)" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="var(--color-accent)" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <Area type="monotone" dataKey="reach" stroke="#10B981" strokeWidth={2} fill="url(#heroGradient)" />
+                  <Area type="monotone" dataKey="reach" stroke="var(--color-accent)" strokeWidth={2} fill="url(#heroGradient)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -319,75 +326,75 @@ export default function DashboardPage() {
 
       </div>
 
-      {/* ── Table Section — Obsidian Dark Header + White Item Rows ── */}
+      {/* ── Scheduled Feed Table ── */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-bold text-gray-900 dark:text-white">
-            Bond & Scheduled Queue (4,4)
+          <h2 className="text-base font-bold text-[var(--color-text)]">
+            Scheduled Campaign Posts
           </h2>
-          <Link href="/calendar" className="text-xs font-bold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white flex items-center gap-1">
-            <span>View Full Calendar</span>
+          <Link href="/calendar" className="text-xs font-bold text-[var(--color-text-secondary)] hover:text-[var(--color-text)] flex items-center gap-1">
+            <span>View Calendar</span>
             <ChevronRight className="h-3.5 w-3.5" />
           </Link>
         </div>
 
         {/* Table Container */}
-        <div className="overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
+        <div className="overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] shadow-sm">
           
-          {/* Obsidian Dark Table Header Bar */}
-          <div className="bg-[#111318] text-white px-6 py-3.5 text-[11px] font-bold uppercase tracking-wider grid grid-cols-12 gap-4 items-center border-b border-gray-800">
+          {/* Table Header Bar */}
+          <div className="bg-[var(--color-primary)] text-[var(--color-text-inverse)] px-6 py-3.5 text-[11px] font-bold uppercase tracking-wider grid grid-cols-12 gap-4 items-center border-b border-[var(--color-border)]">
             <div className="col-span-5 sm:col-span-6">Campaign Content</div>
             <div className="col-span-3 sm:col-span-2">Scheduled Time</div>
             <div className="col-span-2 sm:col-span-2 text-center">Status</div>
             <div className="col-span-2 sm:col-span-2 text-right">Action</div>
           </div>
 
-          {/* Table Body Rows */}
-          <div className="divide-y divide-gray-100 dark:divide-gray-800">
+          {/* Table Rows */}
+          <div className="divide-y divide-[var(--color-border)]">
             {upcomingPosts.length > 0 ? (
               upcomingPosts.map((post) => (
-                <div key={post.id} className="px-6 py-4 grid grid-cols-12 gap-4 items-center hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                <div key={post.id} className="px-6 py-4 grid grid-cols-12 gap-4 items-center hover:bg-[var(--color-surface-hover)] transition-colors">
                   
-                  {/* Content & Platforms */}
+                  {/* Content & Channels */}
                   <div className="col-span-5 sm:col-span-6 flex items-center gap-3 min-w-0">
                     <div className="flex gap-1 shrink-0">
                       {post.platforms.map((p) => (
-                        <div key={p} className="h-7 w-7 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center">
+                        <div key={p} className="h-7 w-7 rounded-lg bg-[var(--color-background)] border border-[var(--color-border)] flex items-center justify-center">
                           {getPlatformIcon(p)}
                         </div>
                       ))}
                     </div>
-                    <span className="text-xs font-semibold text-gray-900 dark:text-white truncate">{post.content}</span>
+                    <span className="text-xs font-semibold text-[var(--color-text)] truncate">{post.content}</span>
                   </div>
 
                   {/* Scheduled Time */}
-                  <div className="col-span-3 sm:col-span-2 text-xs font-medium text-gray-500">
+                  <div className="col-span-3 sm:col-span-2 text-xs font-medium text-[var(--color-text-muted)]">
                     {new Date(post.scheduledAt || "").toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
                   </div>
 
                   {/* Status Badge */}
                   <div className="col-span-2 sm:col-span-2 text-center">
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold uppercase tracking-wider">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[var(--color-accent)]/10 text-[var(--color-accent)] border border-[var(--color-accent)]/30 text-[10px] font-bold uppercase tracking-wider">
                       <CheckCircle className="h-3 w-3" />
                       {post.status}
                     </span>
                   </div>
 
-                  {/* Action Link */}
+                  {/* Action Button */}
                   <div className="col-span-2 sm:col-span-2 text-right">
                     <Link
                       href="/calendar"
-                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#111318] text-white text-[11px] font-bold hover:bg-gray-800 transition-colors"
+                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[var(--color-primary)] text-[var(--color-text-inverse)] text-[11px] font-bold hover:bg-[var(--color-primary-hover)] transition-colors"
                     >
-                      <span>Bond</span>
+                      <span>Manage</span>
                     </Link>
                   </div>
 
                 </div>
               ))
             ) : (
-              <div className="py-12 text-center text-xs text-gray-500">
-                No scheduled campaign posts. Use the composer to stake your first post.
+              <div className="py-12 text-center text-xs text-[var(--color-text-muted)]">
+                No scheduled campaign posts. Use the composer to schedule your first post.
               </div>
             )}
           </div>
