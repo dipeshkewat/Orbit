@@ -118,7 +118,7 @@ export default function SettingsBillingPage() {
       {/* Subscription Info Header Card */}
       <div className="glass rounded-[var(--radius-lg)] p-5 grid gap-4 sm:grid-cols-3 items-center">
         <div>
-          <span className="block text-[10px] uppercase font-bold tracking-wider text-[var(--color-text-muted)]">Active Workspace Plan</span>
+          <span className="block text-xs uppercase font-bold tracking-wider text-[var(--color-text-muted)]">Active Workspace Plan</span>
           <span className="text-xl font-extrabold capitalize text-[var(--color-primary-light)] mt-1 block flex items-center gap-1.5">
             <ShieldCheck className="h-5 w-5 text-[var(--color-success)]" />
             {workspace.plan} Tier
@@ -126,7 +126,7 @@ export default function SettingsBillingPage() {
         </div>
 
         <div>
-          <span className="block text-[10px] uppercase font-bold tracking-wider text-[var(--color-text-muted)]">Monthly AI Credits</span>
+          <span className="block text-xs uppercase font-bold tracking-wider text-[var(--color-text-muted)]">Monthly AI Credits</span>
           <span className="text-sm font-semibold text-[var(--color-text-secondary)] mt-1 block flex items-center gap-1.5">
             <Coins className="h-4 w-4 text-[var(--color-accent)]" />
             {workspace.aiCreditsLimit - workspace.aiCreditsUsed} left ({workspace.aiCreditsUsed}/{workspace.aiCreditsLimit} used)
@@ -161,7 +161,7 @@ export default function SettingsBillingPage() {
                 }`}
               >
                 {plan.popular && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[var(--color-primary)] text-white text-[9px] font-extrabold uppercase px-2.5 py-0.5 rounded-full tracking-wider">
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[var(--color-primary)] text-white text-xs font-extrabold uppercase px-2.5 py-0.5 rounded-full tracking-wider">
                     Most Popular
                   </span>
                 )}
@@ -175,7 +175,7 @@ export default function SettingsBillingPage() {
                     </div>
                   </div>
 
-                  <ul className="space-y-2 pt-2 text-[11px] text-[var(--color-text-secondary)] font-medium">
+                  <ul className="space-y-2 pt-2 text-xs text-[var(--color-text-secondary)] font-medium">
                     {plan.features.map((feat, idx) => (
                       <li key={idx} className="flex items-center gap-1.5">
                         <CheckCircle className="h-3.5 w-3.5 text-[var(--color-success)] shrink-0" />

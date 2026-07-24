@@ -102,12 +102,12 @@ export default function SettingsAccountsPage() {
                     </div>
                     <div>
                       <span className="block text-xs font-bold text-[var(--color-text)]">{acc.displayName}</span>
-                      <span className="block text-[10px] text-[var(--color-text-muted)]">{acc.username}</span>
+                      <span className="block text-xs text-[var(--color-text-muted)]">{acc.username}</span>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <span className="text-[9px] uppercase font-bold tracking-wider text-[var(--color-success)] bg-[var(--color-success)]/10 px-2 py-0.5 rounded border border-[var(--color-success)]/20">
+                    <span className="text-xs uppercase font-bold tracking-wider text-[var(--color-success)] bg-[var(--color-success)]/10 px-2 py-0.5 rounded border border-[var(--color-success)]/20">
                       Token healthy
                     </span>
                     <button
@@ -135,7 +135,7 @@ export default function SettingsAccountsPage() {
                 <Plus className="h-4.5 w-4.5" />
                 Connect New Channel
               </h3>
-              <p className="text-[10px] text-[var(--color-text-muted)] mt-0.5">Authorizes OAuth tokens for automated publishing</p>
+              <p className="text-xs text-[var(--color-text-muted)] mt-0.5">Authorizes OAuth tokens for automated publishing</p>
             </div>
 
             <div className="space-y-2">
@@ -152,7 +152,7 @@ export default function SettingsAccountsPage() {
                       {getPlatformIcon(platform)}
                       Connect {platform}
                     </span>
-                    <span className="text-[10px] text-[var(--color-primary-light)] font-bold">
+                    <span className="text-xs text-[var(--color-primary-light)] font-bold">
                       {isConnecting ? "Redirecting..." : "Link Page"}
                     </span>
                   </button>
@@ -161,7 +161,7 @@ export default function SettingsAccountsPage() {
             </div>
 
             <div className="pt-4 border-t border-[var(--color-border)]">
-              <div className="p-3 bg-[var(--color-surface-hover)] rounded border border-[var(--color-border)] flex items-start gap-2 text-[10px]">
+              <div className="p-3 bg-[var(--color-surface-hover)] rounded border border-[var(--color-border)] flex items-start gap-2 text-xs">
                 <Lock className="h-4 w-4 text-[var(--color-success)] shrink-0 mt-0.5" />
                 <p className="text-[var(--color-text-muted)] leading-relaxed">
                   Tokens are encrypted using <span className="font-semibold text-[var(--color-text-secondary)]">AES-256-GCM</span> prior to database storage. Access details are never returned in public client payloads.

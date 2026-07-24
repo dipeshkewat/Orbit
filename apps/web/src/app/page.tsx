@@ -469,7 +469,7 @@ export default function LandingPage() {
                 >
                   <div className="flex items-center justify-between pb-3" style={{ borderBottom: `1px solid ${C.border}` }}>
                     <span className="text-xs font-semibold" style={{ color: C.textSecondary }}>This week</span>
-                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold" style={{ backgroundColor: "rgba(45,212,191,0.12)", color: C.accent }}>
+                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold" style={{ backgroundColor: "rgba(45,212,191,0.12)", color: C.accent }}>
                       <Sparkles className="h-3 w-3" /> AI ready
                     </span>
                   </div>
@@ -494,14 +494,14 @@ export default function LandingPage() {
                   {/* upcoming post */}
                   <div className="p-3 rounded-xl flex gap-3 items-center" style={{ backgroundColor: C.card, border: `1px solid ${C.border}` }}>
                     <div className="flex -space-x-1">
-                      <div className="h-6 w-6 rounded-full flex items-center justify-center text-[11px] font-bold" style={{ backgroundColor: "rgba(225,48,108,0.18)", color: "#f0729f" }}>I</div>
-                      <div className="h-6 w-6 rounded-full flex items-center justify-center text-[11px] font-bold" style={{ backgroundColor: "rgba(0,119,181,0.2)", color: "#4aa3d5" }}>in</div>
+                      <div className="h-6 w-6 rounded-full flex items-center justify-center text-xs font-bold" style={{ backgroundColor: "rgba(225,48,108,0.18)", color: "#f0729f" }}>I</div>
+                      <div className="h-6 w-6 rounded-full flex items-center justify-center text-xs font-bold" style={{ backgroundColor: "rgba(0,119,181,0.2)", color: "#4aa3d5" }}>in</div>
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-semibold text-white truncate">Product launch thread</p>
-                      <span className="text-[11px]" style={{ color: C.textMuted }}>Scheduled · 9:15 AM</span>
+                      <span className="text-xs" style={{ color: C.textMuted }}>Scheduled · 9:15 AM</span>
                     </div>
-                    <span className="px-2 py-0.5 rounded text-[11px] font-semibold" style={{ backgroundColor: "rgba(22,163,74,0.15)", color: "#4ade80" }}>Ready</span>
+                    <span className="px-2 py-0.5 rounded text-xs font-semibold" style={{ backgroundColor: "rgba(22,163,74,0.15)", color: "#4ade80" }}>Ready</span>
                   </div>
 
                   {/* AI suggestion */}
@@ -516,11 +516,11 @@ export default function LandingPage() {
 
                   <div className="grid grid-cols-2 gap-3">
                     <div className="p-3 rounded-xl" style={{ backgroundColor: C.card, border: `1px solid ${C.border}` }}>
-                      <span className="text-[11px] font-semibold" style={{ color: C.textMuted }}>Reach</span>
+                      <span className="text-xs font-semibold" style={{ color: C.textMuted }}>Reach</span>
                       <p className="text-base font-bold text-white mt-0.5">124.8K</p>
                     </div>
                     <div className="p-3 rounded-xl" style={{ backgroundColor: C.card, border: `1px solid ${C.border}` }}>
-                      <span className="text-[11px] font-semibold" style={{ color: C.textMuted }}>Engagement</span>
+                      <span className="text-xs font-semibold" style={{ color: C.textMuted }}>Engagement</span>
                       <p className="text-base font-bold mt-0.5" style={{ color: "#4ade80" }}>+14.2%</p>
                     </div>
                   </div>
@@ -769,7 +769,7 @@ export default function LandingPage() {
               }}
             >
               {plan.highlighted && (
-                <div className="absolute top-4 right-4 px-2 py-0.5 rounded-full text-[11px] font-bold uppercase" style={{ backgroundColor: "rgba(99,102,241,0.2)", color: C.primaryLight }}>
+                <div className="absolute top-4 right-4 px-2 py-0.5 rounded-full text-xs font-bold uppercase" style={{ backgroundColor: "rgba(99,102,241,0.2)", color: C.primaryLight }}>
                   Most popular
                 </div>
               )}

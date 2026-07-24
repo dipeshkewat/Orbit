@@ -143,7 +143,7 @@ export default function AiStudioPage() {
             <span className="block font-bold text-[var(--color-text)]">
               {workspace?.aiCreditsLimit - workspace?.aiCreditsUsed} Credits Available
             </span>
-            <span className="block text-[10px] text-[var(--color-text-muted)] font-medium">
+            <span className="block text-xs text-[var(--color-text-muted)] font-medium">
               Used: {workspace?.aiCreditsUsed} / {workspace?.aiCreditsLimit} limit
             </span>
           </div>
@@ -197,7 +197,7 @@ export default function AiStudioPage() {
               <div>
                 <div className="flex justify-between items-center mb-2">
                   <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)]">Target Platform Formats</label>
-                  <span className="text-[10px] text-[var(--color-accent)] font-semibold">Cost: {platforms.length} credits</span>
+                  <span className="text-xs text-[var(--color-accent)] font-semibold">Cost: {platforms.length} credits</span>
                 </div>
                 <div className="flex gap-2">
                   {["instagram", "twitter", "linkedin", "facebook"].map((p) => {
@@ -309,7 +309,7 @@ export default function AiStudioPage() {
                   <button
                     key={tag}
                     onClick={() => handleCopyToClipboard(tag)}
-                    className="px-2 py-1 rounded bg-[var(--color-background)] border border-[var(--color-border)] hover:border-[var(--color-border-hover)] text-[10px] text-[var(--color-text-secondary)] font-semibold"
+                    className="px-2 py-1 rounded bg-[var(--color-background)] border border-[var(--color-border)] hover:border-[var(--color-border-hover)] text-xs text-[var(--color-text-secondary)] font-semibold"
                     title="Click to copy"
                   >
                     {tag}
@@ -317,7 +317,7 @@ export default function AiStudioPage() {
                 ))}
               </div>
             ) : (
-              <p className="text-[10px] text-[var(--color-text-muted)]">Search a topic above to suggestions (Costs 1 credit).</p>
+              <p className="text-xs text-[var(--color-text-muted)]">Search a topic above to suggestions (Costs 1 credit).</p>
             )}
           </div>
         </div>

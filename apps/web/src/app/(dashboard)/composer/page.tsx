@@ -400,7 +400,7 @@ Let us know what platforms you want to build on! 👇 #socialmedia #marketing #t
                   <>
                     <label className="aspect-square flex flex-col items-center justify-center rounded-[var(--radius-md)] border-2 border-dashed border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-hover)] cursor-pointer transition-colors p-3 text-center">
                       <UploadCloud className="h-5 w-5 text-[var(--color-text-muted)] mb-1" />
-                      <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--color-text-muted)]">Upload File</span>
+                      <span className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">Upload File</span>
                       <input type="file" accept="image/*" multiple onChange={handleMediaUpload} className="hidden" />
                     </label>
 
@@ -410,7 +410,7 @@ Let us know what platforms you want to build on! 👇 #socialmedia #marketing #t
                       className="aspect-square flex flex-col items-center justify-center rounded-[var(--radius-md)] border-2 border-dashed border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-hover)] cursor-pointer transition-colors p-3 text-center"
                     >
                       <Sparkles className="h-5 w-5 text-[var(--color-accent)] mb-1 animate-pulse" />
-                      <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--color-text-muted)]">AI Generate</span>
+                      <span className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">AI Generate</span>
                     </button>
                   </>
                 )}
@@ -434,7 +434,7 @@ Let us know what platforms you want to build on! 👇 #socialmedia #marketing #t
               >
                 <Zap className="h-5 w-5 text-[var(--color-success)] mb-2 animate-pulse" />
                 <span className="text-xs font-semibold">AI Best Time</span>
-                <span className="text-[10px] text-[var(--color-text-muted)] mt-1">Posts when reach is highest</span>
+                <span className="text-xs text-[var(--color-text-muted)] mt-1">Posts when reach is highest</span>
               </button>
 
               <button
@@ -448,7 +448,7 @@ Let us know what platforms you want to build on! 👇 #socialmedia #marketing #t
               >
                 <CalendarIcon className="h-5 w-5 text-[var(--color-primary)] mb-2" />
                 <span className="text-xs font-semibold">Pick Date & Time</span>
-                <span className="text-[10px] text-[var(--color-text-muted)] mt-1">Specify date and hour</span>
+                <span className="text-xs text-[var(--color-text-muted)] mt-1">Specify date and hour</span>
               </button>
 
               <button
@@ -462,7 +462,7 @@ Let us know what platforms you want to build on! 👇 #socialmedia #marketing #t
               >
                 <Globe className="h-5 w-5 text-[var(--color-accent)] mb-2" />
                 <span className="text-xs font-semibold">Publish Now</span>
-                <span className="text-[10px] text-[var(--color-text-muted)] mt-1">Post immediately</span>
+                <span className="text-xs text-[var(--color-text-muted)] mt-1">Post immediately</span>
               </button>
             </div>
 
@@ -492,14 +492,14 @@ Let us know what platforms you want to build on! 👇 #socialmedia #marketing #t
 
             <div className="space-y-3">
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-1.5">Selected Tone</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-1.5">Selected Tone</label>
                 <div className="grid grid-cols-3 gap-1.5">
                   {TONAL_OPTIONS.map((tone) => (
                     <button
                       key={tone}
                       type="button"
                       onClick={() => setSelectedTone(tone)}
-                      className={`py-1 px-1.5 rounded border text-[10px] font-medium transition-all ${
+                      className={`py-1 px-1.5 rounded border text-xs font-medium transition-all ${
                         selectedTone === tone
                           ? "bg-[var(--color-primary)]/10 border-[var(--color-primary)] text-[var(--color-primary-light)]"
                           : "border-[var(--color-border)] hover:bg-[var(--color-surface-hover)] text-[var(--color-text-muted)]"
@@ -512,7 +512,7 @@ Let us know what platforms you want to build on! 👇 #socialmedia #marketing #t
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-1.5">Generate Caption Topic</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-1.5">Generate Caption Topic</label>
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -533,14 +533,14 @@ Let us know what platforms you want to build on! 👇 #socialmedia #marketing #t
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-1.5">Trending Hashtags</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-1.5">Trending Hashtags</label>
                 <div className="flex flex-wrap gap-1.5">
                   {["#saas", "#tech", "#marketing", "#uiux", "#branding", "#productivity"].map((tag) => (
                     <button
                       key={tag}
                       type="button"
                       onClick={() => handleAddHashtag(tag)}
-                      className="px-2 py-0.5 rounded bg-[var(--color-background)] border border-[var(--color-border)] hover:border-[var(--color-border-hover)] text-[10px] text-[var(--color-text-secondary)] font-medium"
+                      className="px-2 py-0.5 rounded bg-[var(--color-background)] border border-[var(--color-border)] hover:border-[var(--color-border-hover)] text-xs text-[var(--color-text-secondary)] font-medium"
                     >
                       + {tag}
                     </button>
@@ -561,7 +561,7 @@ Let us know what platforms you want to build on! 👇 #socialmedia #marketing #t
                   <button
                     key={platform}
                     onClick={() => setPreviewPlatform(platform)}
-                    className={`px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 transition-all ${
+                    className={`px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider flex items-center gap-1 transition-all ${
                       previewPlatform === platform
                         ? "bg-[var(--color-surface-hover)] text-[var(--color-text)]"
                         : "text-[var(--color-text-muted)]"
@@ -580,7 +580,7 @@ Let us know what platforms you want to build on! 👇 #socialmedia #marketing #t
                 <button
                   type="button"
                   onClick={() => setShowInstaGrid(!showInstaGrid)}
-                  className="px-3 py-1 bg-[var(--color-surface)] border border-[var(--color-border)] hover:bg-[var(--color-surface-hover)] rounded text-[9px] font-bold uppercase tracking-wider text-[var(--color-primary-light)] transition-colors"
+                  className="px-3 py-1 bg-[var(--color-surface)] border border-[var(--color-border)] hover:bg-[var(--color-surface-hover)] rounded text-xs font-bold uppercase tracking-wider text-[var(--color-primary-light)] transition-colors"
                 >
                   {showInstaGrid ? "View Post Preview" : "View Instagram Grid"}
                 </button>
@@ -624,11 +624,11 @@ Let us know what platforms you want to build on! 👇 #socialmedia #marketing #t
                 {/* Header */}
                 <div className="flex items-center gap-2">
                   <div className="h-8 w-8 rounded-full bg-[var(--color-primary)] flex items-center justify-center shrink-0">
-                    <span className="text-[10px] font-bold text-white">D</span>
+                    <span className="text-xs font-bold text-white">D</span>
                   </div>
                   <div className="min-w-0">
                     <span className="block text-xs font-bold text-white truncate">{user?.name || "User"}</span>
-                    <span className="block text-[9px] text-zinc-500">
+                    <span className="block text-xs text-zinc-500">
                       {previewPlatform === "instagram" && "@insta_handle"}
                       {previewPlatform === "twitter" && `@${user?.name.toLowerCase().replace(/\s+/g, "") || "user"}`}
                       {previewPlatform === "linkedin" && "Director of Marketing"}
@@ -650,7 +650,7 @@ Let us know what platforms you want to build on! 👇 #socialmedia #marketing #t
                 )}
 
                 {/* Footer Likes / Comments Bar */}
-                <div className="mt-4 pt-3 border-t border-zinc-800 flex justify-between text-zinc-500 text-[10px]">
+                <div className="mt-4 pt-3 border-t border-zinc-800 flex justify-between text-zinc-500 text-xs">
                   {previewPlatform === "instagram" && (
                     <>
                       <span className="flex items-center gap-1"><Heart className="h-3.5 w-3.5" /> Likes</span>
@@ -712,7 +712,7 @@ Let us know what platforms you want to build on! 👇 #socialmedia #marketing #t
 
             <div className="space-y-4">
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Creative Prompt</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Creative Prompt</label>
                 <textarea
                   rows={3}
                   value={imageGenPrompt}
@@ -723,7 +723,7 @@ Let us know what platforms you want to build on! 👇 #socialmedia #marketing #t
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Resolution Size</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Resolution Size</label>
                 <div className="grid grid-cols-2 gap-3">
                   <button
                     type="button"

@@ -107,7 +107,7 @@ export default function AiContentPlannerPage() {
       {/* Strategy Config Bar */}
       <div className="glass rounded-[var(--radius-lg)] p-5 flex flex-col sm:flex-row gap-4">
         <div className="flex-1 space-y-2">
-          <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] flex items-center gap-1">
+          <label className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] flex items-center gap-1">
             <Target className="h-3 w-3" /> Industry Niche
           </label>
           <select
@@ -124,7 +124,7 @@ export default function AiContentPlannerPage() {
           </select>
         </div>
         <div className="flex-1 space-y-2">
-          <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] flex items-center gap-1">
+          <label className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] flex items-center gap-1">
             <Lightbulb className="h-3 w-3" /> Primary Goal
           </label>
           <select
@@ -140,7 +140,7 @@ export default function AiContentPlannerPage() {
           </select>
         </div>
         <div className="flex-1 space-y-2">
-          <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] flex items-center gap-1">
+          <label className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] flex items-center gap-1">
             <Calendar className="h-3 w-3" /> Plan Period
           </label>
           <div className="px-3 py-2 bg-[var(--color-background)] border border-[var(--color-border)] rounded-[var(--radius-md)] text-xs text-[var(--color-text)] font-medium">
@@ -175,15 +175,15 @@ export default function AiContentPlannerPage() {
                     {/* Content Details */}
                     <div className="flex-1 min-w-0 space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="px-2 py-0.5 rounded bg-[var(--color-surface-hover)] border border-[var(--color-border)] text-[9px] font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
+                        <span className="px-2 py-0.5 rounded bg-[var(--color-surface-hover)] border border-[var(--color-border)] text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
                           {slot.contentType}
                         </span>
-                        <span className={`px-2 py-0.5 rounded border text-[9px] font-bold uppercase tracking-wider ${statusStyles[slot.status]}`}>
+                        <span className={`px-2 py-0.5 rounded border text-xs font-bold uppercase tracking-wider ${statusStyles[slot.status]}`}>
                           {slot.status}
                         </span>
                       </div>
                       <p className="text-xs font-semibold text-[var(--color-text)] truncate">{slot.topic}</p>
-                      <p className="text-[10px] text-[var(--color-text-muted)] flex items-center gap-1">
+                      <p className="text-xs text-[var(--color-text-muted)] flex items-center gap-1">
                         <Sparkles className="h-3 w-3 text-[var(--color-accent)] shrink-0" />
                         {slot.hook}
                       </p>
@@ -194,7 +194,7 @@ export default function AiContentPlannerPage() {
                       {slot.status === "suggested" && (
                         <button
                           onClick={() => handleApproveSlot(slot.id)}
-                          className="px-3 py-1.5 rounded-[var(--radius-md)] border border-[var(--color-success)] bg-[var(--color-success)]/5 text-[var(--color-success)] text-[10px] font-bold uppercase tracking-wider hover:bg-[var(--color-success)]/10 transition-colors"
+                          className="px-3 py-1.5 rounded-[var(--radius-md)] border border-[var(--color-success)] bg-[var(--color-success)]/5 text-[var(--color-success)] text-xs font-bold uppercase tracking-wider hover:bg-[var(--color-success)]/10 transition-colors"
                         >
                           Approve
                         </button>
@@ -202,13 +202,13 @@ export default function AiContentPlannerPage() {
                       {(slot.status === "suggested" || slot.status === "approved") && (
                         <button
                           onClick={() => handleScheduleSlot(slot.id)}
-                          className="px-3 py-1.5 rounded-[var(--radius-md)] border border-[var(--color-primary)] bg-[var(--color-primary)]/5 text-[var(--color-primary-light)] text-[10px] font-bold uppercase tracking-wider hover:bg-[var(--color-primary)]/10 transition-colors"
+                          className="px-3 py-1.5 rounded-[var(--radius-md)] border border-[var(--color-primary)] bg-[var(--color-primary)]/5 text-[var(--color-primary-light)] text-xs font-bold uppercase tracking-wider hover:bg-[var(--color-primary)]/10 transition-colors"
                         >
                           Schedule
                         </button>
                       )}
                       {slot.status === "scheduled" && (
-                        <span className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
+                        <span className="px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">
                           ✓ In Calendar
                         </span>
                       )}

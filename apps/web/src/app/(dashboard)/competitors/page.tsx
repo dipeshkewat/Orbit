@@ -112,21 +112,21 @@ export default function CompetitorTrackingPage() {
         <div className="glass rounded-[var(--radius-lg)] p-5">
           <div className="flex items-center gap-2 mb-2">
             <Users className="h-4 w-4 text-[var(--color-primary-light)]" />
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)]">Avg Competitor Followers</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">Avg Competitor Followers</span>
           </div>
           <span className="text-2xl font-extrabold">{formatFollowers(competitors.reduce((s, c) => s + c.followers, 0) / competitors.length)}</span>
         </div>
         <div className="glass rounded-[var(--radius-lg)] p-5">
           <div className="flex items-center gap-2 mb-2">
             <Eye className="h-4 w-4 text-[var(--color-accent)]" />
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)]">Avg Engagement Rate</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">Avg Engagement Rate</span>
           </div>
           <span className="text-2xl font-extrabold">{(competitors.reduce((s, c) => s + c.avgEngagement, 0) / competitors.length).toFixed(1)}%</span>
         </div>
         <div className="glass rounded-[var(--radius-lg)] p-5">
           <div className="flex items-center gap-2 mb-2">
             <BarChart3 className="h-4 w-4 text-[var(--color-success)]" />
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)]">Avg Posts / Week</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">Avg Posts / Week</span>
           </div>
           <span className="text-2xl font-extrabold">{(competitors.reduce((s, c) => s + c.postsPerWeek, 0) / competitors.length).toFixed(0)}</span>
         </div>
@@ -138,13 +138,13 @@ export default function CompetitorTrackingPage() {
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-[var(--color-border)]">
-                <th className="px-5 py-3 text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)]">Brand</th>
-                <th className="px-5 py-3 text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)]">Platform</th>
-                <th className="px-5 py-3 text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)]">Followers</th>
-                <th className="px-5 py-3 text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)]">Growth</th>
-                <th className="px-5 py-3 text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)]">Eng. Rate</th>
-                <th className="px-5 py-3 text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)]">Posts/Wk</th>
-                <th className="px-5 py-3 text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)]">Top Format</th>
+                <th className="px-5 py-3 text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">Brand</th>
+                <th className="px-5 py-3 text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">Platform</th>
+                <th className="px-5 py-3 text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">Followers</th>
+                <th className="px-5 py-3 text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">Growth</th>
+                <th className="px-5 py-3 text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">Eng. Rate</th>
+                <th className="px-5 py-3 text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">Posts/Wk</th>
+                <th className="px-5 py-3 text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">Top Format</th>
                 <th className="px-5 py-3"></th>
               </tr>
             </thead>
@@ -154,7 +154,7 @@ export default function CompetitorTrackingPage() {
                   <td className="px-5 py-4">
                     <div>
                       <span className="text-xs font-bold text-[var(--color-text)]">{comp.name}</span>
-                      <span className="block text-[10px] text-[var(--color-text-muted)]">{comp.handle}</span>
+                      <span className="block text-xs text-[var(--color-text-muted)]">{comp.handle}</span>
                     </div>
                   </td>
                   <td className="px-5 py-4">
@@ -204,15 +204,15 @@ export default function CompetitorTrackingPage() {
             </h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Brand Name</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Brand Name</label>
                 <input type="text" value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Buffer" className="w-full px-3 py-2.5 text-xs bg-[var(--color-background)] border border-[var(--color-border)] rounded-[var(--radius-md)] text-[var(--color-text)] outline-none focus:border-[var(--color-primary)] transition-colors" />
               </div>
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Handle / URL</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Handle / URL</label>
                 <input type="text" value={newHandle} onChange={(e) => setNewHandle(e.target.value)} placeholder="@buffer" className="w-full px-3 py-2.5 text-xs bg-[var(--color-background)] border border-[var(--color-border)] rounded-[var(--radius-md)] text-[var(--color-text)] outline-none focus:border-[var(--color-primary)] transition-colors font-mono" />
               </div>
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Platform</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Platform</label>
                 <select value={newPlatform} onChange={(e) => setNewPlatform(e.target.value)} className="w-full px-3 py-2 bg-[var(--color-background)] border border-[var(--color-border)] rounded-[var(--radius-md)] text-xs text-[var(--color-text)] outline-none">
                   <option value="twitter">Twitter / X</option>
                   <option value="instagram">Instagram</option>

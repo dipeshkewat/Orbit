@@ -307,7 +307,7 @@ export default function AnalyticsPage() {
         <div className="mt-6 overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="border-b border-[var(--color-border)] pb-3 text-[var(--color-text-muted)] font-bold uppercase tracking-wider text-[10px]">
+              <tr className="border-b border-[var(--color-border)] pb-3 text-[var(--color-text-muted)] font-bold uppercase tracking-wider text-xs">
                 <th className="pb-3 pr-4">Post Content</th>
                 <th className="pb-3 px-4">Channels</th>
                 <th className="pb-3 px-4 text-right">Impressions</th>
@@ -376,7 +376,7 @@ export default function AnalyticsPage() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Report Title</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Report Title</label>
                 <input
                   type="text"
                   value={reportTitle}
@@ -386,7 +386,7 @@ export default function AnalyticsPage() {
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Client / Company Name</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Client / Company Name</label>
                 <input
                   type="text"
                   value={clientName}
@@ -396,7 +396,7 @@ export default function AnalyticsPage() {
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Brand Accent Color</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Brand Accent Color</label>
                 <div className="flex items-center gap-3">
                   <input
                     type="color"
@@ -414,22 +414,22 @@ export default function AnalyticsPage() {
                   <div className="h-6 w-6 rounded" style={{ backgroundColor: brandColor }} />
                   <span className="text-xs font-bold text-[var(--color-text)]">{reportTitle}</span>
                 </div>
-                <span className="text-[10px] text-[var(--color-text-muted)]">Prepared for: {clientName} · Period: June 2026 – July 2026</span>
+                <span className="text-xs text-[var(--color-text-muted)]">Prepared for: {clientName} · Period: June 2026 – July 2026</span>
                 <div className="grid grid-cols-4 gap-2 pt-2">
                   <div className="text-center p-2 rounded bg-[var(--color-surface)] border border-[var(--color-border)]">
-                    <span className="block text-[10px] font-bold" style={{ color: brandColor }}>142.8K</span>
+                    <span className="block text-xs font-bold" style={{ color: brandColor }}>142.8K</span>
                     <span className="text-[8px] text-[var(--color-text-muted)]">Impressions</span>
                   </div>
                   <div className="text-center p-2 rounded bg-[var(--color-surface)] border border-[var(--color-border)]">
-                    <span className="block text-[10px] font-bold" style={{ color: brandColor }}>18.4K</span>
+                    <span className="block text-xs font-bold" style={{ color: brandColor }}>18.4K</span>
                     <span className="text-[8px] text-[var(--color-text-muted)]">Engagement</span>
                   </div>
                   <div className="text-center p-2 rounded bg-[var(--color-surface)] border border-[var(--color-border)]">
-                    <span className="block text-[10px] font-bold" style={{ color: brandColor }}>+3.4K</span>
+                    <span className="block text-xs font-bold" style={{ color: brandColor }}>+3.4K</span>
                     <span className="text-[8px] text-[var(--color-text-muted)]">Followers</span>
                   </div>
                   <div className="text-center p-2 rounded bg-[var(--color-surface)] border border-[var(--color-border)]">
-                    <span className="block text-[10px] font-bold" style={{ color: brandColor }}>87.2%</span>
+                    <span className="block text-xs font-bold" style={{ color: brandColor }}>87.2%</span>
                     <span className="text-[8px] text-[var(--color-text-muted)]">Score</span>
                   </div>
                 </div>

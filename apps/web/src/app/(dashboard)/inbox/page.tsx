@@ -207,9 +207,9 @@ export default function InboxPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-start gap-1">
                     <span className="text-xs font-bold text-[var(--color-text)] truncate">{conv.sender.name}</span>
-                    <span className="text-[10px] text-[var(--color-text-muted)] shrink-0 font-medium">{conv.time}</span>
+                    <span className="text-xs text-[var(--color-text-muted)] shrink-0 font-medium">{conv.time}</span>
                   </div>
-                  <p className="text-[11px] text-[var(--color-text-secondary)] truncate mt-1">
+                  <p className="text-xs text-[var(--color-text-secondary)] truncate mt-1">
                     {conv.lastMessage}
                   </p>
                 </div>
@@ -233,7 +233,7 @@ export default function InboxPage() {
                   <img src={activeConv.sender.avatar} alt="avatar" className="h-10 w-10 rounded-full object-cover" />
                   <div>
                     <span className="block text-xs font-bold text-[var(--color-text)]">{activeConv.sender.name}</span>
-                    <span className="block text-[10px] text-[var(--color-text-muted)]">{activeConv.sender.handle}</span>
+                    <span className="block text-xs text-[var(--color-text-muted)]">{activeConv.sender.handle}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -249,7 +249,7 @@ export default function InboxPage() {
               {/* Chat Log Message bubbles */}
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 <div className="text-center">
-                  <span className="inline-block px-2.5 py-1 rounded bg-[var(--color-surface)] border border-[var(--color-border)] text-[9px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider">
+                  <span className="inline-block px-2.5 py-1 rounded bg-[var(--color-surface)] border border-[var(--color-border)] text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-wider">
                     Mock direct messaging via OAuth
                   </span>
                 </div>
@@ -264,7 +264,7 @@ export default function InboxPage() {
                           : "bg-[var(--color-background)] border-[var(--color-border)] text-[var(--color-text)] rounded-bl-none"
                       }`}>
                         <p className="leading-relaxed">{msg.text}</p>
-                        <span className={`block text-[9px] mt-1.5 text-right ${isMe ? "text-white/60" : "text-[var(--color-text-muted)]"}`}>
+                        <span className={`block text-xs mt-1.5 text-right ${isMe ? "text-white/60" : "text-[var(--color-text-muted)]"}`}>
                           {msg.time}
                         </span>
                       </div>

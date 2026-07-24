@@ -129,13 +129,13 @@ export default function SettingsGeneralPage() {
           <AlertTriangle className="h-5 w-5 text-[var(--color-error)] shrink-0 mt-0.5" />
           <div>
             <span className="block text-xs font-bold text-[var(--color-error)]">Delete Workspace</span>
-            <p className="text-[10px] text-[var(--color-text-secondary)] mt-0.5">
+            <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">
               Once deleted, all scheduled content calendars, connected social tokens, and analytics database logs will be permanently erased.
             </p>
             <button
               type="button"
               onClick={() => toast.error("Primary owners cannot delete active workspaces without downgrading plan.")}
-              className="mt-2.5 text-[10px] font-bold text-[var(--color-error)] underline hover:opacity-80"
+              className="mt-2.5 text-xs font-bold text-[var(--color-error)] underline hover:opacity-80"
             >
               Request Deletion...
             </button>

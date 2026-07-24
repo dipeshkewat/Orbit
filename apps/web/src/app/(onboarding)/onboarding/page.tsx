@@ -148,7 +148,7 @@ export default function OnboardingPage() {
                 >
                   <step.icon className="h-4 w-4" />
                 </div>
-                <span className={`text-[10px] uppercase font-bold tracking-wider hidden sm:block ${isActive ? "text-[var(--color-primary-light)]" : "text-[var(--color-text-muted)]"}`}>
+                <span className={`text-xs uppercase font-bold tracking-wider hidden sm:block ${isActive ? "text-[var(--color-primary-light)]" : "text-[var(--color-text-muted)]"}`}>
                   {step.label}
                 </span>
               </div>
@@ -205,7 +205,7 @@ export default function OnboardingPage() {
                   >
                     <div className="font-semibold text-sm flex items-center justify-between">
                       Creator 
-                      <span className="text-[10px] uppercase font-bold tracking-wide bg-[var(--color-success)]/20 text-[var(--color-success)] px-1.5 py-0.5 rounded">Popular</span>
+                      <span className="text-xs uppercase font-bold tracking-wide bg-[var(--color-success)]/20 text-[var(--color-success)] px-1.5 py-0.5 rounded">Popular</span>
                     </div>
                     <div className="text-xs text-[var(--color-text-muted)] mt-1">10 channels • 200 AI credits</div>
                   </button>

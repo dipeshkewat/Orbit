@@ -154,7 +154,7 @@ export default function SettingsDeveloperPage() {
 
             <form onSubmit={handleCreateKey} className="space-y-4">
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Key Label / Description</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Key Label / Description</label>
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -177,7 +177,7 @@ export default function SettingsDeveloperPage() {
             {/* If key was generated, show once */}
             {generatedKey && (
               <div className="p-4 bg-[var(--color-accent)]/10 border border-[var(--color-accent)]/20 rounded space-y-2">
-                <span className="block text-[10px] font-extrabold text-[var(--color-primary-light)] uppercase tracking-wider">
+                <span className="block text-xs font-extrabold text-[var(--color-primary-light)] uppercase tracking-wider">
                   ⚠️ Copy this Key (Shown only once)
                 </span>
                 <div className="flex rounded overflow-hidden bg-[var(--color-background)] border border-[var(--color-border)] p-2">
@@ -200,11 +200,11 @@ export default function SettingsDeveloperPage() {
                 <div key={key.id} className="py-3 flex justify-between items-center last:pb-0">
                   <div>
                     <span className="block text-xs font-bold text-[var(--color-text)]">{key.name}</span>
-                    <span className="block text-[10px] font-mono text-[var(--color-text-muted)] mt-0.5">{key.prefix}...</span>
+                    <span className="block text-xs font-mono text-[var(--color-text-muted)] mt-0.5">{key.prefix}...</span>
                   </div>
 
                   <div className="flex items-center gap-3 text-right">
-                    <span className="text-[10px] text-[var(--color-text-muted)] block">
+                    <span className="text-xs text-[var(--color-text-muted)] block">
                       Last used: <span className="font-semibold text-[var(--color-text-secondary)]">{key.lastUsedAt}</span>
                     </span>
                     <button
@@ -231,7 +231,7 @@ export default function SettingsDeveloperPage() {
 
             <form onSubmit={handleCreateWebhook} className="space-y-4">
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Endpoint Target URL</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Endpoint Target URL</label>
                 <input
                   type="url"
                   required
@@ -243,7 +243,7 @@ export default function SettingsDeveloperPage() {
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Event Subscriptions</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Event Subscriptions</label>
                 <div className="flex gap-2 flex-wrap">
                   {["post.scheduled", "post.published", "post.failed", "member.invited"].map((ev) => {
                     const isSelected = selectedEvents.includes(ev);
@@ -252,7 +252,7 @@ export default function SettingsDeveloperPage() {
                         key={ev}
                         type="button"
                         onClick={() => toggleEvent(ev)}
-                        className={`px-2.5 py-1 rounded text-[10px] font-semibold border transition-all ${
+                        className={`px-2.5 py-1 rounded text-xs font-semibold border transition-all ${
                           isSelected 
                             ? "bg-[var(--color-primary)]/10 border-[var(--color-primary)] text-[var(--color-primary-light)]"
                             : "bg-[var(--color-background)] border-[var(--color-border)] text-[var(--color-text-muted)]"
@@ -279,13 +279,13 @@ export default function SettingsDeveloperPage() {
                 <div key={wh.id} className="py-3.5 flex justify-between items-center last:pb-0">
                   <div className="min-w-0">
                     <span className="block text-xs font-semibold text-[var(--color-text)] truncate">{wh.url}</span>
-                    <span className="block text-[10px] text-[var(--color-text-muted)] mt-0.5 capitalize">
+                    <span className="block text-xs text-[var(--color-text-muted)] mt-0.5 capitalize">
                       {wh.events.join(", ")}
                     </span>
                   </div>
 
                   <div className="flex items-center gap-3 shrink-0">
-                    <span className="text-[9px] uppercase font-bold tracking-wide text-[var(--color-success)] bg-[var(--color-success)]/10 px-2 py-0.5 rounded border border-[var(--color-success)]/20">
+                    <span className="text-xs uppercase font-bold tracking-wide text-[var(--color-success)] bg-[var(--color-success)]/10 px-2 py-0.5 rounded border border-[var(--color-success)]/20">
                       Active
                     </span>
                     <button

@@ -166,13 +166,13 @@ export default function RssAutoPostPage() {
                 <div className="flex items-center gap-2">
                   <Globe className="h-4 w-4 text-[var(--color-primary-light)] shrink-0" />
                   <h3 className="text-sm font-bold truncate">{feed.name}</h3>
-                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${status.bg} ${status.color}`}>
+                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider ${status.bg} ${status.color}`}>
                     <StatusIcon className="h-3 w-3" />
                     {status.label}
                   </span>
                 </div>
-                <p className="text-[10px] font-mono text-[var(--color-text-muted)] truncate">{feed.url}</p>
-                <div className="flex flex-wrap items-center gap-3 text-[10px] text-[var(--color-text-muted)]">
+                <p className="text-xs font-mono text-[var(--color-text-muted)] truncate">{feed.url}</p>
+                <div className="flex flex-wrap items-center gap-3 text-xs text-[var(--color-text-muted)]">
                   <span>Targets: <span className="font-semibold capitalize text-[var(--color-text-secondary)]">{feed.platforms.join(", ")}</span></span>
                   <span>•</span>
                   <span>{feed.postsImported} posts imported</span>
@@ -185,7 +185,7 @@ export default function RssAutoPostPage() {
               <div className="flex items-center gap-2 shrink-0">
                 <button
                   onClick={() => handleToggleAutoPost(feed.id)}
-                  className={`px-3 py-1.5 rounded-[var(--radius-md)] border text-[10px] font-bold uppercase tracking-wider transition-all ${
+                  className={`px-3 py-1.5 rounded-[var(--radius-md)] border text-xs font-bold uppercase tracking-wider transition-all ${
                     feed.autoPost
                       ? "border-[var(--color-success)] bg-[var(--color-success)]/10 text-[var(--color-success)]"
                       : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)]"
@@ -238,7 +238,7 @@ export default function RssAutoPostPage() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Feed URL</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Feed URL</label>
                 <input
                   type="url"
                   value={newFeedUrl}
@@ -249,7 +249,7 @@ export default function RssAutoPostPage() {
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Feed Label (optional)</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Feed Label (optional)</label>
                 <input
                   type="text"
                   value={newFeedName}
@@ -260,14 +260,14 @@ export default function RssAutoPostPage() {
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Target Platforms</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Target Platforms</label>
                 <div className="flex flex-wrap gap-2">
                   {["twitter", "instagram", "linkedin", "facebook"].map((p) => (
                     <button
                       key={p}
                       type="button"
                       onClick={() => togglePlatform(p)}
-                      className={`px-3 py-1.5 rounded-[var(--radius-md)] border text-[10px] font-bold uppercase tracking-wider capitalize transition-all ${
+                      className={`px-3 py-1.5 rounded-[var(--radius-md)] border text-xs font-bold uppercase tracking-wider capitalize transition-all ${
                         newFeedPlatforms.includes(p)
                           ? "border-[var(--color-primary)] bg-[var(--color-primary)]/5 text-[var(--color-primary-light)]"
                           : "border-[var(--color-border)] text-[var(--color-text-muted)] hover:bg-[var(--color-surface-hover)]"

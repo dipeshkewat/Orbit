@@ -130,12 +130,12 @@ export default function SettingsTeamPage() {
                           </span>
                         )}
                       </span>
-                      <span className="block text-[10px] text-[var(--color-text-muted)]">{member.email}</span>
+                      <span className="block text-xs text-[var(--color-text-muted)]">{member.email}</span>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <span className="text-[10px] font-semibold text-[var(--color-text-secondary)] capitalize flex items-center gap-1">
+                    <span className="text-xs font-semibold text-[var(--color-text-secondary)] capitalize flex items-center gap-1">
                       <Shield className="h-3.5 w-3.5 text-[var(--color-accent)]" />
                       {member.role}
                     </span>
@@ -163,12 +163,12 @@ export default function SettingsTeamPage() {
                 <Plus className="h-4.5 w-4.5" />
                 Invite Collaborators
               </h3>
-              <p className="text-[10px] text-[var(--color-text-muted)] mt-0.5">Send a workspace membership email invitation</p>
+              <p className="text-xs text-[var(--color-text-muted)] mt-0.5">Send a workspace membership email invitation</p>
             </div>
 
             <form onSubmit={handleSendInvite} className="space-y-4">
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Email Address</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Email Address</label>
                 <div className="flex rounded-[var(--radius-md)] overflow-hidden border border-[var(--color-border)]">
                   <span className="px-3 bg-[var(--color-surface)] flex items-center border-r border-[var(--color-border)]">
                     <Mail className="h-4 w-4 text-[var(--color-text-muted)]" />
@@ -185,7 +185,7 @@ export default function SettingsTeamPage() {
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">RBAC Role Permissions</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">RBAC Role Permissions</label>
                 <select
                   value={inviteRole}
                   onChange={(e) => setInviteRole(e.target.value as Member["role"])}
@@ -200,7 +200,7 @@ export default function SettingsTeamPage() {
               {workspace.plan === "free" && (
                 <div className="p-3 bg-[var(--color-warning)]/10 border border-[var(--color-warning)]/20 rounded flex gap-2">
                   <AlertCircle className="h-4.5 w-4.5 text-[var(--color-warning)] shrink-0 mt-0.5" />
-                  <p className="text-[9px] text-[var(--color-text-secondary)] leading-relaxed">
+                  <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed">
                     You've reached your free seat limit. Upgrade to a paid plan to invite collaborators to draft and schedule posts.
                   </p>
                 </div>

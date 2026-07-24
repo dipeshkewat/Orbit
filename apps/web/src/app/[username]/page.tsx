@@ -104,7 +104,7 @@ export default function LinkInBioPage() {
 
         {/* Footer branding */}
         <div className="pt-6 border-t border-[var(--color-border)]/40 flex flex-col items-center gap-1.5">
-          <span className="text-[9px] uppercase font-bold tracking-wider text-[var(--color-text-muted)] flex items-center gap-1">
+          <span className="text-xs uppercase font-bold tracking-wider text-[var(--color-text-muted)] flex items-center gap-1">
             <Sparkles className="h-3.5 w-3.5 text-[var(--color-accent)] animate-pulse" />
             Powered by Orbit
           </span>

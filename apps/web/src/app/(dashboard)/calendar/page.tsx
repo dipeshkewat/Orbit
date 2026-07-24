@@ -215,7 +215,7 @@ export default function CalendarPage() {
                   {dayPosts.map((post) => (
                     <div
                       key={post.id}
-                      className={`text-[9px] font-bold p-1 rounded flex items-center gap-1 leading-none truncate ${
+                      className={`text-xs font-bold p-1 rounded flex items-center gap-1 leading-none truncate ${
                         post.status === "published"
                           ? "bg-[var(--color-success)]/10 text-[var(--color-success)] border border-[var(--color-success)]/20"
                           : "bg-[var(--color-primary)]/10 text-[var(--color-primary-light)] border border-[var(--color-primary)]/20"
@@ -250,12 +250,12 @@ export default function CalendarPage() {
             {/* Meta */}
             <div className="flex flex-wrap gap-2.5 mt-3">
               {selectedPost.platforms.map((p: string) => (
-                <span key={p} className="px-2 py-0.5 rounded-full bg-[var(--color-surface-hover)] border border-[var(--color-border)] text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 capitalize text-[var(--color-text-secondary)]">
+                <span key={p} className="px-2 py-0.5 rounded-full bg-[var(--color-surface-hover)] border border-[var(--color-border)] text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 capitalize text-[var(--color-text-secondary)]">
                   {getPlatformIcon(p)}
                   {p}
                 </span>
               ))}
-              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${selectedPost.status === "published" ? "bg-[var(--color-success)]/20 text-[var(--color-success)]" : "bg-[var(--color-primary)]/20 text-[var(--color-primary-light)]"}`}>
+              <span className={`px-2 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider ${selectedPost.status === "published" ? "bg-[var(--color-success)]/20 text-[var(--color-success)]" : "bg-[var(--color-primary)]/20 text-[var(--color-primary-light)]"}`}>
                 {selectedPost.status}
               </span>
             </div>
@@ -329,7 +329,7 @@ export default function CalendarPage() {
             </p>
 
             {/* CSV helper instructions */}
-            <div className="p-3.5 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] mb-4 text-[10px] space-y-1.5">
+            <div className="p-3.5 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[var(--radius-md)] mb-4 text-xs space-y-1.5">
               <span className="block font-bold text-[var(--color-text-secondary)]">CSV Column Layout:</span>
               <code className="block font-mono text-[var(--color-text-muted)] bg-[var(--color-background)] p-1.5 rounded truncate">
                 Content text | channels (comma separated) | optional schedule datetime
@@ -342,7 +342,7 @@ export default function CalendarPage() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Raw CSV Data</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-2">Raw CSV Data</label>
                 <textarea
                   rows={5}
                   value={csvContentText}
