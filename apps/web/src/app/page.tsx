@@ -718,9 +718,16 @@ export default function LandingPage() {
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
             {PLATFORMS.map((plat, i) => {
               const Icon = plat.icon;
+              const isBlackLogo = plat.color === "#000000" || plat.color === "#000";
               return (
                 <div key={i} className="p-5 rounded-xl flex flex-col items-center justify-center text-center gap-3 transition-colors" style={{ backgroundColor: C.card, border: `1px solid ${C.border}` }}>
-                  <div className="h-10 w-10 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(255,255,255,0.05)", border: `1px solid ${C.border}` }}>
+                  <div 
+                    className="h-10 w-10 rounded-full flex items-center justify-center" 
+                    style={{ 
+                      backgroundColor: isBlackLogo ? "#FFFFFF" : "rgba(255,255,255,0.05)", 
+                      border: isBlackLogo ? "none" : `1px solid ${C.border}` 
+                    }}
+                  >
                     <Icon className="h-5 w-5" color={plat.color} />
                   </div>
                   <span className="text-xs font-semibold" style={{ color: C.textSecondary }}>{plat.name}</span>
@@ -910,11 +917,22 @@ export default function LandingPage() {
                 { Icon: InstagramIcon, color: PLATFORM_COLORS.instagram },
                 { Icon: LinkedInIcon, color: PLATFORM_COLORS.linkedin },
                 { Icon: XIcon, color: PLATFORM_COLORS.twitter },
-              ].map((item, i) => (
-                <a key={i} href="#" className="h-8 w-8 rounded-lg flex items-center justify-center transition-colors hover:opacity-80" style={{ backgroundColor: C.card, border: `1px solid ${C.border}` }}>
-                  <item.Icon className="h-4 w-4" color={item.color} />
-                </a>
-              ))}
+              ].map((item, i) => {
+                const isBlackLogo = item.color === "#000000" || item.color === "#000";
+                return (
+                  <a 
+                    key={i} 
+                    href="#" 
+                    className="h-8 w-8 rounded-lg flex items-center justify-center transition-colors hover:opacity-80" 
+                    style={{ 
+                      backgroundColor: isBlackLogo ? "#FFFFFF" : C.card, 
+                      border: isBlackLogo ? "none" : `1px solid ${C.border}` 
+                    }}
+                  >
+                    <item.Icon className="h-4 w-4" color={item.color} />
+                  </a>
+                );
+              })}
             </div>
             <div className="pt-2 flex items-center gap-1.5 text-xs" style={{ color: C.textMuted }}>
               <Lock className="h-3 w-3" /> © 2026 Orbit Inc.

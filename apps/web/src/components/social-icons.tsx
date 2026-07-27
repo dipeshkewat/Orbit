@@ -150,38 +150,53 @@ export function getPlatformIcon(
 ): React.ReactNode {
   const key = platform.toLowerCase().replace(/\s/g, "");
   const color = colored ? PLATFORM_COLORS[key] ?? PLATFORM_COLORS[key.replace("x(twitter)", "twitter")] : undefined;
-  const className = `h-${size / 4} w-${size / 4}`;
+  const isBlack = colored && (color === "#000000" || color === "#000");
 
-  switch (key) {
-    case "instagram":
-      return <InstagramIcon size={size} color={color} />;
-    case "twitter":
-    case "x":
-    case "x(twitter)":
-      return <XIcon size={size} color={color} />;
-    case "linkedin":
-      return <LinkedInIcon size={size} color={color} />;
-    case "facebook":
-      return <FacebookIcon size={size} color={color} />;
-    case "youtube":
-      return <YouTubeIcon size={size} color={color} />;
-    case "threads":
-      return <ThreadsIcon size={size} color={color} />;
-    case "tiktok":
-      return <TikTokIcon size={size} color={color} />;
-    case "pinterest":
-      return <PinterestIcon size={size} color={color} />;
-    case "reddit":
-      return <RedditIcon size={size} color={color} />;
-    case "telegram":
-      return <TelegramIcon size={size} color={color} />;
-    case "bluesky":
-      return <BlueskyIcon size={size} color={color} />;
-    case "mastodon":
-      return <MastodonIcon size={size} color={color} />;
-    default:
-      return <span className="h-4 w-4 rounded-full bg-[var(--color-text-muted)]" />;
+  const getRawIcon = () => {
+    switch (key) {
+      case "instagram":
+        return <InstagramIcon size={size} color={color} />;
+      case "twitter":
+      case "x":
+      case "x(twitter)":
+        return <XIcon size={size} color={color} />;
+      case "linkedin":
+        return <LinkedInIcon size={size} color={color} />;
+      case "facebook":
+        return <FacebookIcon size={size} color={color} />;
+      case "youtube":
+        return <YouTubeIcon size={size} color={color} />;
+      case "threads":
+        return <ThreadsIcon size={size} color={color} />;
+      case "tiktok":
+        return <TikTokIcon size={size} color={color} />;
+      case "pinterest":
+        return <PinterestIcon size={size} color={color} />;
+      case "reddit":
+        return <RedditIcon size={size} color={color} />;
+      case "telegram":
+        return <TelegramIcon size={size} color={color} />;
+      case "bluesky":
+        return <BlueskyIcon size={size} color={color} />;
+      case "mastodon":
+        return <MastodonIcon size={size} color={color} />;
+      default:
+        return <span className="h-4 w-4 rounded-full bg-[var(--color-text-muted)]" />;
+    }
+  };
+
+  if (isBlack) {
+    return (
+      <span
+        className="inline-flex items-center justify-center rounded-full bg-white shrink-0 p-0.5"
+        style={{ width: size + 4, height: size + 4 }}
+      >
+        {getRawIcon()}
+      </span>
+    );
   }
+
+  return getRawIcon();
 }
 
 /* ─── Helper: get icon component (no color, inherits) ──── */
@@ -196,37 +211,50 @@ export function PlatformIcon({
 }) {
   const key = platform.toLowerCase().replace(/\s/g, "");
   const color = colored ? PLATFORM_COLORS[key] ?? undefined : undefined;
+  const isBlack = colored && (color === "#000000" || color === "#000");
 
   const iconProps = { className, color };
 
-  switch (key) {
-    case "instagram":
-      return <InstagramIcon {...iconProps} />;
-    case "twitter":
-    case "x":
-    case "x(twitter)":
-      return <XIcon {...iconProps} />;
-    case "linkedin":
-      return <LinkedInIcon {...iconProps} />;
-    case "facebook":
-      return <FacebookIcon {...iconProps} />;
-    case "youtube":
-      return <YouTubeIcon {...iconProps} />;
-    case "threads":
-      return <ThreadsIcon {...iconProps} />;
-    case "tiktok":
-      return <TikTokIcon {...iconProps} />;
-    case "pinterest":
-      return <PinterestIcon {...iconProps} />;
-    case "reddit":
-      return <RedditIcon {...iconProps} />;
-    case "telegram":
-      return <TelegramIcon {...iconProps} />;
-    case "bluesky":
-      return <BlueskyIcon {...iconProps} />;
-    case "mastodon":
-      return <MastodonIcon {...iconProps} />;
-    default:
-      return <span className={className} />;
+  const getRawIcon = () => {
+    switch (key) {
+      case "instagram":
+        return <InstagramIcon {...iconProps} />;
+      case "twitter":
+      case "x":
+      case "x(twitter)":
+        return <XIcon {...iconProps} />;
+      case "linkedin":
+        return <LinkedInIcon {...iconProps} />;
+      case "facebook":
+        return <FacebookIcon {...iconProps} />;
+      case "youtube":
+        return <YouTubeIcon {...iconProps} />;
+      case "threads":
+        return <ThreadsIcon {...iconProps} />;
+      case "tiktok":
+        return <TikTokIcon {...iconProps} />;
+      case "pinterest":
+        return <PinterestIcon {...iconProps} />;
+      case "reddit":
+        return <RedditIcon {...iconProps} />;
+      case "telegram":
+        return <TelegramIcon {...iconProps} />;
+      case "bluesky":
+        return <BlueskyIcon {...iconProps} />;
+      case "mastodon":
+        return <MastodonIcon {...iconProps} />;
+      default:
+        return <span className={className} />;
+    }
+  };
+
+  if (isBlack) {
+    return (
+      <span className="inline-flex items-center justify-center rounded-full bg-white p-0.5 shrink-0">
+        {getRawIcon()}
+      </span>
+    );
   }
+
+  return getRawIcon();
 }
