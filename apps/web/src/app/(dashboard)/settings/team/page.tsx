@@ -209,7 +209,7 @@ export default function SettingsTeamPage() {
               <button
                 type="submit"
                 disabled={isSending}
-                className="w-full flex items-center justify-center gap-1.5 bg-[var(--color-primary)] text-white text-xs font-semibold py-2.5 rounded-[var(--radius-md)] hover:opacity-90 active:scale-95 disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-1.5 bg-[var(--color-primary)] text-[var(--color-text-inverse)] text-xs font-semibold py-2.5 rounded-[var(--radius-md)] hover:opacity-90 active:scale-95 disabled:opacity-50"
               >
                 <UserCheck className="h-4 w-4" />
                 {isSending ? "Sending Invite..." : "Send Invitation"}

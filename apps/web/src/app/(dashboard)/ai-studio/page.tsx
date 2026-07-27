@@ -228,7 +228,7 @@ export default function AiStudioPage() {
                 type="button"
                 onClick={handleGenerateCaption}
                 disabled={isGenerating}
-                className="w-full flex items-center justify-center gap-1.5 bg-[var(--color-primary)] text-white text-xs font-semibold py-3 rounded-[var(--radius-md)] hover:opacity-90 active:scale-95 disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-1.5 bg-[var(--color-primary)] text-[var(--color-text-inverse)] text-xs font-semibold py-3 rounded-[var(--radius-md)] hover:opacity-90 active:scale-95 disabled:opacity-50"
               >
                 <Sparkles className="h-3.5 w-3.5 animate-pulse" />
                 Generate Optimized Captions
@@ -272,7 +272,7 @@ export default function AiStudioPage() {
                 <button
                   type="button"
                   onClick={handleOpenInComposer}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-[var(--color-primary)] text-white text-xs font-semibold rounded hover:opacity-90 active:scale-95"
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-[var(--color-primary)] text-[var(--color-text-inverse)] text-xs font-semibold rounded hover:opacity-90 active:scale-95"
                 >
                   <PenSquare className="h-3.5 w-3.5" />
                   Load to Composer

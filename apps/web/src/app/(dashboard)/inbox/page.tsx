@@ -260,11 +260,11 @@ export default function InboxPage() {
                     <div key={idx} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
                       <div className={`max-w-[70%] p-3 rounded-[var(--radius-md)] text-xs border ${
                         isMe 
-                          ? "bg-[var(--color-primary)] border-transparent text-white rounded-br-none" 
+                          ? "bg-[var(--color-primary)] border-transparent text-[var(--color-text-inverse)] rounded-br-none" 
                           : "bg-[var(--color-background)] border-[var(--color-border)] text-[var(--color-text)] rounded-bl-none"
                       }`}>
                         <p className="leading-relaxed">{msg.text}</p>
-                        <span className={`block text-xs mt-1.5 text-right ${isMe ? "text-white/60" : "text-[var(--color-text-muted)]"}`}>
+                        <span className={`block text-xs mt-1.5 text-right ${isMe ? "text-[var(--color-text-inverse)]/60" : "text-[var(--color-text-muted)]"}`}>
                           {msg.time}
                         </span>
                       </div>
@@ -284,7 +284,7 @@ export default function InboxPage() {
                 />
                 <button
                   type="submit"
-                  className="px-5 bg-[var(--color-primary)] text-white text-xs font-semibold rounded-[var(--radius-md)] flex items-center gap-1.5 hover:opacity-90 active:scale-95"
+                  className="px-5 bg-[var(--color-primary)] text-[var(--color-text-inverse)] text-xs font-semibold rounded-[var(--radius-md)] flex items-center gap-1.5 hover:opacity-90 active:scale-95"
                 >
                   <Send className="h-3.5 w-3.5" />
                   Send

@@ -145,7 +145,7 @@ export default function AnalyticsPage() {
         </div>
         <button
           onClick={() => setShowReportModal(true)}
-          className="flex items-center gap-1.5 px-4 py-2.5 bg-[var(--color-primary)] text-white text-xs font-semibold rounded-[var(--radius-md)] hover:opacity-90 active:scale-95 shrink-0"
+          className="flex items-center gap-1.5 px-4 py-2.5 bg-[var(--color-primary)] text-[var(--color-text-inverse)] text-xs font-semibold rounded-[var(--radius-md)] hover:opacity-90 active:scale-95 shrink-0"
         >
           <FileText className="h-3.5 w-3.5" />
           Export White-Label Report
@@ -441,7 +441,7 @@ export default function AnalyticsPage() {
                   setShowReportModal(false);
                   import('sonner').then(({ toast }) => toast.success(`White-label PDF report generated for ${clientName}!`));
                 }}
-                className="w-full flex items-center justify-center gap-1.5 bg-[var(--color-primary)] text-white text-xs font-semibold py-3 rounded-[var(--radius-md)] hover:opacity-90 active:scale-95"
+                className="w-full flex items-center justify-center gap-1.5 bg-[var(--color-primary)] text-[var(--color-text-inverse)] text-xs font-semibold py-3 rounded-[var(--radius-md)] hover:opacity-90 active:scale-95"
               >
                 <FileText className="h-3.5 w-3.5" />
                 Generate & Download PDF

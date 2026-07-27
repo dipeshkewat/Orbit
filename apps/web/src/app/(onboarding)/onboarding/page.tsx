@@ -497,7 +497,7 @@ export default function OnboardingPage() {
 
           <button
             onClick={handleNext}
-            className="flex items-center gap-1.5 bg-[var(--color-primary)] text-white text-sm font-semibold py-2.5 px-5 rounded-[var(--radius-md)] hover:opacity-90 transition-opacity active:scale-[0.98] transition-transform"
+            className="flex items-center gap-1.5 bg-[var(--color-primary)] text-[var(--color-text-inverse)] text-sm font-semibold py-2.5 px-5 rounded-[var(--radius-md)] hover:opacity-90 transition-opacity active:scale-[0.98] transition-transform"
           >
             {currentStep === 5 ? "Complete Setup" : "Next Step"}
             <ArrowRight className="h-4 w-4" />

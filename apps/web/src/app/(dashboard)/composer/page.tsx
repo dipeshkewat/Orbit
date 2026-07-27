@@ -525,7 +525,7 @@ Let us know what platforms you want to build on! 👇 #socialmedia #marketing #t
                     type="button"
                     onClick={handleGenerateAiCaption}
                     disabled={isAiGenerating}
-                    className="px-3.5 bg-[var(--color-primary)] text-white font-semibold text-xs rounded hover:opacity-90 active:scale-95 disabled:opacity-50"
+                    className="px-3.5 bg-[var(--color-primary)] text-[var(--color-text-inverse)] font-semibold text-xs rounded hover:opacity-90 active:scale-95 disabled:opacity-50"
                   >
                     Generate
                   </button>
@@ -687,7 +687,7 @@ Let us know what platforms you want to build on! 👇 #socialmedia #marketing #t
           {/* Large Action Panel */}
           <button
             onClick={handlePublishOrSchedule}
-            className="w-full flex items-center justify-center gap-2 bg-[var(--color-primary)] text-white font-semibold py-3.5 px-4 rounded-[var(--radius-lg)] hover:opacity-90 active:scale-98 transition-all"
+            className="w-full flex items-center justify-center gap-2 bg-[var(--color-primary)] text-[var(--color-text-inverse)] font-semibold py-3.5 px-4 rounded-[var(--radius-lg)] hover:opacity-90 active:scale-98 transition-all"
           >
             {scheduleMode === "now" ? "Publish Campaign Now" : "Schedule Content Campaign"}
           </button>
@@ -754,7 +754,7 @@ Let us know what platforms you want to build on! 👇 #socialmedia #marketing #t
                 type="button"
                 onClick={handleAiImageGenerate}
                 disabled={isGeneratingImage}
-                className="w-full flex items-center justify-center gap-1.5 bg-[var(--color-primary)] text-white text-xs font-semibold py-3 rounded-[var(--radius-md)] hover:opacity-90 active:scale-95 disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-1.5 bg-[var(--color-primary)] text-[var(--color-text-inverse)] text-xs font-semibold py-3 rounded-[var(--radius-md)] hover:opacity-90 active:scale-95 disabled:opacity-50"
               >
                 <Zap className="h-3.5 w-3.5" />
                 {isGeneratingImage ? "Rendering flux image..." : "Start Generation"}

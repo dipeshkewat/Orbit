@@ -161,7 +161,7 @@ export default function SettingsBillingPage() {
                 }`}
               >
                 {plan.popular && (
-                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[var(--color-primary)] text-white text-xs font-extrabold uppercase px-2.5 py-0.5 rounded-full tracking-wider">
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[var(--color-primary)] text-[var(--color-text-inverse)] text-xs font-extrabold uppercase px-2.5 py-0.5 rounded-full tracking-wider">
                     Most Popular
                   </span>
                 )}

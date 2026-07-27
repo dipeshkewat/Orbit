@@ -34,20 +34,20 @@ import { OrbitLogo } from "@/components/logo";
 
 /* ─────────────────────────────────────────────────────────────
  * Calm palette (marketing is single-theme dark by design).
- * De-neoned: indigo action color, teal for AI only, slate neutrals.
+ * Dark grey + white: clean, minimal, no neon or indigo.
  * ───────────────────────────────────────────────────────────── */
 const C = {
-  bg: "#0B0F19",
-  bgDeep: "#090C14",
-  card: "rgba(255,255,255,0.03)",
-  border: "rgba(255,255,255,0.08)",
-  primary: "#6366F1",
-  primaryHover: "#818CF8",
-  primaryLight: "#A5B4FC",
-  accent: "#2DD4BF", // teal — AI moments only
-  text: "#E6E9F0",
-  textSecondary: "#9AA4B8",
-  textMuted: "#64748B",
+  bg: "#111111",
+  bgDeep: "#0A0A0A",
+  card: "rgba(255,255,255,0.04)",
+  border: "rgba(255,255,255,0.10)",
+  primary: "#FFFFFF",
+  primaryHover: "#E4E4E7",
+  primaryLight: "#D4D4D8",
+  accent: "#10B981", // emerald — status moments only
+  text: "#F5F5F5",
+  textSecondary: "#A1A1A1",
+  textMuted: "#6B6B6B",
 };
 
 // --- ANIMATION CONFIGS ---
@@ -336,7 +336,7 @@ export default function LandingPage() {
       {/* One restrained ambient orb behind the hero (indigo, not neon) */}
       <div
         className="glow-bg"
-        style={{ top: "-8%", left: "50%", transform: "translateX(-50%)", width: "60%", height: "45%", backgroundColor: "rgba(99,102,241,0.12)" }}
+        style={{ top: "-8%", left: "50%", transform: "translateX(-50%)", width: "60%", height: "45%", backgroundColor: "rgba(255,255,255,0.06)" }}
       />
 
       {/* ── NAV ── */}
@@ -484,7 +484,7 @@ export default function LandingPage() {
                     </div>
                     <div className="grid grid-cols-7 gap-1 text-center text-xs">
                       {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
-                        <div key={i} className="py-1.5 rounded font-semibold" style={i === 1 ? { backgroundColor: C.primary, color: "#fff" } : { color: C.textMuted }}>
+                        <div key={i} className="py-1.5 rounded font-semibold" style={i === 1 ? { backgroundColor: C.primary, color: "#111" } : { color: C.textMuted }}>
                           {d}
                         </div>
                       ))}
@@ -574,7 +574,7 @@ export default function LandingPage() {
                 className="p-8 rounded-2xl space-y-5"
                 style={{ backgroundColor: C.card, border: `1px solid ${C.border}` }}
               >
-                <div className="h-12 w-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: "rgba(99,102,241,0.12)", color: C.primaryLight }}>
+                <div className="h-12 w-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: "rgba(255,255,255,0.06)", color: C.primaryLight }}>
                   <Icon className="h-6 w-6" />
                 </div>
                 <div className="space-y-2">
@@ -627,7 +627,7 @@ export default function LandingPage() {
               <ul className="space-y-3 pt-2">
                 {activeFeature.bullets.map((b, i) => (
                   <li key={i} className="flex items-center gap-3 text-sm" style={{ color: C.text }}>
-                    <span className="h-5 w-5 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: "rgba(99,102,241,0.15)", color: C.primaryLight }}>
+                    <span className="h-5 w-5 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: "rgba(255,255,255,0.08)", color: C.primaryLight }}>
                       <Check className="h-3 w-3" />
                     </span>
                     {b}
@@ -731,7 +731,7 @@ export default function LandingPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {TESTIMONIALS.map((t, i) => (
             <div key={i} className="p-8 rounded-2xl flex flex-col justify-between gap-8 relative" style={{ backgroundColor: C.card, border: `1px solid ${C.border}` }}>
-              <Quote className="h-8 w-8 absolute top-6 right-6" style={{ color: "rgba(99,102,241,0.2)" }} />
+              <Quote className="h-8 w-8 absolute top-6 right-6" style={{ color: "rgba(255,255,255,0.10)" }} />
               <div className="space-y-4 relative z-10">
                 <div className="flex gap-0.5" style={{ color: "#f5b301" }}>
                   {[...Array(5)].map((_, idx) => <span key={idx}>★</span>)}
@@ -769,7 +769,7 @@ export default function LandingPage() {
               }}
             >
               {plan.highlighted && (
-                <div className="absolute top-4 right-4 px-2 py-0.5 rounded-full text-xs font-bold uppercase" style={{ backgroundColor: "rgba(99,102,241,0.2)", color: C.primaryLight }}>
+                <div className="absolute top-4 right-4 px-2 py-0.5 rounded-full text-xs font-bold uppercase" style={{ backgroundColor: "rgba(255,255,255,0.10)", color: C.primaryLight }}>
                   Most popular
                 </div>
               )}
@@ -789,7 +789,7 @@ export default function LandingPage() {
               <button
                 onClick={handleStart}
                 className="w-full py-2.5 rounded-xl text-xs font-semibold transition-colors"
-                style={plan.highlighted ? { backgroundColor: C.primary, color: "#fff" } : { backgroundColor: "transparent", border: `1px solid ${C.border}`, color: C.text }}
+                style={plan.highlighted ? { backgroundColor: C.primary, color: "#111" } : { backgroundColor: "transparent", border: `1px solid ${C.border}`, color: C.text }}
               >
                 {plan.cta}
               </button>
@@ -843,7 +843,7 @@ export default function LandingPage() {
           className="relative p-12 md:p-20 rounded-3xl text-center space-y-8 max-w-4xl mx-auto overflow-hidden"
           style={{ backgroundColor: C.card, border: `1px solid ${C.border}` }}
         >
-          <div className="glow-bg" style={{ top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: "60%", height: "80%", backgroundColor: "rgba(99,102,241,0.12)" }} />
+          <div className="glow-bg" style={{ top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: "60%", height: "80%", backgroundColor: "rgba(255,255,255,0.06)" }} />
           <div className="relative z-10 space-y-6 max-w-2xl mx-auto">
             <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">Ready to simplify your social media?</h2>
             <p className="text-sm leading-relaxed" style={{ color: C.textSecondary }}>
