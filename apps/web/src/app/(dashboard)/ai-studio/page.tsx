@@ -209,7 +209,7 @@ export default function AiStudioPage() {
                         onClick={() => togglePlatform(p)}
                         className={`px-3 py-1.5 rounded-md text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5 border transition-all ${
                           isSelected
-                            ? "bg-[var(--color-primary)] border-transparent text-white"
+                            ? "bg-[var(--color-primary)] border-transparent text-[var(--color-text-inverse)]"
                             : "bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text-muted)]"
                         }`}
                       >

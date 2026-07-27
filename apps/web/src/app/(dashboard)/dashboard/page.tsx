@@ -12,10 +12,6 @@ import {
   Plus,
   Clock,
   Sparkles,
-  Instagram,
-  Twitter,
-  Linkedin,
-  Facebook,
   CheckCircle,
   AlertTriangle,
   XCircle,
@@ -25,6 +21,7 @@ import {
   BarChart2,
   CheckCircle2,
 } from "lucide-react";
+import { getPlatformIcon } from "@/components/social-icons";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -100,15 +97,7 @@ export default function DashboardPage() {
     );
   };
 
-  const getPlatformIcon = (platform: string) => {
-    switch (platform.toLowerCase()) {
-      case "instagram": return <Instagram className="h-4 w-4 text-[#E1306C]" />;
-      case "twitter": return <Twitter className="h-4 w-4 text-[#1DA1F2]" />;
-      case "linkedin": return <Linkedin className="h-4 w-4 text-[#0077B5]" />;
-      case "facebook": return <Facebook className="h-4 w-4 text-[#1877F2]" />;
-      default: return <Share2 className="h-4 w-4 text-[var(--color-text-muted)]" />;
-    }
-  };
+
 
   const upcomingPosts = posts
     .filter((p) => p.status === "scheduled")

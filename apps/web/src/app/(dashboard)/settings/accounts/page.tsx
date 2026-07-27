@@ -5,15 +5,12 @@ import { useSocialAccountStore, useAuthStore } from "@/lib/store";
 import {
   Link2,
   Trash2,
-  Instagram,
-  Twitter,
-  Linkedin,
-  Facebook,
   Plus,
   Lock,
   CheckCircle,
   HelpCircle
 } from "lucide-react";
+import { getPlatformIcon } from "@/components/social-icons";
 import { toast } from "sonner";
 import Link from "next/link";
 
@@ -25,15 +22,7 @@ export default function SettingsAccountsPage() {
 
   const [isLoadingPlatform, setIsLoadingPlatform] = useState<string | null>(null);
 
-  const getPlatformIcon = (platform: string) => {
-    switch (platform.toLowerCase()) {
-      case "instagram": return <Instagram className="h-5 w-5 text-[var(--color-instagram)]" />;
-      case "twitter": return <Twitter className="h-5 w-5 text-white" />;
-      case "linkedin": return <Linkedin className="h-5 w-5 text-[var(--color-linkedin)]" />;
-      case "facebook": return <Facebook className="h-5 w-5 text-[var(--color-facebook)]" />;
-      default: return <HelpCircle className="h-5 w-5 text-[var(--color-text-muted)]" />;
-    }
-  };
+
 
   const handleSimulatedConnect = (platform: string) => {
     setIsLoadingPlatform(platform);

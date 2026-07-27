@@ -262,7 +262,7 @@ Let us know what platforms you want to build on! 👇 #socialmedia #marketing #t
                     onClick={() => togglePlatform(acc.platform)}
                     className={`flex items-center gap-2 px-4 py-2.5 rounded-[var(--radius-md)] border transition-all text-xs font-semibold uppercase tracking-wider ${
                       isSelected 
-                        ? "bg-[var(--color-primary)] border-transparent text-white" 
+                        ? "bg-[var(--color-primary)] border-transparent text-[var(--color-text-inverse)]" 
                         : "bg-[var(--color-surface)] border-[var(--color-border)] hover:bg-[var(--color-surface-hover)] text-[var(--color-text-secondary)]"
                     }`}
                   >

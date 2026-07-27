@@ -5,12 +5,6 @@ import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from
 import {
   Sparkles,
   ArrowRight,
-  Instagram,
-  Linkedin,
-  Facebook,
-  Twitter,
-  Youtube,
-  Send,
   Calendar as CalendarIcon,
   TrendingUp,
   Users,
@@ -26,6 +20,21 @@ import {
   Share2,
   Lock,
 } from "lucide-react";
+import {
+  InstagramIcon,
+  LinkedInIcon,
+  FacebookIcon,
+  XIcon,
+  YouTubeIcon,
+  ThreadsIcon,
+  TikTokIcon,
+  PinterestIcon,
+  RedditIcon,
+  TelegramIcon,
+  BlueskyIcon,
+  MastodonIcon,
+  PLATFORM_COLORS,
+} from "@/components/social-icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -76,18 +85,18 @@ const TRUSTED_LOGOS = [
 ];
 
 const PLATFORMS = [
-  { name: "Instagram", icon: Instagram },
-  { name: "LinkedIn", icon: Linkedin },
-  { name: "Facebook", icon: Facebook },
-  { name: "X (Twitter)", icon: Twitter },
-  { name: "YouTube", icon: Youtube },
-  { name: "Threads", icon: Globe },
-  { name: "TikTok", icon: Zap },
-  { name: "Pinterest", icon: Shield },
-  { name: "Reddit", icon: MessageSquare },
-  { name: "Telegram", icon: Send },
-  { name: "Bluesky", icon: Globe },
-  { name: "Mastodon", icon: Users },
+  { name: "Instagram", icon: InstagramIcon, color: PLATFORM_COLORS.instagram },
+  { name: "LinkedIn", icon: LinkedInIcon, color: PLATFORM_COLORS.linkedin },
+  { name: "Facebook", icon: FacebookIcon, color: PLATFORM_COLORS.facebook },
+  { name: "X (Twitter)", icon: XIcon, color: PLATFORM_COLORS.twitter },
+  { name: "YouTube", icon: YouTubeIcon, color: PLATFORM_COLORS.youtube },
+  { name: "Threads", icon: ThreadsIcon, color: PLATFORM_COLORS.threads },
+  { name: "TikTok", icon: TikTokIcon, color: PLATFORM_COLORS.tiktok },
+  { name: "Pinterest", icon: PinterestIcon, color: PLATFORM_COLORS.pinterest },
+  { name: "Reddit", icon: RedditIcon, color: PLATFORM_COLORS.reddit },
+  { name: "Telegram", icon: TelegramIcon, color: PLATFORM_COLORS.telegram },
+  { name: "Bluesky", icon: BlueskyIcon, color: PLATFORM_COLORS.bluesky },
+  { name: "Mastodon", icon: MastodonIcon, color: PLATFORM_COLORS.mastodon },
 ];
 
 const PILLARS = [
@@ -347,7 +356,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-6 h-[var(--header-height)] flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5">
             <div className="h-9 w-9 flex items-center justify-center rounded-xl" style={{ backgroundColor: C.primary }}>
-              <OrbitLogo size={20} className="text-white" />
+              <OrbitLogo size={20} className="text-[#111]" />
             </div>
             <span className="text-xl font-bold tracking-tight text-white">Orbit</span>
           </Link>
@@ -365,7 +374,7 @@ export default function LandingPage() {
             </Link>
             <button
               onClick={handleStart}
-              className="px-4 py-2 rounded-xl text-sm font-semibold text-white transition-colors"
+              className="px-4 py-2 rounded-xl text-sm font-semibold text-[#111] transition-colors"
               style={{ backgroundColor: C.primary }}
               onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = C.primaryHover)}
               onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = C.primary)}
@@ -405,7 +414,7 @@ export default function LandingPage() {
               <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="text-center py-3 rounded-xl font-semibold text-sm text-white" style={{ border: `1px solid ${C.border}` }}>
                 Sign in
               </Link>
-              <button onClick={() => { setMobileMenuOpen(false); handleStart(); }} className="text-center py-3 rounded-xl font-semibold text-sm text-white" style={{ backgroundColor: C.primary }}>
+              <button onClick={() => { setMobileMenuOpen(false); handleStart(); }} className="text-center py-3 rounded-xl font-semibold text-sm text-[#111]" style={{ backgroundColor: C.primary }}>
                 Start free
               </button>
             </div>
@@ -438,7 +447,7 @@ export default function LandingPage() {
             <motion.div variants={fadeUp} className="flex flex-wrap items-center gap-4 pt-1">
               <button
                 onClick={handleStart}
-                className="px-6 py-3.5 rounded-xl text-white font-semibold text-sm transition-colors flex items-center gap-2 group"
+                className="px-6 py-3.5 rounded-xl text-[#111] font-semibold text-sm transition-colors flex items-center gap-2 group"
                 style={{ backgroundColor: C.primary }}
                 onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = C.primaryHover)}
                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = C.primary)}
@@ -688,7 +697,7 @@ export default function LandingPage() {
                   <button className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors" style={{ backgroundColor: C.card, border: `1px solid ${C.border}`, color: C.textSecondary }}>
                     Regenerate
                   </button>
-                  <button onClick={handleStart} className="px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition-colors" style={{ backgroundColor: C.primary }}>
+                  <button onClick={handleStart} className="px-3 py-1.5 rounded-lg text-xs font-semibold text-[#111] transition-colors" style={{ backgroundColor: C.primary }}>
                     Use this
                   </button>
                 </div>
@@ -711,8 +720,8 @@ export default function LandingPage() {
               const Icon = plat.icon;
               return (
                 <div key={i} className="p-5 rounded-xl flex flex-col items-center justify-center text-center gap-3 transition-colors" style={{ backgroundColor: C.card, border: `1px solid ${C.border}` }}>
-                  <div className="h-10 w-10 rounded-full flex items-center justify-center text-white" style={{ backgroundColor: "rgba(255,255,255,0.05)", border: `1px solid ${C.border}` }}>
-                    <Icon className="h-5 w-5" />
+                  <div className="h-10 w-10 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(255,255,255,0.05)", border: `1px solid ${C.border}` }}>
+                    <Icon className="h-5 w-5" color={plat.color} />
                   </div>
                   <span className="text-xs font-semibold" style={{ color: C.textSecondary }}>{plat.name}</span>
                 </div>
@@ -852,7 +861,7 @@ export default function LandingPage() {
             <div className="flex justify-center pt-2">
               <button
                 onClick={handleStart}
-                className="px-6 py-3.5 rounded-xl text-white font-semibold text-sm transition-colors flex items-center gap-2 group"
+                className="px-6 py-3.5 rounded-xl text-[#111] font-semibold text-sm transition-colors flex items-center gap-2 group"
                 style={{ backgroundColor: C.primary }}
                 onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = C.primaryHover)}
                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = C.primary)}
@@ -870,7 +879,7 @@ export default function LandingPage() {
           <div className="md:col-span-4 space-y-6">
             <Link href="/" className="flex items-center gap-2.5">
               <div className="h-9 w-9 flex items-center justify-center rounded-xl" style={{ backgroundColor: C.primary }}>
-                <OrbitLogo size={20} className="text-white" />
+                <OrbitLogo size={20} className="text-[#111]" />
               </div>
               <span className="text-xl font-bold tracking-tight text-white">Orbit</span>
             </Link>
@@ -897,9 +906,13 @@ export default function LandingPage() {
           <div className="md:col-span-2 space-y-4">
             <span className="text-xs uppercase font-bold tracking-wider text-white block">Connect</span>
             <div className="flex gap-2">
-              {[Instagram, Linkedin, Twitter].map((Icon, i) => (
-                <a key={i} href="#" className="h-8 w-8 rounded-lg flex items-center justify-center transition-colors hover:text-white" style={{ backgroundColor: C.card, border: `1px solid ${C.border}`, color: C.textSecondary }}>
-                  <Icon className="h-4 w-4" />
+              {[
+                { Icon: InstagramIcon, color: PLATFORM_COLORS.instagram },
+                { Icon: LinkedInIcon, color: PLATFORM_COLORS.linkedin },
+                { Icon: XIcon, color: PLATFORM_COLORS.twitter },
+              ].map((item, i) => (
+                <a key={i} href="#" className="h-8 w-8 rounded-lg flex items-center justify-center transition-colors hover:opacity-80" style={{ backgroundColor: C.card, border: `1px solid ${C.border}` }}>
+                  <item.Icon className="h-4 w-4" color={item.color} />
                 </a>
               ))}
             </div>

@@ -5,16 +5,13 @@ import {
   MessageSquare,
   Search,
   Send,
-  Instagram,
-  Twitter,
-  Linkedin,
-  Facebook,
   Check,
   MoreVertical,
   User,
   Clock,
   Filter
 } from "lucide-react";
+import { getPlatformIcon } from "@/components/social-icons";
 import { toast } from "sonner";
 
 interface MockMessage {
@@ -124,15 +121,7 @@ export default function InboxPage() {
     );
   };
 
-  const getPlatformIcon = (platform: string) => {
-    switch (platform) {
-      case "instagram": return <Instagram className="h-4 w-4 text-[var(--color-instagram)]" />;
-      case "twitter": return <Twitter className="h-4 w-4 text-white" />;
-      case "linkedin": return <Linkedin className="h-4 w-4 text-[var(--color-linkedin)]" />;
-      case "facebook": return <Facebook className="h-4 w-4 text-[var(--color-facebook)]" />;
-      default: return null;
-    }
-  };
+
 
   const filteredConversations = conversations.filter(
     (c) => filterPlatform === "all" || c.platform === filterPlatform

@@ -142,7 +142,7 @@ export default function OnboardingPage() {
                 <div 
                   className={`h-9 w-9 rounded-full flex items-center justify-center text-sm font-semibold transition-all border ${
                     isActive 
-                      ? "bg-[var(--color-primary)] border-transparent text-white" 
+                      ? "bg-[var(--color-primary)] border-transparent text-[var(--color-text-inverse)]" 
                       : "bg-[var(--color-background)] border-[var(--color-border)] text-[var(--color-text-muted)]"
                   } ${isCurrent ? "scale-110 ring-2 ring-[var(--color-primary)]/40" : ""}`}
                 >
@@ -332,7 +332,7 @@ export default function OnboardingPage() {
                         }}
                         className={`px-3 py-1.5 rounded-full text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5 border transition-all ${
                           isSelected 
-                            ? "bg-[var(--color-primary)] border-transparent text-white"
+                            ? "bg-[var(--color-primary)] border-transparent text-[var(--color-text-inverse)]"
                             : "bg-[var(--color-background)] border-[var(--color-border)] text-[var(--color-text-muted)]"
                         }`}
                       >

@@ -58,7 +58,7 @@ export default function LoginPage() {
           <div
             className="h-12 w-12 rounded-2xl flex items-center justify-center bg-[var(--color-primary)]"
           >
-            <OrbitLogo size={24} className="text-white" />
+            <OrbitLogo size={24} className="text-[var(--color-text-inverse)]" />
           </div>
           <div className="text-center space-y-1">
             <h1 className="text-2xl font-bold tracking-tight">Sign in to Orbit</h1>
@@ -102,7 +102,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full flex items-center justify-center gap-2 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-sm font-semibold py-3 px-4 rounded-[var(--radius-md)] transition-colors disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-2 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-[var(--color-text-inverse)] text-sm font-semibold py-3 px-4 rounded-[var(--radius-md)] transition-colors disabled:opacity-50"
             >
               {isLoading ? "Signing in…" : "Continue"}
               <ArrowRight className="h-4 w-4" />
