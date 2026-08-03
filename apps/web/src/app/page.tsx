@@ -36,7 +36,6 @@ import {
   PLATFORM_COLORS,
 } from "@/components/social-icons";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 import { OrbitLogo } from "@/components/logo";
 
@@ -303,8 +302,6 @@ function MouseParallax({ children, intensity = 12 }: { children: React.ReactNode
 
 // --- MAIN PAGE ---
 export default function LandingPage() {
-  const router = useRouter();
-
   const [selectedFeature, setSelectedFeature] = useState(FEATURES[0].id);
   const [aiTab, setAiTab] = useState(AI_TABS[0].id);
   const [typedText, setTypedText] = useState("");
@@ -326,8 +323,6 @@ export default function LandingPage() {
   }, [currentOutput]);
 
   const activeFeature = FEATURES.find((f) => f.id === selectedFeature) || FEATURES[0];
-
-  const handleSignup = () => router.push("/signup");
 
   const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
 

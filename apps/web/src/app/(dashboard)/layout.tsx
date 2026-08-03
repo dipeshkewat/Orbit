@@ -123,15 +123,8 @@ function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => 
     setShowNewWsModal(false);
   };
 
-  const { signOut } = useClerk();
-
-  const handleLogout = async () => {
+  const handleLogout = () => {
     document.cookie = "sb_bypass=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
-    try {
-      await signOut();
-    } catch {
-      // Ignore
-    }
     logout();
     toast.success("Logged out successfully");
     router.push("/login");

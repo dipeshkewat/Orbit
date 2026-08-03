@@ -15,21 +15,16 @@ export function OrbitLogo({ size = 32, className, ...props }: OrbitLogoProps) {
       className={className}
       {...props}
     >
-      {/* Planetary ring (large broken circle) */}
-      <path
-        d="M 81.0 38.7 A 33 33 0 1 1 61.3 19.0"
-        stroke="currentColor"
-        strokeWidth="7.5"
-        strokeLinecap="round"
-      />
-      {/* Orbiting moon (small circle at the top right) */}
-      <circle
-        cx="80.0"
-        cy="20.0"
-        r="8.5"
-        stroke="currentColor"
-        strokeWidth="7.5"
-      />
+      <g fill="currentColor">
+        {[0, 90, 180, 270].map((angle) => (
+          <path
+            key={angle}
+            d="M 44.5 55.5 C 50 36, 62 31, 76.5 34 C 67 52, 55 60, 44.5 55.5 Z"
+            transform={`rotate(${angle} 50 50)`}
+          />
+        ))}
+      </g>
     </svg>
   );
 }
+

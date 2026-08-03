@@ -24,8 +24,6 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!isMounted) return;
 
-    const isAuth = isPublicRoute(pathname) || pathname === "/login" || pathname === "/signup";
-
     if (!isAuthenticated && !isPublicRoute(pathname)) {
       // Unauthenticated user trying to access protected route
       router.replace("/login");

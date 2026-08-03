@@ -44,11 +44,12 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative min-h-screen bg-[var(--color-background)] text-[var(--color-text)] font-sans flex items-center justify-center p-6 overflow-hidden">
+    <div className="fixed inset-0 bg-[var(--color-background)] text-[var(--color-text)] font-sans flex items-center justify-center p-6 overflow-auto z-10">
       {/* Subtle ambient orb */}
       <div
-        className="glow-bg"
+        className="glow-bg pointer-events-none absolute"
         style={{
+          position: "absolute",
           top: "20%",
           left: "50%",
           transform: "translateX(-50%)",
