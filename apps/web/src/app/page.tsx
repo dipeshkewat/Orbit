@@ -38,7 +38,6 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import { useAuthStore } from "@/lib/store";
 import { OrbitLogo } from "@/components/logo";
 
 /* ─────────────────────────────────────────────────────────────
@@ -328,12 +327,7 @@ export default function LandingPage() {
 
   const activeFeature = FEATURES.find((f) => f.id === selectedFeature) || FEATURES[0];
 
-  const handleStart = () => {
-    document.cookie = "sb_bypass=true; path=/; max-age=86400";
-    useAuthStore.getState().login("demo@orbit.com", "Demo User");
-    useAuthStore.getState().setOnboardingStep(0);
-    router.push("/dashboard");
-  };
+  const handleSignup = () => router.push("/signup");
 
   const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
 
@@ -372,15 +366,15 @@ export default function LandingPage() {
             <Link href="/login" className="text-sm font-semibold px-3 py-2 hover:text-white transition-colors" style={{ color: C.textSecondary }}>
               Sign in
             </Link>
-            <button
-              onClick={handleStart}
+            <Link
+              href="/signup"
               className="px-4 py-2 rounded-xl text-sm font-semibold text-[#111] transition-colors"
               style={{ backgroundColor: C.primary }}
               onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = C.primaryHover)}
               onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = C.primary)}
             >
               Start free
-            </button>
+            </Link>
           </div>
 
           <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden p-2 text-white/80" aria-label="Menu">
@@ -414,9 +408,9 @@ export default function LandingPage() {
               <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="text-center py-3 rounded-xl font-semibold text-sm text-white" style={{ border: `1px solid ${C.border}` }}>
                 Sign in
               </Link>
-              <button onClick={() => { setMobileMenuOpen(false); handleStart(); }} className="text-center py-3 rounded-xl font-semibold text-sm text-[#111]" style={{ backgroundColor: C.primary }}>
+              <Link href="/signup" onClick={() => setMobileMenuOpen(false)} className="block text-center py-3 rounded-xl font-semibold text-sm text-[#111]" style={{ backgroundColor: C.primary }}>
                 Start free
-              </button>
+              </Link>
             </div>
           </motion.div>
         )}
@@ -445,8 +439,8 @@ export default function LandingPage() {
             </motion.p>
 
             <motion.div variants={fadeUp} className="flex flex-wrap items-center gap-4 pt-1">
-              <button
-                onClick={handleStart}
+              <Link
+                href="/signup"
                 className="px-6 py-3.5 rounded-xl text-[#111] font-semibold text-sm transition-colors flex items-center gap-2 group"
                 style={{ backgroundColor: C.primary }}
                 onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = C.primaryHover)}
@@ -454,7 +448,7 @@ export default function LandingPage() {
               >
                 Start free
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-              </button>
+              </Link>
               <button onClick={() => scrollTo("features")} className="px-4 py-3.5 text-sm font-semibold transition-colors hover:text-white" style={{ color: C.textSecondary }}>
                 See how it works
               </button>
@@ -644,9 +638,9 @@ export default function LandingPage() {
                 ))}
               </ul>
             </div>
-            <button onClick={handleStart} className="self-start mt-6 text-sm font-semibold flex items-center gap-1.5 transition-colors" style={{ color: C.primaryLight }}>
+            <Link href="/signup" className="self-start mt-6 text-sm font-semibold flex items-center gap-1.5 transition-colors" style={{ color: C.primaryLight }}>
               Try it free <ArrowRight className="h-3.5 w-3.5" />
-            </button>
+            </Link>
           </div>
         </div>
       </section>
@@ -697,9 +691,9 @@ export default function LandingPage() {
                   <button className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors" style={{ backgroundColor: C.card, border: `1px solid ${C.border}`, color: C.textSecondary }}>
                     Regenerate
                   </button>
-                  <button onClick={handleStart} className="px-3 py-1.5 rounded-lg text-xs font-semibold text-[#111] transition-colors" style={{ backgroundColor: C.primary }}>
+                  <Link href="/signup" className="px-3 py-1.5 rounded-lg text-xs font-semibold text-[#111] transition-colors" style={{ backgroundColor: C.primary }}>
                     Use this
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -802,13 +796,13 @@ export default function LandingPage() {
                   ))}
                 </ul>
               </div>
-              <button
-                onClick={handleStart}
-                className="w-full py-2.5 rounded-xl text-xs font-semibold transition-colors"
+              <Link
+                href="/signup"
+                className="block w-full py-2.5 rounded-xl text-xs font-semibold transition-colors text-center"
                 style={plan.highlighted ? { backgroundColor: C.primary, color: "#111" } : { backgroundColor: "transparent", border: `1px solid ${C.border}`, color: C.text }}
               >
                 {plan.cta}
-              </button>
+              </Link>
             </div>
           ))}
         </div>
@@ -866,15 +860,15 @@ export default function LandingPage() {
               Join the teams and creators planning their whole social presence in Orbit. Start free — no credit card required.
             </p>
             <div className="flex justify-center pt-2">
-              <button
-                onClick={handleStart}
+              <Link
+                href="/signup"
                 className="px-6 py-3.5 rounded-xl text-[#111] font-semibold text-sm transition-colors flex items-center gap-2 group"
                 style={{ backgroundColor: C.primary }}
                 onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = C.primaryHover)}
                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = C.primary)}
               >
                 Start free <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-              </button>
+              </Link>
             </div>
           </div>
         </motion.div>

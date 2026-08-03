@@ -34,7 +34,6 @@ import {
   Github,
 } from "lucide-react";
 import { toast } from "sonner";
-import { SignedIn, SignedOut, UserButton, SignInButton, ClerkLoaded, useClerk } from "@clerk/nextjs";
 
 /* ─── Primary Navigation ─── */
 const PRIMARY_NAV = [
@@ -356,9 +355,12 @@ function Sidebar({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => 
 }
 
 function Header() {
+  const router = useRouter();
   const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotificationStore();
   const [showNotif, setShowNotif] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   const handleMarkRead = (id: string) => {
     markAsRead(id);
@@ -368,6 +370,13 @@ function Header() {
   const handleMarkAllRead = () => {
     markAllAsRead();
     toast.success("All notifications read");
+  };
+
+  const handleSignOut = () => {
+    document.cookie = "sb_bypass=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+    logout();
+    toast.success("Logged out successfully");
+    router.push("/login");
   };
 
   return (
@@ -446,20 +455,51 @@ function Header() {
           </div>
         )}
 
-        {/* User button */}
-        <div className="flex items-center gap-2">
-          <ClerkLoaded>
-            <SignedIn>
-              <UserButton />
-            </SignedIn>
-            <SignedOut>
-              <SignInButton mode="modal">
-                <button className="text-xs font-bold px-3.5 py-2 bg-[var(--color-primary)] text-[var(--color-text-inverse)] rounded-lg hover:bg-[var(--color-primary-hover)] transition-colors">
-                  Sign In
+        {/* User Avatar & Menu */}
+        <div className="relative">
+          <button
+            onClick={() => setShowUserMenu(!showUserMenu)}
+            className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-[var(--color-surface-hover)] transition-colors"
+          >
+            {user?.avatarUrl ? (
+              <img
+                src={user.avatarUrl}
+                alt={user.name}
+                className="h-7 w-7 rounded-full object-cover ring-2 ring-[var(--color-border)]"
+              />
+            ) : (
+              <div className="h-7 w-7 rounded-full bg-[var(--color-primary)] flex items-center justify-center text-[var(--color-text-inverse)] text-xs font-bold">
+                {user?.name?.charAt(0)?.toUpperCase() || "?"}
+              </div>
+            )}
+            <ChevronDown className="h-3 w-3 text-[var(--color-text-muted)]" />
+          </button>
+
+          {showUserMenu && (
+            <div className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-[var(--color-border)] bg-[var(--color-surface-elevated)] shadow-xl z-50 overflow-hidden">
+              <div className="p-3 border-b border-[var(--color-border)]">
+                <p className="text-xs font-bold text-[var(--color-text)] truncate">{user?.name}</p>
+                <p className="text-[11px] text-[var(--color-text-muted)] truncate">{user?.email}</p>
+              </div>
+              <div className="p-1">
+                <Link
+                  href="/settings"
+                  onClick={() => setShowUserMenu(false)}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-[var(--color-text-secondary)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-text)] transition-colors"
+                >
+                  <Settings className="h-3.5 w-3.5" />
+                  Settings
+                </Link>
+                <button
+                  onClick={handleSignOut}
+                  className="flex w-full items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-[var(--color-error)] hover:bg-[var(--color-error)]/10 transition-colors"
+                >
+                  <LogOut className="h-3.5 w-3.5" />
+                  Sign out
                 </button>
-              </SignInButton>
-            </SignedOut>
-          </ClerkLoaded>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </header>

@@ -57,6 +57,7 @@ interface AuthState {
   isAuthenticated: boolean;
   onboardingStep: number; // 0 means onboarding is completed
   login: (email: string, name: string) => void;
+  demoLogin: () => void;
   logout: () => void;
   setWorkspace: (id: string) => void;
   createWorkspace: (name: string) => MockWorkspace;
@@ -235,16 +236,11 @@ const INITIAL_NOTIFICATIONS: MockNotification[] = [
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
-      user: {
-        id: "usr-1",
-        name: "Dipes",
-        email: "dipes@orbit.com",
-        avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&h=100&q=80",
-      },
-      workspaces: INITIAL_WORKSPACES,
-      activeWorkspaceId: "ws-1",
-      isAuthenticated: true,
-      onboardingStep: 0, // 0 = onboarding completed
+      user: null,
+      workspaces: [],
+      activeWorkspaceId: null,
+      isAuthenticated: false,
+      onboardingStep: 1, // 1 = needs onboarding, 0 = completed
 
       login: (email, name) =>
         set({
@@ -255,15 +251,36 @@ export const useAuthStore = create<AuthState>()(
             avatarUrl: `https://api.dicebear.com/7.x/adventurer/svg?seed=${name}`,
           },
           isAuthenticated: true,
-          onboardingStep: 0, // onboarding completed
+          workspaces: INITIAL_WORKSPACES,
+          activeWorkspaceId: "ws-1",
         }),
 
-      logout: () =>
+      demoLogin: () => {
+        document.cookie = "sb_bypass=true; path=/; max-age=86400";
+        set({
+          user: {
+            id: "usr-demo",
+            name: "Demo User",
+            email: "demo@orbit.com",
+            avatarUrl: "https://api.dicebear.com/7.x/adventurer/svg?seed=Demo",
+          },
+          isAuthenticated: true,
+          workspaces: INITIAL_WORKSPACES,
+          activeWorkspaceId: "ws-1",
+          onboardingStep: 0, // skip onboarding for demo
+        });
+      },
+
+      logout: () => {
+        document.cookie = "sb_bypass=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
         set({
           user: null,
           isAuthenticated: false,
           activeWorkspaceId: null,
-        }),
+          workspaces: [],
+          onboardingStep: 1,
+        });
+      },
 
       setWorkspace: (id) => set({ activeWorkspaceId: id }),
 
