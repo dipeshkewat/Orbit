@@ -24,7 +24,20 @@ export default function SettingsAccountsPage() {
 
 
 
-  const handleSimulatedConnect = (platform: string) => {
+  const handleConnectPlatform = (platform: string) => {
+    if (platform === "facebook" || platform === "instagram") {
+      setIsLoadingPlatform(platform);
+      const appId = process.env.NEXT_PUBLIC_META_APP_ID || "1600609308298106";
+      const redirectUri = typeof window !== "undefined" ? `${window.location.origin}/settings/accounts` : "http://localhost:3000/settings/accounts";
+      const scopes = "pages_show_list,pages_read_engagement,pages_manage_posts,instagram_basic,instagram_content_publish,business_management";
+      const oauthUrl = `https://www.facebook.com/v21.0/dialog/oauth?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scopes)}&response_type=code`;
+      
+      toast.info(`Redirecting to Meta OAuth for ${platform}...`);
+      window.location.href = oauthUrl;
+      return;
+    }
+
+    // Fallback simulated connect for other channels pending credentials
     setIsLoadingPlatform(platform);
     setTimeout(() => {
       const handleName = `@${user?.name.toLowerCase().replace(/\s+/g, "") || "user"}_brand`;
@@ -133,7 +146,7 @@ export default function SettingsAccountsPage() {
                 return (
                   <button
                     key={platform}
-                    onClick={() => handleSimulatedConnect(platform)}
+                    onClick={() => handleConnectPlatform(platform)}
                     disabled={isConnecting || !!isLoadingPlatform}
                     className="w-full flex justify-between items-center p-3 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-hover)] transition-colors text-xs font-semibold text-[var(--color-text-secondary)] disabled:opacity-50"
                   >

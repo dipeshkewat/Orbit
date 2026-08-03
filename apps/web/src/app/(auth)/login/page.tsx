@@ -138,7 +138,7 @@ export default function LoginPage() {
         {/* Login card */}
         <div className="bg-[var(--color-surface)] border border-[var(--color-border)] p-8 rounded-[var(--radius-xl)] shadow-[var(--shadow-lg)] space-y-6">
           {/* Fast OAuth Options */}
-          <div className="space-y-2.5">
+          <div>
             <button
               type="button"
               onClick={handleGoogleAuth}
@@ -147,16 +147,6 @@ export default function LoginPage() {
             >
               <GoogleIcon className="h-4 w-4" />
               <span>{oauthLoading === "google" ? "Connecting to Google…" : "Continue with Google"}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={handleGithubAuth}
-              disabled={isLoading || oauthLoading !== null}
-              className="w-full flex items-center justify-center gap-3 py-2.5 px-4 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-background)] hover:bg-[var(--color-surface-hover)] text-sm font-semibold text-[var(--color-text)] shadow-sm transition-all active:scale-[0.99] disabled:opacity-50"
-            >
-              <GithubIcon className="h-4 w-4" />
-              <span>{oauthLoading === "github" ? "Connecting to GitHub…" : "Continue with GitHub"}</span>
             </button>
           </div>
 

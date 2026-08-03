@@ -12,29 +12,67 @@ export class InstagramPublisher implements PlatformPublisher {
     post: Post,
     decryptedAccessToken: string
   ): Promise<PublishResult> {
-    this.logger.log(`Publishing post ${post.id} to Instagram account: ${account.username}`);
-    void decryptedAccessToken;
+    this.logger.log(`Publishing post ${post.id} to Instagram Account ID: ${account.platformUserId}`);
     void job;
 
     try {
-      // In production:
-      // 1. Create media container: POST https://graph.facebook.com/v21.0/{platformUserId}/media
-      //    params: { image_url/video_url, caption: post.content, access_token }
-      // 2. Publish media container: POST https://graph.facebook.com/v21.0/{platformUserId}/media_publish
-      //    params: { creation_id, access_token }
-      
-      const mediaUrls = post.mediaUrls as string[];
+      const mediaUrls = (post.mediaUrls as string[]) || [];
       if (mediaUrls.length === 0) {
         return {
           success: false,
-          errorMessage: "Instagram requires at least one image or video attachment.",
+          errorMessage: "Instagram requires at least one image or video attachment URL.",
         };
       }
 
-      // Mock delay representing Graph API network requests
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const igUserId = account.platformUserId;
+      const imageUrl = mediaUrls[0];
 
-      const platformPostId = `ig_post_${Math.random().toString(36).substring(2, 10)}`;
+      // Step 1: Create Media Container
+      const containerUrl = `https://graph.facebook.com/v21.0/${igUserId}/media`;
+      const containerRes = await fetch(containerUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          image_url: imageUrl,
+          caption: post.content || "",
+          access_token: decryptedAccessToken,
+        }),
+      });
+
+      const containerData = await containerRes.json();
+      if (!containerRes.ok || containerData.error) {
+        const errorMsg = containerData.error?.message || "Failed to create Instagram media container.";
+        this.logger.error(`Instagram Media Container Error: ${errorMsg}`);
+        return {
+          success: false,
+          errorMessage: errorMsg,
+        };
+      }
+
+      const creationId = containerData.id;
+
+      // Step 2: Publish Media Container
+      const publishUrl = `https://graph.facebook.com/v21.0/${igUserId}/media_publish`;
+      const publishRes = await fetch(publishUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          creation_id: creationId,
+          access_token: decryptedAccessToken,
+        }),
+      });
+
+      const publishData = await publishRes.json();
+      if (!publishRes.ok || publishData.error) {
+        const errorMsg = publishData.error?.message || "Failed to publish Instagram media container.";
+        this.logger.error(`Instagram Media Publish Error: ${errorMsg}`);
+        return {
+          success: false,
+          errorMessage: errorMsg,
+        };
+      }
+
+      const platformPostId = publishData.id;
       return {
         success: true,
         platformPostId,

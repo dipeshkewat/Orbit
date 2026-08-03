@@ -12,22 +12,45 @@ export class FacebookPublisher implements PlatformPublisher {
     post: Post,
     decryptedAccessToken: string
   ): Promise<PublishResult> {
-    this.logger.log(`Publishing post ${post.id} to Facebook Page: ${account.username}`);
-    void decryptedAccessToken;
+    this.logger.log(`Publishing post ${post.id} to Facebook Page ID: ${account.platformUserId}`);
     void job;
 
     try {
-      // In production:
-      // POST https://graph.facebook.com/v21.0/{platformUserId}/feed
-      // params: { message: post.content, access_token }
+      const pageId = account.platformUserId;
+      const url = `https://graph.facebook.com/v21.0/${pageId}/feed`;
 
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      const mediaUrls = (post.mediaUrls as string[]) || [];
+      const payload: Record<string, any> = {
+        message: post.content || "",
+        access_token: decryptedAccessToken,
+      };
 
-      const platformPostId = `fb_page_post_${Math.random().toString(36).substring(2, 12)}`;
+      if (mediaUrls.length > 0) {
+        payload.link = mediaUrls[0];
+      }
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || data.error) {
+        const errorMsg = data.error?.message || "Failed to publish post to Facebook Page.";
+        this.logger.error(`Facebook Graph API Error: ${errorMsg}`);
+        return {
+          success: false,
+          errorMessage: errorMsg,
+        };
+      }
+
+      const platformPostId = data.id;
       return {
         success: true,
         platformPostId,
-        platformUrl: `https://www.facebook.com/${account.platformUserId}/posts/${platformPostId}`,
+        platformUrl: `https://www.facebook.com/${platformPostId}`,
       };
     } catch (err) {
       this.logger.error(`Failed to publish to Facebook: ${(err as Error).message}`);
