@@ -333,8 +333,8 @@ export default function LandingPage() {
     >
       {/* One restrained ambient orb behind the hero (indigo, not neon) */}
       <div
-        className="glow-bg"
-        style={{ top: "-8%", left: "50%", transform: "translateX(-50%)", width: "60%", height: "45%", backgroundColor: "rgba(255,255,255,0.06)" }}
+        className="glow-bg pointer-events-none absolute"
+        style={{ position: "absolute", top: "-8%", left: "50%", transform: "translateX(-50%)", width: "60%", height: "45%", backgroundColor: "rgba(255,255,255,0.06)" }}
       />
 
       {/* ── NAV ── */}

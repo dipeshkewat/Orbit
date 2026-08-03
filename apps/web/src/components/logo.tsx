@@ -19,7 +19,7 @@ export function OrbitLogo({ size = 32, className, ...props }: OrbitLogoProps) {
         {[0, 90, 180, 270].map((angle) => (
           <path
             key={angle}
-            d="M 44.5 55.5 C 50 36, 62 31, 76.5 34 C 67 52, 55 60, 44.5 55.5 Z"
+            d="M 43 57 C 48 38, 58 31, 76 34 C 65 54, 52 61, 43 57 Z"
             transform={`rotate(${angle} 50 50)`}
           />
         ))}
