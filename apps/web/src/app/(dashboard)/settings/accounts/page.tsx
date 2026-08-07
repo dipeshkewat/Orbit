@@ -37,6 +37,18 @@ export default function SettingsAccountsPage() {
       return;
     }
 
+    if (platform === "linkedin") {
+      setIsLoadingPlatform(platform);
+      const clientId = process.env.NEXT_PUBLIC_LINKEDIN_CLIENT_ID || "77iiqia3pf4gn8";
+      const redirectUri = typeof window !== "undefined" ? `${window.location.origin}/settings/accounts` : "http://localhost:3000/settings/accounts";
+      const scopes = "openid profile w_member_social email";
+      const oauthUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scopes)}&state=orbit_linkedin_state`;
+
+      toast.info("Redirecting to LinkedIn OAuth...");
+      window.location.href = oauthUrl;
+      return;
+    }
+
     // Fallback simulated connect for other channels pending credentials
     setIsLoadingPlatform(platform);
     setTimeout(() => {
