@@ -1,7 +1,7 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { CreateExpressContextOptions } from "@trpc/server/adapters/express";
-import { prisma } from "@socialsphear/db";
+import { prisma } from "@orbit/db";
 
 // Define the context type
 export interface TrpcContext {

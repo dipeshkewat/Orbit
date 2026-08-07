@@ -1,5 +1,5 @@
 import { Injectable, ConflictException, NotFoundException } from "@nestjs/common";
-import { prisma } from "@socialsphear/db";
+import { prisma } from "@orbit/db";
 
 @Injectable()
 export class WorkspaceService {

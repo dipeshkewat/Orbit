@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common";
-import { prisma } from "@socialsphear/db";
-import { CreatePostInput } from "@socialsphear/types";
+import { prisma } from "@orbit/db";
+import { CreatePostInput } from "@orbit/types";
 import { PostSchedulerService } from "../scheduler/post-scheduler.service";
 
 @Injectable()

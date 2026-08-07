@@ -14,7 +14,7 @@ import {
   BadRequestException,
   Logger,
 } from "@nestjs/common";
-import { prisma } from "@socialsphear/db";
+import { prisma } from "@orbit/db";
 import * as crypto from "crypto";
 
 /**

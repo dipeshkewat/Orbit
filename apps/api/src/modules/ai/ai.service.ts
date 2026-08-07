@@ -1,6 +1,6 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { anthropic, CAPTION_MODEL, generateText } from "@socialsphear/ai";
-import { prisma } from "@socialsphear/db";
+import { anthropic, CAPTION_MODEL, generateText } from "@orbit/ai";
+import { prisma } from "@orbit/db";
 
 @Injectable()
 export class AiService {

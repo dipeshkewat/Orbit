@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { TrpcService } from "../trpc.service";
-import { PlanSchema } from "@socialsphear/types";
+import { PlanSchema } from "@orbit/types";
 
 export function createBillingRouter(trpc: TrpcService) {
   return trpc.router({

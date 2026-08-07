@@ -1,5 +1,5 @@
 {
-  "name": "@socialsphear/config",
+  "name": "@orbit/config",
   "version": "0.1.0",
   "private": true,
   "files": ["typescript", "eslint"]

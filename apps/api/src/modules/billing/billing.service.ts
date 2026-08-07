@@ -1,6 +1,6 @@
 import { Injectable, Logger, BadRequestException } from "@nestjs/common";
 import Stripe from "stripe";
-import { prisma } from "@socialsphear/db";
+import { prisma } from "@orbit/db";
 
 @Injectable()
 export class BillingService {

@@ -1,5 +1,5 @@
 {
-  "name": "@socialsphear/api",
+  "name": "@orbit/api",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -13,9 +13,9 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@socialsphear/types": "workspace:*",
-    "@socialsphear/db": "workspace:*",
-    "@socialsphear/ai": "workspace:*",
+    "@orbit/types": "workspace:*",
+    "@orbit/db": "workspace:*",
+    "@orbit/ai": "workspace:*",
     "@nestjs/common": "^11.0.10",
     "@nestjs/core": "^11.0.10",
     "@nestjs/platform-express": "^11.0.10",

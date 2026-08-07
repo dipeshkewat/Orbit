@@ -1,20 +1,20 @@
 services:
   postgres:
-    image: pgvector/pgvector:pg16
-    container_name: socialsphear-db
+    image: postgres:16-alpine
+    container_name: orbit-db
     restart: unless-stopped
     ports:
       - "5432:5432"
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: socialsphear
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: orbit
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
 
   redis:
     image: redis:7-alpine
-    container_name: socialsphear-redis
+    container_name: orbit-redis
     restart: unless-stopped
     ports:
       - "6379:6379"

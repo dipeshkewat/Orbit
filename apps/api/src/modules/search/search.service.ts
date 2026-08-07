@@ -1,5 +1,5 @@
 import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
-import { prisma } from "@socialsphear/db";
+import { prisma } from "@orbit/db";
 
 /**
  * Search service using in-database full-text search (PostgreSQL).

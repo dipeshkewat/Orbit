@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { prisma } from "@socialsphear/db";
+import { prisma } from "@orbit/db";
 import type { SocialAccount } from "@prisma/client";
 import { TokenEncryptionService } from "./token-encryption.service";
 

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { TrpcService } from "../trpc.service";
-import { TeamRoleSchema } from "@socialsphear/types";
+import { TeamRoleSchema } from "@orbit/types";
 
 export function createWorkspaceRouter(trpc: TrpcService) {
   return trpc.router({

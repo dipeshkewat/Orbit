@@ -1,7 +1,7 @@
 import { createAnthropic } from "@ai-sdk/anthropic";
 
 /**
- * Pre-configured Anthropic provider for SocialSphear.
+ * Pre-configured Anthropic provider for Orbit.
  * Uses claude-sonnet-4-6 as the default model for caption generation.
  * API key must be set via ANTHROPIC_API_KEY environment variable.
  */

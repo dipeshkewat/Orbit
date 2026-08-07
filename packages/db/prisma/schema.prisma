@@ -1,4 +1,4 @@
-// SocialSphear — Prisma Schema v1.0
+// Orbit — Prisma Schema v1.0
 // All 14 tables defined per tech spec + implementation plan.
 
 generator client {

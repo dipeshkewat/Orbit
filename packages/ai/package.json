@@ -1,5 +1,5 @@
 {
-  "name": "@socialsphear/ai",
+  "name": "@orbit/ai",
   "version": "0.1.0",
   "private": true,
   "main": "./src/index.ts",

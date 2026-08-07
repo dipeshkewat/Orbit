@@ -10,7 +10,7 @@ export class TokenEncryptionService {
     const keyEnv = process.env.ENCRYPTION_KEY;
     if (!keyEnv) {
       // Fallback key for development if env is not defined
-      this.key = crypto.scryptSync("dev-socialsphear-secret-salt-key-string", "salt", 32);
+      this.key = crypto.scryptSync("dev-orbit-secret-salt-key-string", "salt", 32);
     } else {
       try {
         this.key = Buffer.from(keyEnv, "hex");

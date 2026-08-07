@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { TrpcService } from "../trpc.service";
-import { PlatformSchema } from "@socialsphear/types";
+import { PlatformSchema } from "@orbit/types";
 
 export function createSocialAccountsRouter(trpc: TrpcService) {
   return trpc.router({

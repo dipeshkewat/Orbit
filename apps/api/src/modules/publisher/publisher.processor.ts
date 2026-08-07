@@ -1,7 +1,7 @@
 import { Processor, WorkerHost } from "@nestjs/bullmq";
 import { Logger } from "@nestjs/common";
 import { Job } from "bullmq";
-import { prisma } from "@socialsphear/db";
+import { prisma } from "@orbit/db";
 import { SocialAccountsService } from "../social-accounts/social-accounts.service";
 import { NotificationsService } from "../notifications/notifications.service";
 import { InstagramPublisher } from "./adapters/instagram.publisher";

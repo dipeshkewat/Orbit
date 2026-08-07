@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Moon, Sun } from "lucide-react";
-import { cn } from "@socialsphear/ui";
+import { cn } from "@orbit/ui";
 
 type Theme = "dark" | "light";
 

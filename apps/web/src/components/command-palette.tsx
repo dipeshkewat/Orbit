@@ -19,7 +19,7 @@ import {
   Clock,
   CornerDownLeft,
 } from "lucide-react";
-import { cn } from "@socialsphear/ui";
+import { cn } from "@orbit/ui";
 import { useCalendarStore } from "@/lib/store";
 
 interface CommandItem {

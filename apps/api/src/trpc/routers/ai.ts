@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { TrpcService } from "../trpc.service";
-import { GenerateCaptionSchema, PlatformSchema } from "@socialsphear/types";
+import { GenerateCaptionSchema, PlatformSchema } from "@orbit/types";
 
 export function createAiRouter(trpc: TrpcService) {
   return trpc.router({

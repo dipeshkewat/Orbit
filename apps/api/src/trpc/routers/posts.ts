@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { TrpcService } from "../trpc.service";
-import { CreatePostSchema, PlatformSchema } from "@socialsphear/types";
+import { CreatePostSchema, PlatformSchema } from "@orbit/types";
 
 export function createPostsRouter(trpc: TrpcService) {
   return trpc.router({

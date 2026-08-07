@@ -1,6 +1,6 @@
 import { Injectable, Logger } from "@nestjs/common";
 import * as crypto from "crypto";
-import { prisma } from "@socialsphear/db";
+import { prisma } from "@orbit/db";
 
 @Injectable()
 export class WebhooksService {

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { cn } from "@socialsphear/ui";
+import { cn } from "@orbit/ui";
 import { OrbitLogo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { CommandPalette, CommandPaletteTrigger } from "@/components/command-palette";
