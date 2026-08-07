@@ -1,7 +1,9 @@
-import { Module } from "@nestjs/common";
+import { Module, Logger } from "@nestjs/common";
 import { BullModule } from "@nestjs/bullmq";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { PostSchedulerService } from "./post-scheduler.service";
+
+const logger = new Logger("SchedulerModule");
 
 @Module({
   imports: [
@@ -23,7 +25,7 @@ import { PostSchedulerService } from "./post-scheduler.service";
               },
             };
           } catch (e) {
-            console.error("Failed to parse REDIS_URL, falling back to default localhost");
+            logger.error(`Failed to parse REDIS_URL, falling back to default localhost: ${(e as Error).message}`);
           }
         }
         return {

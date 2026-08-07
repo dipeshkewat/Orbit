@@ -11,7 +11,6 @@ import { LinkedInOauthService } from "./linkedin-oauth.service";
     MetaOauthService,
     LinkedInOauthService,
   ],
-  controllers: [],
   exports: [
     TokenEncryptionService,
     SocialAccountsService,

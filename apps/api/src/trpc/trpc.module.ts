@@ -10,5 +10,3 @@ import { TrpcController } from "./trpc.controller";
   exports: [TrpcService, TrpcRouter],
 })
 export class TrpcModule {}
-
-

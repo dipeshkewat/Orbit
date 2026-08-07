@@ -1,9 +1,11 @@
-import { Module, Global } from "@nestjs/common";
+import { Module, Global, Logger } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import Redis from "ioredis";
 import { RateLimiterGuard } from "./rate-limiter.guard";
 
 export const REDIS_CLIENT = "REDIS_CLIENT";
+
+const logger = new Logger("RedisModule");
 
 @Global()
 @Module({
@@ -17,7 +19,7 @@ export const REDIS_CLIENT = "REDIS_CLIENT";
           try {
             return new Redis(redisUrl);
           } catch (e) {
-            console.error("Failed to connect to REDIS_URL, falling back to localhost Redis connection");
+            logger.error(`Failed to connect to REDIS_URL, falling back to localhost: ${(e as Error).message}`);
           }
         }
         return new Redis({
@@ -32,4 +34,3 @@ export const REDIS_CLIENT = "REDIS_CLIENT";
   exports: [REDIS_CLIENT, RateLimiterGuard],
 })
 export class RedisModule {}
-

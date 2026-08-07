@@ -21,7 +21,7 @@ export class TikTokPublisher implements PlatformPublisher {
       // POST https://open-api.tiktok.com/share/video/upload/
       // params: { open_id, access_token }
 
-      const mediaUrls = post.mediaUrls as string[];
+      const mediaUrls = (post.mediaUrls as string[]) || [];
       if (mediaUrls.length === 0) {
         return {
           success: false,

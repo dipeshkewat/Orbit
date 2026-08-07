@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { CreateExpressContextOptions } from "@trpc/server/adapters/express";
 import { prisma } from "@socialsphear/db";
@@ -12,6 +12,8 @@ export interface TrpcContext {
 
 @Injectable()
 export class TrpcService {
+  private readonly logger = new Logger(TrpcService.name);
+
   // Initialize tRPC
   private t = initTRPC.context<TrpcContext>().create();
 
@@ -58,7 +60,7 @@ export class TrpcService {
           userId = "user_mocked_id";
           orgId = "org_mocked_id";
         } catch (e) {
-          // Token invalid, leave userId/orgId undefined
+          this.logger.warn(`Failed to decode auth token: ${(e as Error).message}`);
         }
       }
     }
@@ -70,3 +72,4 @@ export class TrpcService {
     };
   }
 }
+

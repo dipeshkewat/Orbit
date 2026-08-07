@@ -1,10 +1,11 @@
-import { Injectable, BadRequestException } from "@nestjs/common";
+import { Injectable, BadRequestException, Logger } from "@nestjs/common";
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { prisma } from "@socialsphear/db";
 
 @Injectable()
 export class MediaService {
+  private readonly logger = new Logger(MediaService.name);
   private s3Client: S3Client;
   private bucketName: string;
 
@@ -118,7 +119,7 @@ export class MediaService {
       await this.s3Client.send(command);
     } catch (err) {
       // Log error but proceed to clean up Postgres record
-      console.error(`Failed to delete object from R2: ${(err as Error).message}`);
+      this.logger.error(`Failed to delete object from R2: ${(err as Error).message}`);
     }
 
     await prisma.mediaFile.delete({

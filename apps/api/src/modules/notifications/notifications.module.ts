@@ -7,4 +7,3 @@ import { NotificationsService } from "./notifications.service";
   exports: [NotificationsGateway, NotificationsService],
 })
 export class NotificationsModule {}
-

@@ -7,13 +7,11 @@ import {
 } from "./v1.controllers";
 
 @Module({
-  providers: [],
   controllers: [
     PostsV1Controller,
     SocialAccountsV1Controller,
     AnalyticsV1Controller,
     WorkspaceV1Controller,
   ],
-  exports: [],
 })
 export class PublicApiModule {}

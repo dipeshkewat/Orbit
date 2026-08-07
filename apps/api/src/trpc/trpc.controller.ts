@@ -6,20 +6,23 @@ import { Request, Response } from "express";
 
 @Controller("trpc")
 export class TrpcController {
+  private readonly trpcHandler: ReturnType<typeof createExpressMiddleware>;
+
   constructor(
     private readonly trpcRouter: TrpcRouter,
     private readonly trpcService: TrpcService
-  ) {}
+  ) {
+    this.trpcHandler = createExpressMiddleware({
+      router: this.trpcRouter.appRouter,
+      createContext: (opts) => this.trpcService.createContext(opts),
+    });
+  }
 
   /**
    * Catch-all route to forward all /trpc/* requests to tRPC Express adapter
    */
   @All("*")
   async handler(@Req() req: Request, @Res() res: Response) {
-    const trpcHandler = createExpressMiddleware({
-      router: this.trpcRouter.appRouter,
-      createContext: (opts) => this.trpcService.createContext(opts),
-    });
-    return trpcHandler(req, res, () => {});
+    return this.trpcHandler(req, res, () => {});
   }
 }

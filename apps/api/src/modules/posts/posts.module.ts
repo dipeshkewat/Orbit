@@ -5,9 +5,6 @@ import { SchedulerModule } from "../scheduler/scheduler.module";
 @Module({
   imports: [SchedulerModule],
   providers: [PostsService],
-  controllers: [],
   exports: [PostsService],
 })
 export class PostsModule {}
-
-
