@@ -19,7 +19,9 @@ import { generateText as vercelGenerateText } from "ai";
  * Overridden generateText that transparently routes calls to Google Gemini API
  * if GEMINI_API_KEY is configured in the environment.
  */
-export async function generateText(options: any): Promise<{ text: string }> {
+export async function generateText(
+  options: Parameters<typeof vercelGenerateText>[0],
+): Promise<{ text: string }> {
   const geminiKey = process.env.GEMINI_API_KEY;
 
   if (geminiKey && geminiKey !== "xxx") {
