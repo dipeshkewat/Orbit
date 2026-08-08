@@ -201,7 +201,7 @@ export default function SettingsTeamPage() {
                 <div className="p-3 bg-[var(--color-warning)]/10 border border-[var(--color-warning)]/20 rounded flex gap-2">
                   <AlertCircle className="h-4.5 w-4.5 text-[var(--color-warning)] shrink-0 mt-0.5" />
                   <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed">
-                    You've reached your free seat limit. Upgrade to a paid plan to invite collaborators to draft and schedule posts.
+                    You&apos;ve reached your free seat limit. Upgrade to a paid plan to invite collaborators to draft and schedule posts.
                   </p>
                 </div>
               )}

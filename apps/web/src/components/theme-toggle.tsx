@@ -27,7 +27,7 @@ export function useTheme() {
 
   useEffect(() => {
     const stored = (localStorage.getItem(STORAGE_KEY) as Theme | null) ?? "light";
-    setThemeState(stored);
+    queueMicrotask(() => setThemeState(stored));
     applyTheme(stored);
   }, []);
 

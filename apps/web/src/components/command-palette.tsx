@@ -57,8 +57,10 @@ export function CommandPalette() {
   // Focus input when opening
   useEffect(() => {
     if (open) {
-      setQuery("");
-      setActiveIndex(0);
+      queueMicrotask(() => {
+        setQuery("");
+        setActiveIndex(0);
+      });
       setTimeout(() => inputRef.current?.focus(), 50);
     }
   }, [open]);
@@ -172,7 +174,7 @@ export function CommandPalette() {
         <div ref={listRef} className="max-h-[320px] overflow-y-auto p-2">
           {groups.length === 0 ? (
             <div className="py-8 text-center text-sm text-[var(--color-text-muted)]">
-              No results for "{query}"
+              No results for &quot;{query}&quot;
             </div>
           ) : (
             groups.map(({ group, items }) => (

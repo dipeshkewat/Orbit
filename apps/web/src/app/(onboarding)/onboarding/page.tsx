@@ -312,7 +312,7 @@ export default function OnboardingPage() {
           <div className="space-y-6">
             <div className="text-center sm:text-left">
               <h3 className="text-xl font-bold tracking-tight text-[var(--color-text)]">Draft your first post</h3>
-              <p className="text-sm text-[var(--color-text-secondary)] mt-1">Let's create some content. You can try our AI suggestion widget.</p>
+              <p className="text-sm text-[var(--color-text-secondary)] mt-1">Let&apos;s create some content. You can try our AI suggestion widget.</p>
             </div>
 
             <div className="space-y-4">

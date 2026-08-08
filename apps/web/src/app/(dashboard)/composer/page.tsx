@@ -113,7 +113,7 @@ export default function ComposerPage() {
 
     setIsAiGenerating(true);
     setContent(""); // clear old content
-    let fullText = `🌌 Discovering new frontiers with Orbit! 🚀
+    const fullText = `🌌 Discovering new frontiers with Orbit! 🚀
 
 We're building the future of social automation, branding feeds, and scheduling campaigns directly from our premium, dark-mode workspace. 
 

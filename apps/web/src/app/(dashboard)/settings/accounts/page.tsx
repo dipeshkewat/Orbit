@@ -33,7 +33,7 @@ export default function SettingsAccountsPage() {
       const oauthUrl = `https://www.facebook.com/v21.0/dialog/oauth?client_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scopes)}&response_type=code`;
       
       toast.info(`Redirecting to Meta OAuth for ${platform}...`);
-      window.location.href = oauthUrl;
+      window.location.assign(oauthUrl);
       return;
     }
 
@@ -45,7 +45,7 @@ export default function SettingsAccountsPage() {
       const oauthUrl = `https://www.linkedin.com/oauth/v2/authorization?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scopes)}&state=orbit_linkedin_state`;
 
       toast.info("Redirecting to LinkedIn OAuth...");
-      window.location.href = oauthUrl;
+      window.location.assign(oauthUrl);
       return;
     }
 
