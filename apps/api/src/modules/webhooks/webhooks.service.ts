@@ -76,8 +76,8 @@ export class WebhooksService {
       },
     });
 
-    const matchingWebhooks = webhooks.filter((w) =>
-      (w.events as string[]).includes(eventType) || (w.events as string[]).includes("*")
+    const matchingWebhooks = webhooks.filter((w: { events: string[] }) =>
+      w.events.includes(eventType) || w.events.includes("*")
     );
 
     for (const webhook of matchingWebhooks) {

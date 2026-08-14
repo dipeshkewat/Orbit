@@ -237,8 +237,9 @@ export class AnalyticsV1Controller {
 
     const metrics = await prisma.postMetric.findMany({ where });
 
+    const initialTotals = { likes: 0, comments: 0, shares: 0, impressions: 0, reach: 0, clicks: 0 };
     const totals = metrics.reduce(
-      (acc, m) => ({
+      (acc: typeof initialTotals, m: { likes: number; comments: number; shares: number; impressions: number; reach: number; clicks: number }) => ({
         likes: acc.likes + m.likes,
         comments: acc.comments + m.comments,
         shares: acc.shares + m.shares,
@@ -246,7 +247,7 @@ export class AnalyticsV1Controller {
         reach: acc.reach + m.reach,
         clicks: acc.clicks + m.clicks,
       }),
-      { likes: 0, comments: 0, shares: 0, impressions: 0, reach: 0, clicks: 0 }
+      initialTotals
     );
 
     return {

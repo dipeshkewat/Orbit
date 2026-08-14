@@ -9,7 +9,7 @@ export function createAiRouter(trpc: TrpcService) {
       .mutation(async ({ input }) => {
         // Simple mock caption output
         return {
-          captions: input.platforms.reduce((acc, platform) => {
+          captions: input.platforms.reduce((acc: Record<string, any>, platform: string) => {
             acc[platform] = {
               content: `Here is a platform-optimized caption for ${platform} about: ${input.topic} #awesome #ai`,
               characterCount: 100,

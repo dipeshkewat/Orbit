@@ -40,7 +40,7 @@ export class PostsService {
     });
 
     // Create individual post jobs for each platform
-    const jobsData = input.socialAccountIds.map((socialAccountId) => {
+    const jobsData = input.socialAccountIds.map((socialAccountId: string) => {
       return prisma.postJob.create({
         data: {
           postId: post.id,

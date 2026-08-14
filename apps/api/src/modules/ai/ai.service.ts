@@ -38,7 +38,7 @@ export class AiService {
         take: 5,
       });
       if (examples.length > 0) {
-        brandVoiceContext = `\n\nBrand voice examples to emulate:\n${examples.map((e) => `- "${e.content}"`).join("\n")}`;
+        brandVoiceContext = `\n\nBrand voice examples to emulate:\n${examples.map((e: { content: string }) => `- "${e.content}"`).join("\n")}`;
       }
     }
 

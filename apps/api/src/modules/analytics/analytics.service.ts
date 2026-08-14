@@ -96,8 +96,18 @@ export class AnalyticsService implements OnModuleInit {
     });
 
     // Aggregate totals
+    const initialTotals = {
+      likes: 0,
+      comments: 0,
+      shares: 0,
+      impressions: 0,
+      reach: 0,
+      clicks: 0,
+      saves: 0,
+      totalPosts: 0,
+    };
     const totals = metrics.reduce(
-      (acc, m) => ({
+      (acc: typeof initialTotals, m: { likes: number; comments: number; shares: number; impressions: number; reach: number; clicks: number; saves: number }) => ({
         likes: acc.likes + m.likes,
         comments: acc.comments + m.comments,
         shares: acc.shares + m.shares,
@@ -107,21 +117,12 @@ export class AnalyticsService implements OnModuleInit {
         saves: acc.saves + m.saves,
         totalPosts: acc.totalPosts + 1,
       }),
-      {
-        likes: 0,
-        comments: 0,
-        shares: 0,
-        impressions: 0,
-        reach: 0,
-        clicks: 0,
-        saves: 0,
-        totalPosts: 0,
-      }
+      initialTotals
     );
 
     const avgEngagementRate =
       metrics.length > 0
-        ? metrics.reduce((sum, m) => sum + m.engagementRate, 0) / metrics.length
+        ? metrics.reduce((sum: number, m: { engagementRate: number }) => sum + m.engagementRate, 0) / metrics.length
         : 0;
 
     return {
@@ -153,11 +154,11 @@ export class AnalyticsService implements OnModuleInit {
       skip: offset,
     });
 
-    return posts.map((post) => ({
+    return posts.map((post: any) => ({
       id: post.id,
       content: (post.content || "").slice(0, 100),
       publishedAt: post.publishedAt,
-      platforms: post.metrics.map((m) => ({
+      platforms: post.metrics.map((m: any) => ({
         platform: m.platform,
         likes: m.likes,
         comments: m.comments,
@@ -166,7 +167,7 @@ export class AnalyticsService implements OnModuleInit {
         engagementRate: m.engagementRate,
       })),
       totalEngagement: post.metrics.reduce(
-        (sum, m) => sum + m.likes + m.comments + m.shares,
+        (sum: number, m: { likes: number; comments: number; shares: number }) => sum + m.likes + m.comments + m.shares,
         0
       ),
     }));

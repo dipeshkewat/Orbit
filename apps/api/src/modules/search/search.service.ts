@@ -60,7 +60,7 @@ export class SearchService implements OnModuleInit {
     ]);
 
     return {
-      hits: posts.map((post) => ({
+      hits: posts.map((post: any) => ({
         id: post.id,
         content: post.content,
         status: post.status,
