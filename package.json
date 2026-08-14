@@ -23,6 +23,7 @@
   "devDependencies": {
     "eslint": "^9",
     "prettier": "^3.4.2",
+    "prisma": "^6.3.1",
     "turbo": "^2.4.4",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8"
