@@ -1,8 +1,61 @@
-import { Injectable, ConflictException, NotFoundException } from "@nestjs/common";
+import { Injectable, ConflictException, NotFoundException, ForbiddenException, BadRequestException } from "@nestjs/common";
+import { createHmac, timingSafeEqual } from "node:crypto";
 import { prisma } from "@orbit/db";
+
+const INVITE_TOKEN_TTL_MS = 1000 * 60 * 60 * 24 * 7;
 
 @Injectable()
 export class WorkspaceService {
+  private getInviteSecret() {
+    return process.env.APP_SECRET || process.env.CLERK_SECRET_KEY || "orbit-dev-invite-secret";
+  }
+
+  private hashInvitePayload(payload: string) {
+    return createHmac("sha256", this.getInviteSecret()).update(payload).digest("base64url");
+  }
+
+  createInviteToken(workspaceId: string, email: string, role?: string) {
+    const payload = JSON.stringify({
+      workspaceId,
+      email,
+      role: role ?? "editor",
+      exp: Date.now() + INVITE_TOKEN_TTL_MS,
+    });
+    return `${Buffer.from(payload, "utf8").toString("base64url")}.${this.hashInvitePayload(payload)}`;
+  }
+
+  private verifyInviteToken(token: string) {
+    const [payloadSegment, signature] = token.split(".");
+    if (!payloadSegment || !signature) {
+      throw new BadRequestException("Invalid invitation token");
+    }
+
+    const payloadText = Buffer.from(payloadSegment, "base64url").toString("utf8");
+    const expectedSignature = this.hashInvitePayload(payloadText);
+    const providedSignature = Buffer.from(signature);
+    const expectedValue = Buffer.from(expectedSignature);
+
+    if (providedSignature.length !== expectedValue.length || !timingSafeEqual(providedSignature, expectedValue)) {
+      throw new ForbiddenException("Invitation token signature is invalid");
+    }
+
+    let payload: { workspaceId: string; email: string; role?: string; exp: number };
+    try {
+      payload = JSON.parse(payloadText);
+    } catch {
+      throw new BadRequestException("Invitation token is malformed");
+    }
+
+    if (!payload.workspaceId || !payload.email || typeof payload.exp !== "number") {
+      throw new BadRequestException("Invitation token is incomplete");
+    }
+
+    if (Date.now() > payload.exp) {
+      throw new BadRequestException("Invitation token has expired");
+    }
+
+    return payload;
+  }
   /**
    * Create a new workspace and add the owner as a team member
    */
@@ -102,6 +155,28 @@ export class WorkspaceService {
    * Invite a new member by email (creates team_members with pending status)
    */
   async inviteMember(workspaceId: string, email: string, role: string) {
+    const workspace = await prisma.workspace.findUnique({
+      where: { id: workspaceId },
+      select: { plan: true },
+    });
+
+    if (!workspace) {
+      throw new NotFoundException(`Workspace with ID '${workspaceId}' not found`);
+    }
+
+    if (workspace.plan === "free") {
+      const memberCount = await prisma.teamMember.count({
+        where: {
+          workspaceId,
+          inviteStatus: "accepted",
+        },
+      });
+
+      if (memberCount >= 1) {
+        throw new ConflictException("Free plan invites are limited to one active member");
+      }
+    }
+
     // Check if user already exists in db by email
     let user = await prisma.user.findUnique({
       where: { email },
@@ -141,6 +216,61 @@ export class WorkspaceService {
         inviteEmail: email,
       },
     });
+  }
+
+  async acceptInvite(workspaceId: string, token: string, clerkUserId: string) {
+    const payload = this.verifyInviteToken(token);
+
+    if (payload.workspaceId !== workspaceId) {
+      throw new ForbiddenException("Invitation token does not match this workspace");
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { clerkId: clerkUserId },
+    });
+
+    if (!user) {
+      throw new NotFoundException("User account is not provisioned");
+    }
+
+    if (user.email.toLowerCase() !== payload.email.toLowerCase()) {
+      throw new ForbiddenException("Invitation email does not match your account");
+    }
+
+    const member = await prisma.teamMember.findFirst({
+      where: {
+        workspaceId,
+        inviteStatus: "pending",
+        inviteEmail: payload.email,
+      },
+    });
+
+    if (!member) {
+      throw new NotFoundException("No pending invitation was found for this workspace and email");
+    }
+
+    const existingAcceptedMember = await prisma.teamMember.findFirst({
+      where: {
+        workspaceId,
+        userId: user.id,
+        inviteStatus: "accepted",
+      },
+    });
+
+    if (existingAcceptedMember) {
+      return { success: true, workspaceId, memberId: existingAcceptedMember.id };
+    }
+
+    const updatedMember = await prisma.teamMember.update({
+      where: { id: member.id },
+      data: {
+        userId: user.id,
+        inviteStatus: "accepted",
+        joinedAt: new Date(),
+      },
+    });
+
+    return { success: true, workspaceId, memberId: updatedMember.id };
   }
 
   /**

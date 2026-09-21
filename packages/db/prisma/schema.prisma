@@ -28,6 +28,7 @@ model User {
   ownedWorkspaces Workspace[]    @relation("WorkspaceOwner")
   teamMemberships TeamMember[]
   createdPosts    Post[]
+  assignedPosts   Post[]          @relation("PostAssignee")
   activityLogs    ActivityLog[]
 
   @@map("users")
@@ -118,6 +119,7 @@ model Post {
   id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   workspaceId       String    @map("workspace_id") @db.Uuid
   createdById       String    @map("created_by") @db.Uuid
+  assignedToId      String?   @map("assigned_to") @db.Uuid
   content           String?   @db.Text
   mediaUrls         Json      @default("[]") @map("media_urls") // string[]
   platformOverrides Json      @default("{}") @map("platform_overrides") // Record<platform, {content}>
@@ -135,6 +137,7 @@ model Post {
   // Relations
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   createdBy User      @relation(fields: [createdById], references: [id])
+  assignedTo User?    @relation("PostAssignee", fields: [assignedToId], references: [id])
   postJobs  PostJob[]
   metrics   PostMetric[]
   mediaAssets MediaFile[] @relation("PostMedia")

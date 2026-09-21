@@ -40,6 +40,7 @@ const PRIMARY_NAV = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/composer", label: "Composer", icon: PenSquare },
   { href: "/calendar", label: "Calendar", icon: Calendar },
+  { href: "/approvals", label: "Approvals", icon: CheckCircle2 },
   { href: "/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/inbox", label: "Inbox", icon: Inbox },
   { href: "/ai-studio", label: "AI Studio", icon: Sparkles },

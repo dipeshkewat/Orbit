@@ -6,9 +6,10 @@ import { SocialAccountsModule } from "../modules/social-accounts/social-accounts
 import { PostsModule } from "../modules/posts/posts.module";
 import { MediaModule } from "../modules/media/media.module";
 import { WorkspaceModule } from "../modules/workspace/workspace.module";
+import { NotificationsModule } from "../modules/notifications/notifications.module";
 
 @Module({
-  imports: [SocialAccountsModule, PostsModule, MediaModule, WorkspaceModule],
+  imports: [SocialAccountsModule, PostsModule, MediaModule, WorkspaceModule, NotificationsModule],
   controllers: [TrpcController],
   providers: [TrpcService, TrpcRouter],
   exports: [TrpcService, TrpcRouter],

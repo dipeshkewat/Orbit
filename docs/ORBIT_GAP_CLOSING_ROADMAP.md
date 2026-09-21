@@ -59,6 +59,12 @@ identity and workspace isolation.
    media through presigned URLs, confirm CDN assets, and create persisted scheduled posts.
    Demo workspaces retain local preview behavior until real workspace provisioning replaces
    the mock auth store.
+- **P1 collaboration foundation:** team member listing, invite records, role changes, member
+   removal, signed invite acceptance, seat-limit enforcement, approvals, comments, post
+   assignments, and workspace activity history are now workspace-scoped server operations.
+   Assignment mutations require owner/admin access, validate active members, and atomically
+   record audit events. Richer collaboration UI and notification delivery remain pending.
 
-The next active implementation slice is the web migration for media and calendar,
-followed by integration tests against a test database and mocked provider APIs.
+The next active implementation slice is the collaboration UI for comments, assignment,
+and activity history, followed by integration tests against a test database and mocked
+provider APIs.

@@ -3,6 +3,7 @@ import { CreatePostSchema, PlatformSchema } from "@orbit/types";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { PostsService } from "../../modules/posts/posts.service";
+import { NotificationsService } from "../../modules/notifications/notifications.service";
 
 const PostIdSchema = z.object({
   workspaceId: z.string().uuid(),
@@ -13,6 +14,7 @@ const postSelect = {
   id: true,
   workspaceId: true,
   createdById: true,
+  assignedToId: true,
   content: true,
   mediaUrls: true,
   platformOverrides: true,
@@ -28,7 +30,11 @@ const postSelect = {
   updatedAt: true,
 } as const;
 
-export function createPostsRouter(trpc: TrpcService, postsService: PostsService) {
+export function createPostsRouter(
+  trpc: TrpcService,
+  postsService: PostsService,
+  notificationsService: NotificationsService,
+) {
   return trpc.router({
     create: trpc.protectedProcedure
       .input(CreatePostSchema)
@@ -134,6 +140,106 @@ export function createPostsRouter(trpc: TrpcService, postsService: PostsService)
           input.id,
           new Date(input.scheduledAt),
         );
+      }),
+
+    submitForApproval: trpc.protectedProcedure
+      .input(PostIdSchema)
+      .mutation(async ({ input, ctx }) => {
+        await trpc.authorizeWorkspaceMutation(ctx, input.workspaceId);
+        const post = await postsService.submitForApproval(input.workspaceId, input.id);
+        notificationsService.notifyWorkspace(input.workspaceId, {
+          id: `approval_requested_${post.id}`,
+          title: "Post submitted for approval",
+          body: "A draft is waiting for review before publishing.",
+        });
+        return post;
+      }),
+
+    approve: trpc.protectedProcedure
+      .input(PostIdSchema)
+      .mutation(async ({ input, ctx }) => {
+        await trpc.authorizeWorkspace(ctx, input.workspaceId, ["owner", "admin"]);
+        const post = await postsService.approvePost(input.workspaceId, input.id);
+        notificationsService.notifyWorkspace(input.workspaceId, {
+          id: `approval_approved_${post.id}`,
+          title: "Post approved",
+          body: "The post is approved and can be scheduled.",
+        });
+        return post;
+      }),
+
+    reject: trpc.protectedProcedure
+      .input(PostIdSchema.extend({ note: z.string().trim().min(1).max(2000) }))
+      .mutation(async ({ input, ctx }) => {
+        await trpc.authorizeWorkspace(ctx, input.workspaceId, ["owner", "admin"]);
+        const post = await postsService.rejectPost(input.workspaceId, input.id, input.note);
+        notificationsService.notifyWorkspace(input.workspaceId, {
+          id: `approval_rejected_${post.id}`,
+          title: "Post needs changes",
+          body: input.note,
+        });
+        return post;
+      }),
+
+    addComment: trpc.protectedProcedure
+      .input(
+        z.object({
+          workspaceId: z.string().uuid(),
+          postId: z.string().uuid(),
+          text: z.string().trim().min(1).max(2000),
+        })
+      )
+      .mutation(async ({ input, ctx }) => {
+        const access = await trpc.authorizeWorkspaceMutation(ctx, input.workspaceId);
+        return postsService.addComment(
+          input.workspaceId,
+          input.postId,
+          access.userId,
+          input.text,
+        );
+      }),
+
+    getComments: trpc.protectedProcedure
+      .input(
+        z.object({
+          workspaceId: z.string().uuid(),
+          postId: z.string().uuid(),
+        })
+      )
+      .query(async ({ input, ctx }) => {
+        await trpc.authorizeWorkspace(ctx, input.workspaceId);
+
+        return postsService.getComments(input.workspaceId, input.postId);
+      }),
+
+    assign: trpc.protectedProcedure
+      .input(
+        z.object({
+          workspaceId: z.string().uuid(),
+          postId: z.string().uuid(),
+          assigneeId: z.string().uuid().nullable(),
+        }),
+      )
+      .mutation(async ({ input, ctx }) => {
+        const access = await trpc.authorizeWorkspace(ctx, input.workspaceId, ["owner", "admin"]);
+        return postsService.assignPost(
+          input.workspaceId,
+          input.postId,
+          input.assigneeId,
+          access.userId,
+        );
+      }),
+
+    getActivity: trpc.protectedProcedure
+      .input(
+        z.object({
+          workspaceId: z.string().uuid(),
+          limit: z.coerce.number().int().min(1).max(100).default(50),
+        }),
+      )
+      .query(async ({ input, ctx }) => {
+        await trpc.authorizeWorkspace(ctx, input.workspaceId);
+        return postsService.getActivity(input.workspaceId, input.limit);
       }),
 
     duplicate: trpc.protectedProcedure

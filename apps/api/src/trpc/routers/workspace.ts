@@ -3,13 +3,18 @@ import { z } from "zod";
 import { TeamRoleSchema } from "@orbit/types";
 import { TrpcService } from "../trpc.service";
 import { WorkspaceService } from "../../modules/workspace/workspace.service";
+import { NotificationsService } from "../../modules/notifications/notifications.service";
 
 const WorkspaceInputSchema = z.object({ workspaceId: z.string().uuid() });
 const ManageableRoleSchema = TeamRoleSchema.refine((role) => role !== "owner", {
   message: "Ownership cannot be assigned through this procedure",
 });
 
-export function createWorkspaceRouter(trpc: TrpcService, workspaceService: WorkspaceService) {
+export function createWorkspaceRouter(
+  trpc: TrpcService,
+  workspaceService: WorkspaceService,
+  notificationsService: NotificationsService,
+) {
   return trpc.router({
     getMe: trpc.protectedProcedure.query(async ({ ctx }) => {
       if (!ctx.userId) {
@@ -48,7 +53,37 @@ export function createWorkspaceRouter(trpc: TrpcService, workspaceService: Works
       )
       .mutation(async ({ input, ctx }) => {
         await trpc.authorizeWorkspace(ctx, input.workspaceId, ["owner", "admin"]);
-        return workspaceService.inviteMember(input.workspaceId, input.email, input.role);
+        const member = await workspaceService.inviteMember(input.workspaceId, input.email, input.role);
+        const inviteToken = workspaceService.createInviteToken(input.workspaceId, input.email, input.role);
+        const inviteUrl = `${process.env.APP_URL ?? "http://localhost:3000"}/accept-invite?token=${encodeURIComponent(inviteToken)}&workspaceId=${input.workspaceId}`;
+
+        try {
+          await notificationsService.sendEmail(
+            input.email,
+            "You’ve been invited to Orbit",
+            `<p>You have been invited to join a workspace in Orbit.</p><p><a href="${inviteUrl}">Accept invite</a></p>`,
+          );
+        } catch (error) {
+          // best effort; invite still gets created even if outbound email fails
+          // eslint-disable-next-line no-console
+          console.warn("Failed to send invite email", error);
+        }
+
+        return member;
+      }),
+
+    acceptInvite: trpc.protectedProcedure
+      .input(
+        WorkspaceInputSchema.extend({
+          token: z.string().min(1),
+        }),
+      )
+      .mutation(async ({ input, ctx }) => {
+        if (!ctx.userId) {
+          throw new TRPCError({ code: "UNAUTHORIZED", message: "You must be logged in" });
+        }
+
+        return workspaceService.acceptInvite(input.workspaceId, input.token, ctx.userId);
       }),
 
     updateMemberRole: trpc.protectedProcedure

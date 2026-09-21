@@ -5,7 +5,7 @@ import { useAuthStore } from "@/lib/store";
 import { useRouter, usePathname } from "next/navigation";
 import { Sparkles } from "lucide-react";
 
-const PUBLIC_ROUTES = ["/", "/login", "/signup"];
+const PUBLIC_ROUTES = ["/", "/login", "/signup", "/accept-invite"];
 
 function isPublicRoute(pathname: string): boolean {
   return PUBLIC_ROUTES.includes(pathname);
