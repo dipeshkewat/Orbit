@@ -15,6 +15,7 @@ import { PostsService } from "../modules/posts/posts.service";
 import { MediaService } from "../modules/media/media.service";
 import { WorkspaceService } from "../modules/workspace/workspace.service";
 import { NotificationsService } from "../modules/notifications/notifications.service";
+import { AnalyticsService } from "../modules/analytics/analytics.service";
 
 @Injectable()
 export class TrpcRouter {
@@ -29,12 +30,13 @@ export class TrpcRouter {
     mediaService: MediaService,
     workspaceService: WorkspaceService,
     notificationsService: NotificationsService,
+    analyticsService: AnalyticsService,
   ) {
     this.appRouter = this.trpc.router({
       workspace: createWorkspaceRouter(this.trpc, workspaceService, notificationsService),
       posts: createPostsRouter(this.trpc, postsService, notificationsService),
       socialAccounts: createSocialAccountsRouter(this.trpc, socialAccounts, oauthState, oauthConnection),
-      analytics: createAnalyticsRouter(this.trpc),
+      analytics: createAnalyticsRouter(this.trpc, analyticsService),
       ai: createAiRouter(this.trpc),
       media: createMediaRouter(this.trpc, mediaService),
       billing: createBillingRouter(this.trpc),

@@ -64,7 +64,11 @@ identity and workspace isolation.
    assignments, and workspace activity history are now workspace-scoped server operations.
    Assignment mutations require owner/admin access, validate active members, and atomically
    record audit events. Richer collaboration UI and notification delivery remain pending.
+- **P2 analytics:** workspace overview aggregation, platform breakdown, and top-post queries
+   now use the real PostgreSQL metrics service through authorized tRPC procedures. The
+   analytics dashboard summary cards, monthly reach chart, platform spread, and top-post
+   table and CSV export consume those server-backed results. Follower growth and live
+   provider metric ingestion remain.
 
-The next active implementation slice is the collaboration UI for comments, assignment,
-and activity history, followed by integration tests against a test database and mocked
-provider APIs.
+The next active implementation slice is provider metric ingestion, followed by integration
+tests against a test database and mocked provider APIs.

@@ -1,45 +1,51 @@
 import { z } from "zod";
 import { TrpcService } from "../trpc.service";
+import { AnalyticsService } from "../../modules/analytics/analytics.service";
 
-export function createAnalyticsRouter(trpc: TrpcService) {
+const DateRangeSchema = z.object({
+  workspaceId: z.string().uuid(),
+  from: z.string().datetime(),
+  to: z.string().datetime(),
+});
+
+export function createAnalyticsRouter(trpc: TrpcService, analyticsService: AnalyticsService) {
   return trpc.router({
-    getPostMetrics: trpc.protectedProcedure
+    getOverview: trpc.protectedProcedure
       .input(
-        z.object({
-          postId: z.string().uuid(),
-        })
+        DateRangeSchema.extend({ platform: z.string().min(1).optional() }),
       )
-      .query(async ({ input }) => {
-        // Return dummy analytics data for now. ClickHouse wiring comes later.
-        return {
-          postId: input.postId,
-          likes: 245,
-          comments: 32,
-          shares: 12,
-          saves: 8,
-          reach: 12500,
-          impressions: 15400,
-          engagementRate: 2.3,
-        };
+      .query(async ({ input, ctx }) => {
+        await trpc.authorizeWorkspace(ctx, input.workspaceId);
+        return analyticsService.getWorkspaceOverview(
+          input.workspaceId,
+          new Date(input.from),
+          new Date(input.to),
+          input.platform,
+        );
       }),
 
-    getAccountMetrics: trpc.protectedProcedure
+    getPlatformBreakdown: trpc.protectedProcedure
       .input(
-        z.object({
-          accountId: z.string().uuid(),
-          from: z.string(),
-          to: z.string(),
-        })
+        DateRangeSchema,
       )
-      .query(async ({ input }) => {
-        return {
-          accountId: input.accountId,
-          followersHistory: [
-            { date: "2026-06-01", count: 12000 },
-            { date: "2026-06-15", count: 12200 },
-            { date: "2026-06-30", count: 12400 },
-          ],
-        };
+      .query(async ({ input, ctx }) => {
+        await trpc.authorizeWorkspace(ctx, input.workspaceId);
+        return analyticsService.getPlatformBreakdown(
+          input.workspaceId,
+          new Date(input.from),
+          new Date(input.to),
+        );
+      }),
+
+    getTimeSeries: trpc.protectedProcedure
+      .input(DateRangeSchema)
+      .query(async ({ input, ctx }) => {
+        await trpc.authorizeWorkspace(ctx, input.workspaceId);
+        return analyticsService.getTimeSeries(
+          input.workspaceId,
+          new Date(input.from),
+          new Date(input.to),
+        );
       }),
 
     getTopPosts: trpc.protectedProcedure
@@ -49,30 +55,40 @@ export function createAnalyticsRouter(trpc: TrpcService) {
           limit: z.number().min(1).max(50).default(5),
         })
       )
-      .query(async ({ input }) => {
-        void input;
-        return [
-          {
-            id: "post_top_1",
-            content: "We just launched our new AI caption tool! 🚀",
-            engagementRate: 7.8,
-            likes: 450,
-          },
-        ];
+      .query(async ({ input, ctx }) => {
+        await trpc.authorizeWorkspace(ctx, input.workspaceId);
+        const posts = await analyticsService.getPostAnalytics(input.workspaceId, {
+          limit: input.limit,
+        });
+        return posts
+          .sort((left, right) => right.totalEngagement - left.totalEngagement)
+          .slice(0, input.limit);
       }),
 
-    exportCSV: trpc.protectedProcedure
+    getPostMetrics: trpc.protectedProcedure
       .input(
         z.object({
           workspaceId: z.string().uuid(),
-          from: z.string(),
-          to: z.string(),
+          postId: z.string().uuid(),
         })
       )
-      .mutation(async ({ input }) => {
-        void input;
+      .query(async ({ input, ctx }) => {
+        await trpc.authorizeWorkspace(ctx, input.workspaceId);
+        const posts = await analyticsService.getPostAnalytics(input.workspaceId, { limit: 100 });
+        return posts.find((post) => post.id === input.postId) ?? null;
+      }),
+
+    exportCSV: trpc.protectedProcedure
+      .input(DateRangeSchema)
+      .mutation(async ({ input, ctx }) => {
+        await trpc.authorizeWorkspace(ctx, input.workspaceId);
         return {
-          csvUrl: "https://cdn.orbit.com/exports/analytics_mock.csv",
+          filename: `orbit-analytics-${input.from.slice(0, 10)}-${input.to.slice(0, 10)}.csv`,
+          content: await analyticsService.exportCsv(
+            input.workspaceId,
+            new Date(input.from),
+            new Date(input.to),
+          ),
         };
       }),
   });

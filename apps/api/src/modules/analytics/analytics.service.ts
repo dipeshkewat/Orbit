@@ -188,20 +188,103 @@ export class AnalyticsService implements OnModuleInit {
 
     const breakdown: Record<
       string,
-      { likes: number; comments: number; shares: number; impressions: number; posts: number }
+      { likes: number; comments: number; shares: number; impressions: number; reach: number; posts: number }
     > = {};
 
     for (const m of metrics) {
       if (!breakdown[m.platform]) {
-        breakdown[m.platform] = { likes: 0, comments: 0, shares: 0, impressions: 0, posts: 0 };
+        breakdown[m.platform] = { likes: 0, comments: 0, shares: 0, impressions: 0, reach: 0, posts: 0 };
       }
       breakdown[m.platform].likes += m.likes;
       breakdown[m.platform].comments += m.comments;
       breakdown[m.platform].shares += m.shares;
       breakdown[m.platform].impressions += m.impressions;
+      breakdown[m.platform].reach += m.reach;
       breakdown[m.platform].posts += 1;
     }
 
     return breakdown;
+  }
+
+  async getTimeSeries(workspaceId: string, startDate: Date, endDate: Date) {
+    const metrics = await prisma.postMetric.findMany({
+      where: {
+        post: {
+          workspaceId,
+          publishedAt: { gte: startDate, lte: endDate },
+        },
+      },
+      select: {
+        platform: true,
+        reach: true,
+        impressions: true,
+        likes: true,
+        comments: true,
+        shares: true,
+        post: { select: { publishedAt: true } },
+      },
+      orderBy: { post: { publishedAt: "asc" } },
+    });
+
+    const periods = new Map<string, Record<string, number>>();
+    for (const metric of metrics) {
+      if (!metric.post.publishedAt) continue;
+      const date = metric.post.publishedAt;
+      const period = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
+      const values = periods.get(period) ?? {};
+      values[metric.platform] = (values[metric.platform] ?? 0) + metric.reach;
+      periods.set(period, values);
+    }
+
+    return Array.from(periods.entries()).map(([period, values]) => ({
+      period,
+      ...values,
+    }));
+  }
+
+  async exportCsv(workspaceId: string, startDate: Date, endDate: Date) {
+    const metrics = await prisma.postMetric.findMany({
+      where: {
+        post: {
+          workspaceId,
+          publishedAt: { gte: startDate, lte: endDate },
+        },
+      },
+      orderBy: { post: { publishedAt: "asc" } },
+      select: {
+        platform: true,
+        likes: true,
+        comments: true,
+        shares: true,
+        impressions: true,
+        reach: true,
+        clicks: true,
+        saves: true,
+        engagementRate: true,
+        post: { select: { id: true, content: true, publishedAt: true } },
+      },
+    });
+
+    const escapeCell = (value: string | number | Date | null) => {
+      const text = value instanceof Date ? value.toISOString() : String(value ?? "");
+      return `"${text.replaceAll('"', '""')}"`;
+    };
+    const header = "post_id,platform,published_at,content,likes,comments,shares,impressions,reach,clicks,saves,engagement_rate";
+    const rows = metrics.map((metric) => [
+      metric.post.id,
+      metric.platform,
+      metric.post.publishedAt,
+      metric.post.content,
+      metric.likes,
+      metric.comments,
+      metric.shares,
+      metric.impressions,
+      metric.reach,
+      metric.clicks,
+      metric.saves,
+      metric.engagementRate,
+    ].map(escapeCell).join(","));
+
+    return [header, ...rows].join("\n");
   }
 }

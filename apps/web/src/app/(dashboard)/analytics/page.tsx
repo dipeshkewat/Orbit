@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { useCalendarStore } from "@/lib/store";
+import { useMemo, useState } from "react";
+import { useAuthStore } from "@/lib/store";
+import { trpc } from "@/lib/trpc";
 import {
   TrendingUp,
   Zap,
@@ -33,6 +34,7 @@ import {
   Bar,
   Cell
 } from "recharts";
+import { toast } from "sonner";
 
 const MONTHLY_REACH = [
   { month: "Jan", instagram: 4000, twitter: 2400, linkedin: 1800 },
@@ -50,6 +52,23 @@ const PLATFORM_PIE = [
   { name: "LinkedIn", value: 34000, color: "var(--color-linkedin)" },
   { name: "Facebook", value: 18000, color: "var(--color-facebook)" },
 ];
+
+function isUuid(value: string | null): value is string {
+  return value !== null && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+}
+
+type AnalyticsPlatform = {
+  platform: string;
+  likes: number;
+  comments: number;
+  shares: number;
+  impressions: number;
+};
+
+type AnalyticsSeriesPoint = {
+  period: string;
+  [platform: string]: string | number;
+};
 
 function AnalyticsCard({
   title,
@@ -97,12 +116,60 @@ function AnalyticsCard({
 }
 
 export default function AnalyticsPage() {
-  const posts = useCalendarStore((state) => state.posts);
+  const activeWorkspaceId = useAuthStore((state) => state.activeWorkspaceId);
+  const workspaceId = isUuid(activeWorkspaceId) ? activeWorkspaceId : null;
   const [activeTab, setActiveTab] = useState<"reach" | "growth" | "breakdown">("reach");
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportTitle, setReportTitle] = useState("Acme Social Media Performance");
   const [clientName, setClientName] = useState("Acme Corp");
   const [brandColor, setBrandColor] = useState("var(--color-primary)");
+  const dateRange = useMemo(() => ({
+    from: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+    to: new Date().toISOString(),
+  }), []);
+  const overviewQuery = trpc.analytics.getOverview.useQuery(
+    { workspaceId: workspaceId ?? "00000000-0000-0000-0000-000000000000", ...dateRange },
+    { enabled: workspaceId !== null },
+  );
+  const topPostsQuery = trpc.analytics.getTopPosts.useQuery(
+    { workspaceId: workspaceId ?? "00000000-0000-0000-0000-000000000000", limit: 10 },
+    { enabled: workspaceId !== null },
+  );
+  const timeSeriesQuery = trpc.analytics.getTimeSeries.useQuery(
+    { workspaceId: workspaceId ?? "00000000-0000-0000-0000-000000000000", ...dateRange },
+    { enabled: workspaceId !== null },
+  );
+  const platformBreakdownQuery = trpc.analytics.getPlatformBreakdown.useQuery(
+    { workspaceId: workspaceId ?? "00000000-0000-0000-0000-000000000000", ...dateRange },
+    { enabled: workspaceId !== null },
+  );
+  const exportMutation = trpc.analytics.exportCSV.useMutation();
+
+  const handleExport = () => {
+    if (!workspaceId) {
+      setShowReportModal(false);
+      toast.success(`White-label report generated for ${clientName}.`);
+      return;
+    }
+
+    exportMutation.mutate(
+      { workspaceId, ...dateRange },
+      {
+        onSuccess: ({ filename, content }) => {
+          const blob = new Blob([content], { type: "text/csv;charset=utf-8" });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = filename;
+          link.click();
+          URL.revokeObjectURL(url);
+          setShowReportModal(false);
+          toast.success("Analytics CSV downloaded.");
+        },
+        onError: (error) => toast.error(error.message),
+      },
+    );
+  };
 
   const getPlatformIcon = (platform: string) => {
     switch (platform.toLowerCase()) {
@@ -114,24 +181,38 @@ export default function AnalyticsPage() {
     }
   };
 
-  // Mock top performing posts
-  const publishedPosts = posts
-    .filter((p) => p.status === "published")
-    .map((post) => {
-      // aggregate metrics
-      const likes = Object.values(post.metrics || {}).reduce((s, m) => s + m.likes, 0);
-      const comments = Object.values(post.metrics || {}).reduce((s, m) => s + m.comments, 0);
-      const shares = Object.values(post.metrics || {}).reduce((s, m) => s + m.shares, 0);
-      const impressions = Object.values(post.metrics || {}).reduce((s, m) => s + m.impressions, 0);
-      return {
-        ...post,
-        likes,
-        comments,
-        shares,
-        impressions
-      };
-    })
-    .sort((a, b) => b.impressions - a.impressions);
+  const publishedPosts = (topPostsQuery.data ?? []).map((post: { id: string; content: string; platforms: AnalyticsPlatform[] }) => ({
+    ...post,
+    likes: post.platforms.reduce((sum: number, platform: AnalyticsPlatform) => sum + platform.likes, 0),
+    comments: post.platforms.reduce((sum: number, platform: AnalyticsPlatform) => sum + platform.comments, 0),
+    shares: post.platforms.reduce((sum: number, platform: AnalyticsPlatform) => sum + platform.shares, 0),
+    impressions: post.platforms.reduce((sum: number, platform: AnalyticsPlatform) => sum + platform.impressions, 0),
+    platforms: post.platforms.map((platform: AnalyticsPlatform) => platform.platform),
+  }));
+
+  const overview = overviewQuery.data;
+  const engagement = overview
+    ? overview.likes + overview.comments + overview.shares + overview.saves
+    : 0;
+  const chartData: AnalyticsSeriesPoint[] = workspaceId && Array.isArray(timeSeriesQuery.data)
+    ? (timeSeriesQuery.data as unknown as AnalyticsSeriesPoint[]).map((point) => ({
+        ...point,
+        month: point.period,
+      }))
+    : MONTHLY_REACH;
+  const platformColors: Record<string, string> = {
+    instagram: "var(--color-instagram)",
+    twitter: "var(--color-twitter)",
+    linkedin: "var(--color-linkedin)",
+    facebook: "var(--color-facebook)",
+  };
+  const platformChartData = workspaceId && platformBreakdownQuery.data
+    ? Object.entries(platformBreakdownQuery.data as Record<string, { reach: number }>).map(([name, values]) => ({
+        name: name.charAt(0).toUpperCase() + name.slice(1),
+        value: values.reach,
+        color: platformColors[name] ?? "var(--color-primary)",
+      }))
+    : PLATFORM_PIE;
 
   return (
     <div className="space-y-6">
@@ -156,30 +237,30 @@ export default function AnalyticsPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <AnalyticsCard
           title="Total Impressions"
-          value="142.8K"
-          change="+18.4%"
+          value={overview ? overview.impressions.toLocaleString() : "—"}
+          change={overviewQuery.isLoading ? "Loading" : "Live data"}
           changeType="up"
           icon={Eye}
         />
         <AnalyticsCard
           title="Total Engagement"
-          value="18,420"
-          change="+12.2%"
+          value={overview ? engagement.toLocaleString() : "—"}
+          change={overviewQuery.isLoading ? "Loading" : "Live data"}
           changeType="up"
           icon={Zap}
         />
         <AnalyticsCard
           title="Audience Growth"
-          value="+3,420"
-          change="+6.7%"
+          value={overview ? overview.reach.toLocaleString() : "—"}
+          change={overviewQuery.isLoading ? "Loading" : "Reach"}
           changeType="up"
           icon={Users}
         />
         <AnalyticsCard
           title="Avg. Engagement Rate"
-          value="5.62%"
-          change="-0.2%"
-          changeType="down"
+          value={overview ? `${overview.avgEngagementRate}%` : "—"}
+          change={overviewQuery.isLoading ? "Loading" : "Live data"}
+          changeType="up"
           icon={TrendingUp}
         />
       </div>
@@ -218,7 +299,7 @@ export default function AnalyticsPage() {
           <div className="h-[280px] w-full">
             {activeTab === "reach" ? (
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={MONTHLY_REACH} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <defs>
                     <linearGradient id="reachInsta" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="var(--color-instagram)" stopOpacity={0.2}/>
@@ -242,7 +323,7 @@ export default function AnalyticsPage() {
               </ResponsiveContainer>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={MONTHLY_REACH} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
                   <XAxis dataKey="month" stroke="var(--color-text-muted)" fontSize={11} tickLine={false} />
                   <YAxis stroke="var(--color-text-muted)" fontSize={11} tickLine={false} />
@@ -268,7 +349,7 @@ export default function AnalyticsPage() {
 
           <div className="h-[200px] w-full mt-4">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={PLATFORM_PIE} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <BarChart data={platformChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
                 <XAxis dataKey="name" stroke="var(--color-text-muted)" fontSize={10} tickLine={false} />
                 <YAxis stroke="var(--color-text-muted)" fontSize={10} tickLine={false} />
@@ -277,7 +358,7 @@ export default function AnalyticsPage() {
                   labelStyle={{ color: "var(--color-text)", fontWeight: "bold" }}
                 />
                 <Bar dataKey="value" fill="var(--color-primary)" radius={[4, 4, 0, 0]}>
-                  {PLATFORM_PIE.map((entry, index) => (
+                  {platformChartData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Bar>
@@ -286,7 +367,7 @@ export default function AnalyticsPage() {
           </div>
 
           <div className="space-y-2 mt-4 pt-4 border-t border-[var(--color-border)]">
-            {PLATFORM_PIE.map((entry) => (
+            {platformChartData.map((entry) => (
               <div key={entry.name} className="flex justify-between items-center text-xs">
                 <span className="flex items-center gap-2">
                   <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
@@ -325,7 +406,7 @@ export default function AnalyticsPage() {
                     </td>
                     <td className="py-4 px-4">
                       <div className="flex gap-1">
-                        {post.platforms.map((p) => (
+                        {post.platforms.map((p: string) => (
                           <div key={p} className="h-6 w-6 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center">
                             {getPlatformIcon(p)}
                           </div>
@@ -370,9 +451,9 @@ export default function AnalyticsPage() {
 
             <h3 className="text-base font-bold flex items-center gap-1.5 mb-2">
               <FileText className="h-4.5 w-4.5 text-[var(--color-primary-light)]" />
-              White-Label PDF Report
+              Analytics CSV Export
             </h3>
-            <p className="text-xs text-[var(--color-text-muted)] mb-5">Customize branding for a client-ready performance report.</p>
+            <p className="text-xs text-[var(--color-text-muted)] mb-5">Download the selected workspace metrics for client reporting.</p>
 
             <div className="space-y-4">
               <div>
@@ -408,7 +489,7 @@ export default function AnalyticsPage() {
                 </div>
               </div>
 
-              {/* Preview strip */}
+              {/* Export preview */}
               <div className="p-4 rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-background)] space-y-2">
                 <div className="flex items-center gap-2">
                   <div className="h-6 w-6 rounded" style={{ backgroundColor: brandColor }} />
@@ -437,14 +518,12 @@ export default function AnalyticsPage() {
 
               <button
                 type="button"
-                onClick={() => {
-                  setShowReportModal(false);
-                  import('sonner').then(({ toast }) => toast.success(`White-label PDF report generated for ${clientName}!`));
-                }}
-                className="w-full flex items-center justify-center gap-1.5 bg-[var(--color-primary)] text-[var(--color-text-inverse)] text-xs font-semibold py-3 rounded-[var(--radius-md)] hover:opacity-90 active:scale-95"
+                onClick={handleExport}
+                disabled={exportMutation.isPending}
+                className="w-full flex items-center justify-center gap-1.5 bg-[var(--color-primary)] text-[var(--color-text-inverse)] text-xs font-semibold py-3 rounded-[var(--radius-md)] hover:opacity-90 active:scale-95 disabled:opacity-50"
               >
                 <FileText className="h-3.5 w-3.5" />
-                Generate & Download PDF
+                {exportMutation.isPending ? "Preparing export..." : "Generate & Download Report"}
               </button>
             </div>
           </div>
