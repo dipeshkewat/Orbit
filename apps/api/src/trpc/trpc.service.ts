@@ -1,7 +1,9 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { initTRPC, TRPCError } from "@trpc/server";
 import { CreateExpressContextOptions } from "@trpc/server/adapters/express";
+import { verifyToken } from "@clerk/backend";
 import { prisma } from "@orbit/db";
+import { TeamRole } from "@orbit/types";
 
 // Define the context type
 export interface TrpcContext {
@@ -9,6 +11,8 @@ export interface TrpcContext {
   orgId?: string;
   prisma: typeof prisma;
 }
+
+const MUTATING_ROLES: TeamRole[] = ["owner", "admin", "editor"];
 
 @Injectable()
 export class TrpcService {
@@ -43,33 +47,70 @@ export class TrpcService {
    */
   public async createContext(opts: CreateExpressContextOptions): Promise<TrpcContext> {
     const authHeader = opts.req.headers.authorization;
-    let userId: string | undefined;
-    let orgId: string | undefined;
-
-    if (authHeader?.startsWith("Bearer ")) {
-      const token = authHeader.slice(7);
-      // In production, decode Clerk JWT token here.
-      // For now, parse placeholder or mocked token.
-      if (token === "placeholder" || token.startsWith("pk_") || token.startsWith("sk_")) {
-        userId = "placeholder-user";
-        orgId = "placeholder-org";
-      } else {
-        // If JWT token is present, we can decode it here
-        try {
-          // Placeholder decoding or mock logic
-          userId = "user_mocked_id";
-          orgId = "org_mocked_id";
-        } catch (e) {
-          this.logger.warn(`Failed to decode auth token: ${(e as Error).message}`);
-        }
-      }
+    if (!authHeader?.startsWith("Bearer ")) {
+      return { prisma };
     }
 
-    return {
-      userId,
-      orgId,
-      prisma,
-    };
+    const token = authHeader.slice(7).trim();
+    const secretKey = process.env.CLERK_SECRET_KEY;
+    if (!token || !secretKey) {
+      return { prisma };
+    }
+
+    try {
+      const session = await verifyToken(token, { secretKey });
+      return {
+        userId: session.sub,
+        orgId: typeof session.org_id === "string" ? session.org_id : undefined,
+        prisma,
+      };
+    } catch (error: unknown) {
+      this.logger.warn(
+        `Clerk token verification failed: ${error instanceof Error ? error.message : "unknown error"}`,
+      );
+      return { prisma };
+    }
   }
+
+  public async authorizeWorkspace(
+    ctx: TrpcContext,
+    workspaceId: string,
+    roles: TeamRole[] = [],
+  ) {
+    if (!ctx.userId) {
+      throw new TRPCError({ code: "UNAUTHORIZED", message: "You must be logged in" });
+    }
+
+    const user = await ctx.prisma.user.findUnique({
+      where: { clerkId: ctx.userId },
+      select: { id: true },
+    });
+    if (!user) {
+      throw new TRPCError({ code: "UNAUTHORIZED", message: "User account is not provisioned" });
+    }
+
+    const member = await ctx.prisma.teamMember.findFirst({
+      where: {
+        workspaceId,
+        userId: user.id,
+        inviteStatus: "accepted",
+        ...(roles.length > 0 ? { role: { in: roles } } : {}),
+      },
+      select: { id: true, role: true },
+    });
+    if (!member) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Workspace resource not found" });
+    }
+    if (roles.length > 0 && !roles.includes(member.role as TeamRole)) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Workspace resource not found" });
+    }
+
+    return { userId: user.id, role: member.role };
+  }
+
+  public async authorizeWorkspaceMutation(ctx: TrpcContext, workspaceId: string) {
+    return this.authorizeWorkspace(ctx, workspaceId, MUTATING_ROLES);
+  }
+
 }
 

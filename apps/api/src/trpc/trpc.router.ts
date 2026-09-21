@@ -8,16 +8,26 @@ import { createAiRouter } from "./routers/ai";
 import { createMediaRouter } from "./routers/media";
 import { createBillingRouter } from "./routers/billing";
 import { createNotificationsRouter } from "./routers/notifications";
+import { SocialAccountsService } from "../modules/social-accounts/social-accounts.service";
+import { OAuthStateService } from "../modules/social-accounts/oauth-state.service";
+import { OAuthConnectionService } from "../modules/social-accounts/oauth-connection.service";
+import { PostsService } from "../modules/posts/posts.service";
 
 @Injectable()
 export class TrpcRouter {
   public appRouter;
 
-  constructor(private readonly trpc: TrpcService) {
+  constructor(
+    private readonly trpc: TrpcService,
+    socialAccounts: SocialAccountsService,
+    oauthState: OAuthStateService,
+    oauthConnection: OAuthConnectionService,
+    postsService: PostsService,
+  ) {
     this.appRouter = this.trpc.router({
       workspace: createWorkspaceRouter(this.trpc),
-      posts: createPostsRouter(this.trpc),
-      socialAccounts: createSocialAccountsRouter(this.trpc),
+      posts: createPostsRouter(this.trpc, postsService),
+      socialAccounts: createSocialAccountsRouter(this.trpc, socialAccounts, oauthState, oauthConnection),
       analytics: createAnalyticsRouter(this.trpc),
       ai: createAiRouter(this.trpc),
       media: createMediaRouter(this.trpc),

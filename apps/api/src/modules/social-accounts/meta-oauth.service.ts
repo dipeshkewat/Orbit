@@ -1,5 +1,17 @@
 import { Injectable, Logger } from "@nestjs/common";
 
+export type MetaConnectedAccount = {
+  id?: string;
+  name?: string;
+  username?: string;
+  accessToken?: string;
+  instagramBusinessAccount?: {
+    id?: string;
+    username?: string;
+    profilePictureUrl?: string;
+  };
+};
+
 @Injectable()
 export class MetaOauthService {
   private readonly logger = new Logger(MetaOauthService.name);
@@ -44,14 +56,17 @@ export class MetaOauthService {
     });
 
     const res = await fetch(`https://graph.facebook.com/v21.0/oauth/access_token?${params.toString()}`);
-    const data = await res.json();
+    const data = (await res.json()) as { access_token?: string; error?: { message?: string } };
 
     if (!res.ok || data.error) {
       this.logger.error(`Meta OAuth Token Exchange Error: ${data.error?.message}`);
       throw new Error(data.error?.message || "Failed to exchange authorization code with Meta API");
     }
 
-    return data.access_token as string;
+    if (!data.access_token) {
+      throw new Error("Meta did not return an access token");
+    }
+    return data.access_token;
   }
 
   /**
@@ -61,13 +76,35 @@ export class MetaOauthService {
     this.logger.log("Fetching connected Meta Pages and Instagram Accounts...");
     const url = `https://graph.facebook.com/v21.0/me/accounts?fields=id,name,username,picture,access_token,instagram_business_account{id,username,profile_picture_url}&access_token=${accessToken}`;
     const res = await fetch(url);
-    const data = await res.json();
+    const data = (await res.json()) as { data?: Array<{
+      id?: string;
+      name?: string;
+      username?: string;
+      access_token?: string;
+      instagram_business_account?: {
+        id?: string;
+        username?: string;
+        profile_picture_url?: string;
+      };
+    }>; error?: { message?: string } };
 
     if (!res.ok || data.error) {
       this.logger.error(`Meta Accounts Fetch Error: ${data.error?.message}`);
       throw new Error(data.error?.message || "Failed to fetch Facebook Pages & Instagram Accounts");
     }
 
-    return data.data || [];
+    return (data.data ?? []).map((account) => ({
+      id: account.id,
+      name: account.name,
+      username: account.username,
+      accessToken: account.access_token,
+      instagramBusinessAccount: account.instagram_business_account
+        ? {
+            id: account.instagram_business_account.id,
+            username: account.instagram_business_account.username,
+            profilePictureUrl: account.instagram_business_account.profile_picture_url,
+          }
+        : undefined,
+    }));
   }
 }

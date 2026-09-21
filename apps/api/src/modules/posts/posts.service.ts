@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common";
 import { prisma } from "@orbit/db";
+import type { Prisma } from "@prisma/client";
 import { CreatePostInput } from "@orbit/types";
 import { PostSchedulerService } from "../scheduler/post-scheduler.service";
 
@@ -25,33 +26,51 @@ export class PostsService {
       throw new BadRequestException("User is not a member of this workspace");
     }
 
-    const post = await prisma.post.create({
-      data: {
+    const socialAccounts = await prisma.socialAccount.findMany({
+      where: {
+        id: { in: input.socialAccountIds },
         workspaceId,
-        createdById: userId,
-        content: input.content,
-        mediaUrls: input.mediaUrls ?? [],
-        platforms: input.platforms,
-        platformOverrides: input.platformOverrides ?? {},
-        scheduledAt: input.scheduledAt ? new Date(input.scheduledAt) : null,
-        status: input.scheduledAt ? "scheduled" : "draft",
-        approvalStatus: "none",
+        status: "active",
       },
+      select: { id: true, platform: true },
     });
+    if (
+      socialAccounts.length !== input.socialAccountIds.length ||
+      socialAccounts.some((account) => !input.platforms.includes(account.platform as (typeof input.platforms)[number]))
+    ) {
+      throw new BadRequestException("Selected social accounts do not match this workspace and post");
+    }
 
-    // Create individual post jobs for each platform
-    const jobsData = input.socialAccountIds.map((socialAccountId: string) => {
-      return prisma.postJob.create({
+    const post = await prisma.$transaction(async (transaction) => {
+      const createdPost = await transaction.post.create({
         data: {
-          postId: post.id,
-          socialAccountId,
-          platform: input.platforms[0],
-          status: "pending",
+          workspaceId,
+          createdById: userId,
+          content: input.content,
+          mediaUrls: input.mediaUrls ?? [],
+          platforms: input.platforms,
+          platformOverrides: input.platformOverrides ?? {},
+          scheduledAt: input.scheduledAt ? new Date(input.scheduledAt) : null,
+          status: input.scheduledAt ? "scheduled" : "draft",
+          approvalStatus: "none",
         },
       });
-    });
 
-    await Promise.all(jobsData);
+      // Keep the post and its delivery jobs atomic so scheduling cannot observe a partial post.
+      await Promise.all(
+        socialAccounts.map((socialAccount) =>
+          transaction.postJob.create({
+            data: {
+              postId: createdPost.id,
+              socialAccountId: socialAccount.id,
+              platform: socialAccount.platform,
+              status: "pending",
+            },
+          }),
+        ),
+      );
+      return createdPost;
+    });
 
     // Queue in BullMQ if scheduledAt is set
     if (post.scheduledAt) {
@@ -140,7 +159,7 @@ export class PostsService {
       mediaUrls?: string[];
       platforms?: string[];
       scheduledAt?: string | null;
-      platformOverrides?: any;
+      platformOverrides?: Prisma.InputJsonValue;
     }
   ) {
     const post = await prisma.post.findUnique({

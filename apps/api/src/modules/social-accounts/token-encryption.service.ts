@@ -9,18 +9,17 @@ export class TokenEncryptionService {
   constructor() {
     const keyEnv = process.env.ENCRYPTION_KEY;
     if (!keyEnv) {
-      // Fallback key for development if env is not defined
-      this.key = crypto.scryptSync("dev-orbit-secret-salt-key-string", "salt", 32);
-    } else {
-      try {
-        this.key = Buffer.from(keyEnv, "hex");
-        if (this.key.length !== 32) {
-          throw new Error("Key must be exactly 32 bytes (64 hex characters)");
-        }
-      } catch (err) {
-        throw new Error(`Invalid ENCRYPTION_KEY environment variable: ${(err as Error).message}`);
+      if (process.env.NODE_ENV === "test") {
+        this.key = crypto.scryptSync("orbit-test-encryption-key", "test-salt", 32);
+        return;
       }
+      throw new Error("ENCRYPTION_KEY is required outside test environments");
     }
+
+    if (!/^[0-9a-fA-F]{64}$/.test(keyEnv)) {
+      throw new Error("ENCRYPTION_KEY must be exactly 64 hexadecimal characters");
+    }
+    this.key = Buffer.from(keyEnv, "hex");
   }
 
   /**
@@ -38,8 +37,10 @@ export class TokenEncryptionService {
       
       // Concat IV + Tag + Encrypted data
       return Buffer.concat([iv, tag, encrypted]);
-    } catch (err) {
-      throw new InternalServerErrorException(`Token encryption failed: ${(err as Error).message}`);
+    } catch (error: unknown) {
+      throw new InternalServerErrorException(
+        `Token encryption failed: ${error instanceof Error ? error.message : "unknown error"}`,
+      );
     }
   }
 
@@ -63,8 +64,10 @@ export class TokenEncryptionService {
       decrypted = Buffer.concat([decrypted, decipher.final()]);
       
       return decrypted.toString("utf8");
-    } catch (err) {
-      throw new InternalServerErrorException(`Token decryption failed: ${(err as Error).message}`);
+    } catch (error: unknown) {
+      throw new InternalServerErrorException(
+        `Token decryption failed: ${error instanceof Error ? error.message : "unknown error"}`,
+      );
     }
   }
 }

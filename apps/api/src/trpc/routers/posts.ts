@@ -1,21 +1,41 @@
-import { z } from "zod";
 import { TrpcService } from "../trpc.service";
 import { CreatePostSchema, PlatformSchema } from "@orbit/types";
+import { TRPCError } from "@trpc/server";
+import { z } from "zod";
+import { PostsService } from "../../modules/posts/posts.service";
 
-export function createPostsRouter(trpc: TrpcService) {
+const PostIdSchema = z.object({
+  workspaceId: z.string().uuid(),
+  id: z.string().uuid(),
+});
+
+const postSelect = {
+  id: true,
+  workspaceId: true,
+  createdById: true,
+  content: true,
+  mediaUrls: true,
+  platformOverrides: true,
+  platforms: true,
+  scheduledAt: true,
+  publishedAt: true,
+  status: true,
+  approvalStatus: true,
+  approvalNote: true,
+  isRecurring: true,
+  recurringRule: true,
+  createdAt: true,
+  updatedAt: true,
+} as const;
+
+export function createPostsRouter(trpc: TrpcService, postsService: PostsService) {
   return trpc.router({
     create: trpc.protectedProcedure
       .input(CreatePostSchema)
-      .mutation(async ({ input }) => {
-        // Implement simple Postgres db save
-        return {
-          id: "post_created_stub",
-          content: input.content,
-          platforms: input.platforms,
-          scheduledAt: input.scheduledAt,
-          status: "draft",
-          createdAt: new Date(),
-        };
+      .mutation(async ({ input, ctx }) => {
+        const access = await trpc.authorizeWorkspaceMutation(ctx, input.workspaceId);
+        void access;
+        return postsService.createPost(access.userId, input.workspaceId, input);
       }),
 
     getByWorkspace: trpc.protectedProcedure
@@ -26,13 +46,14 @@ export function createPostsRouter(trpc: TrpcService) {
         })
       )
       .query(async ({ input, ctx }) => {
-        // Retrieve posts from database
+        await trpc.authorizeWorkspace(ctx, input.workspaceId);
         const posts = await ctx.prisma.post.findMany({
           where: {
             workspaceId: input.workspaceId,
             ...(input.status ? { status: input.status } : {}),
           },
           orderBy: { createdAt: "desc" },
+          select: postSelect,
         });
         return posts;
       }),
@@ -54,9 +75,7 @@ export function createPostsRouter(trpc: TrpcService) {
               lte: new Date(input.to),
             },
           },
-          include: {
-            postJobs: true,
-          },
+          select: { ...postSelect, postJobs: true },
         });
         return posts;
       }),
@@ -64,6 +83,7 @@ export function createPostsRouter(trpc: TrpcService) {
     update: trpc.protectedProcedure
       .input(
         z.object({
+          workspaceId: z.string().uuid(),
           id: z.string().uuid(),
           content: z.string().optional(),
           scheduledAt: z.string().datetime().nullable().optional(),
@@ -71,8 +91,9 @@ export function createPostsRouter(trpc: TrpcService) {
         })
       )
       .mutation(async ({ input, ctx }) => {
+        await trpc.authorizeWorkspaceMutation(ctx, input.workspaceId);
         const post = await ctx.prisma.post.update({
-          where: { id: input.id },
+          where: { id: input.id, workspaceId: input.workspaceId },
           data: {
             ...(input.content !== undefined ? { content: input.content } : {}),
             ...(input.scheduledAt !== undefined
@@ -81,28 +102,34 @@ export function createPostsRouter(trpc: TrpcService) {
             ...(input.platforms !== undefined ? { platforms: input.platforms } : {}),
           },
         });
-        return post;
+        return { ...post, workspaceId: input.workspaceId };
       }),
 
     delete: trpc.protectedProcedure
-      .input(z.object({ id: z.string().uuid() }))
+      .input(PostIdSchema)
       .mutation(async ({ input, ctx }) => {
-        await ctx.prisma.post.delete({
-          where: { id: input.id },
+        await trpc.authorizeWorkspaceMutation(ctx, input.workspaceId);
+        const result = await ctx.prisma.post.deleteMany({
+          where: { id: input.id, workspaceId: input.workspaceId },
         });
-        return { success: true };
+        if (result.count !== 1) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Post not found" });
+        }
+        return { id: input.id, workspaceId: input.workspaceId, status: "deleted" as const };
       }),
 
     schedule: trpc.protectedProcedure
       .input(
         z.object({
+          workspaceId: z.string().uuid(),
           id: z.string().uuid(),
           scheduledAt: z.string().datetime(),
         })
       )
       .mutation(async ({ input, ctx }) => {
+        await trpc.authorizeWorkspaceMutation(ctx, input.workspaceId);
         const post = await ctx.prisma.post.update({
-          where: { id: input.id },
+          where: { id: input.id, workspaceId: input.workspaceId },
           data: {
             status: "scheduled",
             scheduledAt: new Date(input.scheduledAt),
@@ -112,12 +139,13 @@ export function createPostsRouter(trpc: TrpcService) {
       }),
 
     duplicate: trpc.protectedProcedure
-      .input(z.object({ id: z.string().uuid() }))
+      .input(PostIdSchema)
       .mutation(async ({ input, ctx }) => {
-        const original = await ctx.prisma.post.findUnique({
-          where: { id: input.id },
+        await trpc.authorizeWorkspaceMutation(ctx, input.workspaceId);
+        const original = await ctx.prisma.post.findFirst({
+          where: { id: input.id, workspaceId: input.workspaceId },
         });
-        if (!original) throw new Error("Post not found");
+        if (!original) throw new TRPCError({ code: "NOT_FOUND", message: "Post not found" });
 
         const duplicate = await ctx.prisma.post.create({
           data: {
@@ -129,6 +157,7 @@ export function createPostsRouter(trpc: TrpcService) {
             platforms: original.platforms,
             status: "draft",
           },
+          select: postSelect,
         });
         return duplicate;
       }),

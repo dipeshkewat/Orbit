@@ -127,6 +127,7 @@ export const PLATFORM_CHAR_LIMITS: Record<Platform, number> = {
 
 // ─── Post Creation Schema ────────────────────────────────────
 export const CreatePostSchema = z.object({
+  workspaceId: z.string().uuid(),
   content: z.string().min(1, "Content is required"),
   platforms: z.array(PlatformSchema).min(1, "Select at least one platform"),
   socialAccountIds: z.array(z.string().uuid()).min(1),

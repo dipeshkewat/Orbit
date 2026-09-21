@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { prisma } from "@orbit/db";
-import type { SocialAccount } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import { TokenEncryptionService } from "./token-encryption.service";
 
 @Injectable()
@@ -20,7 +20,7 @@ export class SocialAccountsService {
     accessToken: string;
     refreshToken?: string;
     expiresInSeconds?: number;
-    metadata?: any;
+    metadata?: Prisma.InputJsonValue;
   }) {
     const encryptedAccessToken = new Uint8Array(this.encryptionService.encrypt(data.accessToken));
     const encryptedRefreshToken = data.refreshToken
@@ -79,10 +79,20 @@ export class SocialAccountsService {
     const accounts = await prisma.socialAccount.findMany({
       where: { workspaceId },
       orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        platform: true,
+        username: true,
+        displayName: true,
+        avatarUrl: true,
+        status: true,
+        tokenExpiresAt: true,
+        createdAt: true,
+      },
     });
 
     // Decrypt and return safe metadata (omit access/refresh tokens)
-    return accounts.map((acc: SocialAccount) => ({
+    return accounts.map((acc) => ({
       id: acc.id,
       platform: acc.platform,
       username: acc.username,
@@ -98,27 +108,38 @@ export class SocialAccountsService {
    * Disconnect a social account from a workspace
    */
   async disconnectAccount(workspaceId: string, id: string) {
-    const account = await prisma.socialAccount.findUnique({
-      where: { id },
+    const account = await prisma.socialAccount.findFirst({
+      where: { id, workspaceId },
     });
 
     if (!account || account.workspaceId !== workspaceId) {
       throw new NotFoundException(`Social account not found`);
     }
 
-    await prisma.socialAccount.delete({
+    const disconnected = await prisma.socialAccount.update({
       where: { id },
+      data: { status: "disconnected" },
+      select: {
+        id: true,
+        platform: true,
+        username: true,
+        displayName: true,
+        avatarUrl: true,
+        status: true,
+        tokenExpiresAt: true,
+        createdAt: true,
+      },
     });
 
-    return { success: true };
+    return disconnected;
   }
 
   /**
    * Retrieve decrypted access token for execution
    */
-  async getDecryptedAccessToken(id: string): Promise<string> {
-    const account = await prisma.socialAccount.findUnique({
-      where: { id },
+  async getDecryptedAccessToken(workspaceId: string, id: string): Promise<string> {
+    const account = await prisma.socialAccount.findFirst({
+      where: { id, workspaceId },
     });
 
     if (!account) {
@@ -131,9 +152,9 @@ export class SocialAccountsService {
   /**
    * Retrieve decrypted refresh token if available
    */
-  async getDecryptedRefreshToken(id: string): Promise<string | null> {
-    const account = await prisma.socialAccount.findUnique({
-      where: { id },
+  async getDecryptedRefreshToken(workspaceId: string, id: string): Promise<string | null> {
+    const account = await prisma.socialAccount.findFirst({
+      where: { id, workspaceId },
     });
 
     if (!account || !account.refreshToken) {
@@ -146,10 +167,28 @@ export class SocialAccountsService {
   /**
    * Update token health status
    */
-  async updateAccountStatus(id: string, status: "active" | "expiring" | "disconnected" | "error") {
+  async updateAccountStatus(workspaceId: string, id: string, status: "active" | "expiring" | "disconnected" | "error") {
+    const account = await prisma.socialAccount.findFirst({
+      where: { id, workspaceId },
+      select: { id: true },
+    });
+    if (!account) {
+      throw new NotFoundException("Social account not found");
+    }
+
     return prisma.socialAccount.update({
-      where: { id },
+      where: { id: account.id },
       data: { status },
+      select: {
+        id: true,
+        platform: true,
+        username: true,
+        displayName: true,
+        avatarUrl: true,
+        status: true,
+        tokenExpiresAt: true,
+        createdAt: true,
+      },
     });
   }
 }

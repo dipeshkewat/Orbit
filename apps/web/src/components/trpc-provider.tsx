@@ -2,10 +2,12 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";
+import { useAuth } from "@clerk/nextjs";
 import React, { useState } from "react";
 import { trpc } from "@/lib/trpc";
 
 export function TrpcProvider({ children }: { children: React.ReactNode }) {
+  const { getToken } = useAuth();
   // Ensure QueryClient is instantiated once per component lifecycle
   const [queryClient] = useState(() => new QueryClient({
     defaultOptions: {
@@ -23,11 +25,10 @@ export function TrpcProvider({ children }: { children: React.ReactNode }) {
           url: process.env.NEXT_PUBLIC_API_URL 
             ? `${process.env.NEXT_PUBLIC_API_URL}/trpc`
             : "http://localhost:3001/trpc",
-          // Inject authorization header if user is authenticated (e.g. Clerk token)
           async headers() {
-            // We can fetch token dynamically here
+            const token = await getToken();
             return {
-              Authorization: `Bearer placeholder`,
+              ...(token ? { Authorization: `Bearer ${token}` } : {}),
             };
           },
         }),

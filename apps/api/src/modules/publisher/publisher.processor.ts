@@ -10,6 +10,7 @@ import { LinkedInPublisher } from "./adapters/linkedin.publisher";
 import { FacebookPublisher } from "./adapters/facebook.publisher";
 import { TikTokPublisher } from "./adapters/tiktok.publisher";
 import { PlatformPublisher } from "./adapters/platform-publisher.interface";
+import { isFinalAttempt, resolvePostStatus } from "./publishing-state";
 
 @Processor("post_publish")
 export class PublisherProcessor extends WorkerHost {
@@ -30,7 +31,7 @@ export class PublisherProcessor extends WorkerHost {
   /**
    * Main entry point for executing scheduled post jobs from BullMQ
    */
-  async process(job: Job<{ postId: string }>): Promise<any> {
+  async process(job: Job<{ postId: string }>): Promise<void> {
     const { postId } = job.data;
     this.logger.log(`Processing post publication job for post ID: ${postId}`);
 
@@ -50,27 +51,39 @@ export class PublisherProcessor extends WorkerHost {
       return;
     }
 
-    // Update post status to publishing
-    await prisma.post.update({
-      where: { id: postId },
+    if (post.status === "published") {
+      return;
+    }
+
+    await prisma.post.updateMany({
+      where: { id: postId, status: { in: ["scheduled", "queued", "retrying"] } },
       data: { status: "publishing" },
     });
 
-    let overallSuccess = true;
+    let hasRetryableFailure = false;
     const errors: string[] = [];
+    const maxAttempts = job.opts.attempts ?? 1;
+    const finalAttempt = isFinalAttempt(job.attemptsMade, maxAttempts);
 
     for (const postJob of post.postJobs) {
       if (postJob.status === "published") {
         continue; // Already published, skip (idempotency)
       }
 
-      await prisma.postJob.update({
-        where: { id: postJob.id },
+      const claim = await prisma.postJob.updateMany({
+        where: {
+          id: postJob.id,
+          status: { in: ["pending", "retrying", "failed"] },
+        },
         data: { status: "publishing" },
       });
+      if (claim.count !== 1) {
+        continue;
+      }
 
       try {
         const decryptedToken = await this.socialAccountsService.getDecryptedAccessToken(
+          post.workspaceId,
           postJob.socialAccountId
         );
 
@@ -94,7 +107,7 @@ export class PublisherProcessor extends WorkerHost {
               platformPostId: result.platformPostId,
               platformUrl: result.platformUrl,
               publishedAt: new Date(),
-              retryCount: postJob.retryCount + (job.attemptsMade || 0),
+              retryCount: postJob.retryCount + 1,
             },
           });
           
@@ -105,58 +118,69 @@ export class PublisherProcessor extends WorkerHost {
             platform: postJob.platform,
           });
         } else {
-          overallSuccess = false;
           const errorMsg = result.errorMessage || "Unknown error";
           errors.push(`${postJob.platform}: ${errorMsg}`);
+          hasRetryableFailure = !finalAttempt || hasRetryableFailure;
           
           await prisma.postJob.update({
             where: { id: postJob.id },
             data: {
-              status: "failed",
+              status: finalAttempt ? "failed" : "retrying",
               errorMessage: errorMsg,
               retryCount: postJob.retryCount + 1,
             },
           });
 
+          if (finalAttempt) {
+            this.notificationsService.notifyPostStatus(post.workspaceId, {
+              postId: post.id,
+              status: "failed",
+              platform: postJob.platform,
+            });
+          }
+        }
+      } catch (error: unknown) {
+        const errorMsg = error instanceof Error ? error.message : "Unknown publishing error";
+        errors.push(`${postJob.platform}: ${errorMsg}`);
+        hasRetryableFailure = !finalAttempt || hasRetryableFailure;
+
+        await prisma.postJob.update({
+          where: { id: postJob.id },
+          data: {
+            status: finalAttempt ? "failed" : "retrying",
+            errorMessage: errorMsg,
+            retryCount: postJob.retryCount + 1,
+          },
+        });
+
+        if (finalAttempt) {
           this.notificationsService.notifyPostStatus(post.workspaceId, {
             postId: post.id,
             status: "failed",
             platform: postJob.platform,
           });
         }
-      } catch (err) {
-        overallSuccess = false;
-        const errorMsg = (err as Error).message;
-        errors.push(`${postJob.platform}: ${errorMsg}`);
-
-        await prisma.postJob.update({
-          where: { id: postJob.id },
-          data: {
-            status: "failed",
-            errorMessage: errorMsg,
-            retryCount: postJob.retryCount + 1,
-          },
-        });
-
-        this.notificationsService.notifyPostStatus(post.workspaceId, {
-          postId: post.id,
-          status: "failed",
-          platform: postJob.platform,
-        });
       }
     }
 
-    // Update overall Post status based on all job results
-    const finalPostStatus = overallSuccess ? "published" : "failed";
+    const jobStatuses = await prisma.postJob.findMany({
+      where: { postId },
+      select: { status: true },
+    });
+    const finalPostStatus = resolvePostStatus(
+      jobStatuses.map((item) => item.status),
+      hasRetryableFailure,
+    );
+    const allPublished = finalPostStatus === "published";
     await prisma.post.update({
       where: { id: postId },
       data: {
         status: finalPostStatus,
-        publishedAt: overallSuccess ? new Date() : null,
+        publishedAt: allPublished ? new Date() : null,
       },
     });
 
-    if (overallSuccess) {
+    if (allPublished) {
       this.notificationsService.notifyWorkspace(post.workspaceId, {
         id: `pub_ok_${postId}`,
         title: "Post Published Successfully 🎉",
@@ -168,8 +192,7 @@ export class PublisherProcessor extends WorkerHost {
         title: "Post Publication Failed ⚠️",
         body: `Failed to deliver post. Details: ${errors.join(", ")}`,
       });
-      // Throw exception to trigger BullMQ retry logic if attempts remain
-      if ((job.opts.attempts || 1) > (job.attemptsMade || 0) + 1) {
+      if (hasRetryableFailure) {
         throw new Error(`Publishing failed: ${errors.join("; ")}`);
       }
     }
