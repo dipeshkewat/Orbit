@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useCalendarStore } from "@/lib/store";
+import { useAuthStore } from "@/lib/store";
+import { trpc } from "@/lib/trpc";
 import {
   Calendar as CalendarIcon,
   ChevronLeft,
@@ -20,8 +22,14 @@ import {
 import { toast } from "sonner";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths } from "date-fns";
 
+function isUuid(value: string | null): value is string {
+  return value !== null && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+}
+
 export default function CalendarPage() {
   const { posts, updatePost, deletePost, reschedulePost, addPost } = useCalendarStore();
+  const activeWorkspaceId = useAuthStore((state) => state.activeWorkspaceId);
+  const serverWorkspaceId = isUuid(activeWorkspaceId) ? activeWorkspaceId : null;
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedPost, setSelectedPost] = useState<any>(null);
   const [rescheduleDate, setRescheduleDate] = useState("");
@@ -34,6 +42,42 @@ export default function CalendarPage() {
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
   const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
+  const calendarQuery = trpc.posts.getCalendar.useQuery(
+    {
+      workspaceId: serverWorkspaceId ?? "00000000-0000-0000-0000-000000000000",
+      from: monthStart.toISOString(),
+      to: monthEnd.toISOString(),
+    },
+    { enabled: serverWorkspaceId !== null },
+  );
+  const scheduleMutation = trpc.posts.schedule.useMutation();
+  const deleteMutation = trpc.posts.delete.useMutation();
+
+  const rawCalendarData: unknown = calendarQuery.data;
+  const serverPosts = (Array.isArray(rawCalendarData) ? rawCalendarData : []).map((post: unknown) => {
+    const serialized = post as {
+      id: string;
+      content: string | null;
+      platforms: string[];
+      status: string;
+      scheduledAt: string | null;
+      publishedAt: string | null;
+      mediaUrls: unknown;
+    };
+    return {
+      id: serialized.id,
+      content: serialized.content ?? "",
+      platforms: serialized.platforms,
+      status: serialized.status as "draft" | "scheduled" | "publishing" | "published" | "failed",
+      scheduledAt: serialized.scheduledAt,
+      publishedAt: serialized.publishedAt,
+      mediaUrls: Array.isArray(serialized.mediaUrls)
+        ? serialized.mediaUrls.filter((value): value is string => typeof value === "string")
+        : [],
+      platformOverrides: {},
+    };
+  }) ?? [];
+  const visiblePosts = serverWorkspaceId ? serverPosts : posts;
 
   const handleCsvImport = () => {
     if (!csvContentText.trim()) {
@@ -87,20 +131,50 @@ export default function CalendarPage() {
     e.preventDefault();
     if (!rescheduleDate || !selectedPost) return;
 
-    reschedulePost(selectedPost.id, new Date(rescheduleDate).toISOString());
+    const scheduledAt = new Date(rescheduleDate).toISOString();
+    if (serverWorkspaceId) {
+      scheduleMutation.mutate(
+        { workspaceId: serverWorkspaceId, id: selectedPost.id, scheduledAt },
+        {
+          onSuccess: () => {
+            toast.success("Post rescheduled successfully!");
+            void calendarQuery.refetch();
+            setSelectedPost(null);
+            setRescheduleDate("");
+          },
+          onError: (error) => toast.error(error.message),
+        },
+      );
+      return;
+    }
+    reschedulePost(selectedPost.id, scheduledAt);
     toast.success("Post rescheduled successfully!");
     setSelectedPost(null);
     setRescheduleDate("");
   };
 
   const handleDeletePost = (id: string) => {
+    if (serverWorkspaceId) {
+      deleteMutation.mutate(
+        { workspaceId: serverWorkspaceId, id },
+        {
+          onSuccess: () => {
+            toast.success("Post deleted successfully");
+            void calendarQuery.refetch();
+            setSelectedPost(null);
+          },
+          onError: (error) => toast.error(error.message),
+        },
+      );
+      return;
+    }
     deletePost(id);
     toast.success("Post deleted successfully");
     setSelectedPost(null);
   };
 
   // Filter posts based on filters
-  const filteredPosts = posts.filter((post) => {
+  const filteredPosts = visiblePosts.filter((post) => {
     if (platformFilter !== "all" && !post.platforms.includes(platformFilter)) return false;
     if (statusFilter !== "all" && post.status !== statusFilter) return false;
     return true;
@@ -108,6 +182,16 @@ export default function CalendarPage() {
 
   return (
     <div className="space-y-6">
+      {serverWorkspaceId && calendarQuery.isLoading && (
+        <div className="rounded-[var(--radius-md)] border border-[var(--color-border)] bg-[var(--color-surface)] p-3 text-sm text-[var(--color-text-secondary)]">
+          Loading calendar...
+        </div>
+      )}
+      {serverWorkspaceId && calendarQuery.isError && (
+        <div className="rounded-[var(--radius-md)] border border-[var(--color-error)]/30 bg-[var(--color-error)]/10 p-3 text-sm text-[var(--color-error)]">
+          We could not load this workspace calendar. Please try again.
+        </div>
+      )}
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>

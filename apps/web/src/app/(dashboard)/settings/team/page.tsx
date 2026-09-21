@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAuthStore } from "@/lib/store";
+import { trpc } from "@/lib/trpc";
 import {
   Users,
   Plus,
@@ -28,16 +29,37 @@ const INITIAL_MEMBERS: Member[] = [
   { id: "m-3", name: "Bob Smith", email: "bob@orbit.com", role: "editor", status: "pending" }
 ];
 
+function isUuid(value: string | null): value is string {
+  return value !== null && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+}
+
 export default function SettingsTeamPage() {
   const workspace = useAuthStore((state) => {
     const active = state.workspaces.find((w) => w.id === state.activeWorkspaceId);
     return active || state.workspaces[0];
   });
+  const activeWorkspaceId = useAuthStore((state) => state.activeWorkspaceId);
+  const serverWorkspaceId = isUuid(activeWorkspaceId) ? activeWorkspaceId : null;
+  const membersQuery = trpc.workspace.getMembers.useQuery(
+    { workspaceId: serverWorkspaceId ?? "00000000-0000-0000-0000-000000000000" },
+    { enabled: serverWorkspaceId !== null },
+  );
+  const inviteMutation = trpc.workspace.invite.useMutation();
+  const removeMutation = trpc.workspace.removeMember.useMutation();
 
   const [members, setMembers] = useState<Member[]>(INITIAL_MEMBERS);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState<Member["role"]>("editor");
   const [isSending, setIsSending] = useState(false);
+  const visibleMembers: Member[] = serverWorkspaceId
+    ? (membersQuery.data ?? []).map((member) => ({
+        id: member.id,
+        name: member.user.name ?? member.user.email,
+        email: member.user.email,
+        role: member.role as Member["role"],
+        status: member.inviteStatus === "accepted" ? "joined" : "pending",
+      }))
+    : members;
 
   const handleSendInvite = (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,13 +68,30 @@ export default function SettingsTeamPage() {
       return;
     }
 
-    // Role lock for free plans
-    if (workspace.plan === "free" && members.length >= 1) {
+    if (serverWorkspaceId === null && workspace.plan === "free" && members.length >= 1) {
       toast.error("Free plan is limited to 1 team member. Upgrade to add more.");
       return;
     }
 
     setIsSending(true);
+    if (serverWorkspaceId) {
+      inviteMutation.mutate(
+        { workspaceId: serverWorkspaceId, email: inviteEmail, role: inviteRole },
+        {
+          onSuccess: () => {
+            void membersQuery.refetch();
+            setIsSending(false);
+            setInviteEmail("");
+            toast.success(`Invitation created for: ${inviteEmail}`);
+          },
+          onError: (error) => {
+            setIsSending(false);
+            toast.error(error.message);
+          },
+        },
+      );
+      return;
+    }
     setTimeout(() => {
       const newMember: Member = {
         id: "m-" + Math.random().toString(36).substr(2, 9),
@@ -70,6 +109,19 @@ export default function SettingsTeamPage() {
   };
 
   const handleRemoveMember = (id: string, name: string) => {
+    if (serverWorkspaceId) {
+      removeMutation.mutate(
+        { workspaceId: serverWorkspaceId, memberId: id },
+        {
+          onSuccess: () => {
+            void membersQuery.refetch();
+            toast.success(`Removed team member: ${name}`);
+          },
+          onError: (error) => toast.error(error.message),
+        },
+      );
+      return;
+    }
     setMembers((prev) => prev.filter((m) => m.id !== id));
     toast.success(`Removed team member: ${name}`);
   };
@@ -82,6 +134,9 @@ export default function SettingsTeamPage() {
         <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
           Manage member profiles, active roles, and invite workflow.
         </p>
+        {serverWorkspaceId && membersQuery.isError && (
+          <p className="mt-2 text-sm text-[var(--color-error)]">We could not load team members for this workspace.</p>
+        )}
       </div>
 
       {/* Tab bar header */}
@@ -111,11 +166,11 @@ export default function SettingsTeamPage() {
           <div className="glass rounded-[var(--radius-lg)] p-5 space-y-4">
             <h3 className="text-sm font-bold uppercase tracking-wider text-[var(--color-text-muted)] flex items-center gap-1.5">
               <Users className="h-4 w-4" />
-              Active Team Members ({members.length})
+              Active Team Members ({visibleMembers.length})
             </h3>
 
             <div className="divide-y divide-[var(--color-border)]/40">
-              {members.map((member) => (
+              {visibleMembers.map((member) => (
                 <div key={member.id} className="py-3.5 flex justify-between items-center first:pt-0 last:pb-0">
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-full bg-[var(--color-primary)] flex items-center justify-center shrink-0">

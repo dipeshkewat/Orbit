@@ -209,6 +209,25 @@ export class PostsService {
     return updatedPost;
   }
 
+  async schedulePost(workspaceId: string, id: string, scheduledAt: Date) {
+    const post = await prisma.post.findFirst({
+      where: { id, workspaceId },
+    });
+    if (!post) {
+      throw new NotFoundException("Post not found");
+    }
+    if (post.status === "published" || post.status === "publishing") {
+      throw new BadRequestException("Cannot schedule a post that is already publishing or published");
+    }
+
+    const scheduledPost = await prisma.post.update({
+      where: { id: post.id },
+      data: { status: "scheduled", scheduledAt },
+    });
+    await this.schedulerService.schedulePost(scheduledPost.id, scheduledAt);
+    return scheduledPost;
+  }
+
   /**
    * Delete a post
    */

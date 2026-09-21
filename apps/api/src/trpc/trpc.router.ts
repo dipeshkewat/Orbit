@@ -12,6 +12,8 @@ import { SocialAccountsService } from "../modules/social-accounts/social-account
 import { OAuthStateService } from "../modules/social-accounts/oauth-state.service";
 import { OAuthConnectionService } from "../modules/social-accounts/oauth-connection.service";
 import { PostsService } from "../modules/posts/posts.service";
+import { MediaService } from "../modules/media/media.service";
+import { WorkspaceService } from "../modules/workspace/workspace.service";
 
 @Injectable()
 export class TrpcRouter {
@@ -23,14 +25,16 @@ export class TrpcRouter {
     oauthState: OAuthStateService,
     oauthConnection: OAuthConnectionService,
     postsService: PostsService,
+    mediaService: MediaService,
+    workspaceService: WorkspaceService,
   ) {
     this.appRouter = this.trpc.router({
-      workspace: createWorkspaceRouter(this.trpc),
+      workspace: createWorkspaceRouter(this.trpc, workspaceService),
       posts: createPostsRouter(this.trpc, postsService),
       socialAccounts: createSocialAccountsRouter(this.trpc, socialAccounts, oauthState, oauthConnection),
       analytics: createAnalyticsRouter(this.trpc),
       ai: createAiRouter(this.trpc),
-      media: createMediaRouter(this.trpc),
+      media: createMediaRouter(this.trpc, mediaService),
       billing: createBillingRouter(this.trpc),
       notifications: createNotificationsRouter(this.trpc),
     });

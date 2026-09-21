@@ -1,116 +1,73 @@
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { TrpcService } from "../trpc.service";
 import { TeamRoleSchema } from "@orbit/types";
+import { TrpcService } from "../trpc.service";
+import { WorkspaceService } from "../../modules/workspace/workspace.service";
 
-export function createWorkspaceRouter(trpc: TrpcService) {
+const WorkspaceInputSchema = z.object({ workspaceId: z.string().uuid() });
+const ManageableRoleSchema = TeamRoleSchema.refine((role) => role !== "owner", {
+  message: "Ownership cannot be assigned through this procedure",
+});
+
+export function createWorkspaceRouter(trpc: TrpcService, workspaceService: WorkspaceService) {
   return trpc.router({
     getMe: trpc.protectedProcedure.query(async ({ ctx }) => {
-      // Find the user's workspace or return a placeholder
-      const member = await ctx.prisma.teamMember.findFirst({
-        where: { userId: ctx.userId },
-        include: { workspace: true },
-      });
-
-      if (member) {
-        return member.workspace;
+      if (!ctx.userId) {
+        throw new TRPCError({ code: "UNAUTHORIZED", message: "You must be logged in" });
       }
-
-      // Return a mock/fallback workspace if none exists for the user yet
-      return {
-        id: "ws_default",
-        name: "My Workspace",
-        slug: "my-workspace",
-        logoUrl: null,
-        plan: "free",
-        ownerId: ctx.userId,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
+      const user = await ctx.prisma.user.findUnique({
+        where: { clerkId: ctx.userId },
+        select: { id: true },
+      });
+      if (!user) {
+        throw new TRPCError({ code: "UNAUTHORIZED", message: "User account is not provisioned" });
+      }
+      const member = await ctx.prisma.teamMember.findFirst({
+        where: { userId: user.id, inviteStatus: "accepted" },
+        select: { workspaceId: true },
+      });
+      if (!member) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Workspace not found" });
+      }
+      return workspaceService.getWorkspaceById(member.workspaceId);
     }),
 
-    create: trpc.protectedProcedure
-      .input(
-        z.object({
-          name: z.string().min(1),
-          slug: z.string().min(1),
-        })
-      )
-      .mutation(async ({ input, ctx }) => {
-        return {
-          id: "ws_new",
-          name: input.name,
-          slug: input.slug,
-          logoUrl: null,
-          plan: "free",
-          ownerId: ctx.userId,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        };
+    getMembers: trpc.protectedProcedure
+      .input(WorkspaceInputSchema)
+      .query(async ({ input, ctx }) => {
+        await trpc.authorizeWorkspace(ctx, input.workspaceId);
+        return workspaceService.getWorkspaceMembers(input.workspaceId);
       }),
-
-    update: trpc.protectedProcedure
-      .input(
-        z.object({
-          name: z.string().optional(),
-          logoUrl: z.string().url().optional(),
-        })
-      )
-      .mutation(async ({ input }) => {
-        return {
-          id: "ws_updated",
-          name: input.name ?? "Updated Workspace",
-          slug: "updated-workspace",
-          logoUrl: input.logoUrl ?? null,
-          plan: "free",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        };
-      }),
-
-    getMembers: trpc.protectedProcedure.query(async () => {
-      return [
-        {
-          id: "mem_1",
-          userId: "user_1",
-          role: "owner",
-          inviteStatus: "accepted",
-          user: {
-            name: "Workspace Owner",
-            email: "owner@workspace.com",
-            avatarUrl: null,
-          },
-        },
-      ];
-    }),
 
     invite: trpc.protectedProcedure
       .input(
-        z.object({
+        WorkspaceInputSchema.extend({
           email: z.string().email(),
-          role: TeamRoleSchema,
-        })
+          role: ManageableRoleSchema,
+        }),
       )
-      .mutation(async ({ input }) => {
-        return {
-          id: "invite_new",
-          email: input.email,
-          role: input.role,
-          status: "pending",
-        };
+      .mutation(async ({ input, ctx }) => {
+        await trpc.authorizeWorkspace(ctx, input.workspaceId, ["owner", "admin"]);
+        return workspaceService.inviteMember(input.workspaceId, input.email, input.role);
       }),
 
     updateMemberRole: trpc.protectedProcedure
       .input(
-        z.object({
-          memberId: z.string(),
-          role: TeamRoleSchema,
-        })
+        WorkspaceInputSchema.extend({
+          memberId: z.string().uuid(),
+          role: ManageableRoleSchema,
+        }),
       )
-      .mutation(async ({ input }) => {
-        return {
-          id: input.memberId,
-          role: input.role,
-        };
+      .mutation(async ({ input, ctx }) => {
+        await trpc.authorizeWorkspace(ctx, input.workspaceId, ["owner", "admin"]);
+        return workspaceService.updateMemberRole(input.workspaceId, input.memberId, input.role);
+      }),
+
+    removeMember: trpc.protectedProcedure
+      .input(WorkspaceInputSchema.extend({ memberId: z.string().uuid() }))
+      .mutation(async ({ input, ctx }) => {
+        await trpc.authorizeWorkspace(ctx, input.workspaceId, ["owner", "admin"]);
+        return workspaceService.removeMember(input.workspaceId, input.memberId);
       }),
   });
 }

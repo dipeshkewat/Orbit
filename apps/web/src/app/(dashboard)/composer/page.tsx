@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useComposerStore, useCalendarStore, useSocialAccountStore, useAuthStore } from "@/lib/store";
+import { trpc } from "@/lib/trpc";
 import {
   Sparkles,
   Instagram,
@@ -33,9 +34,23 @@ const PLATFORM_LIMITS: Record<string, number> = {
   facebook: 5000
 };
 
+function isUuid(value: string | null): value is string {
+  return value !== null && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+}
+
 export default function ComposerPage() {
   const router = useRouter();
   const accounts = useSocialAccountStore((state) => state.accounts);
+  const activeWorkspaceId = useAuthStore((state) => state.activeWorkspaceId);
+  const serverWorkspaceId = isUuid(activeWorkspaceId) ? activeWorkspaceId : null;
+  const serverAccountsQuery = trpc.socialAccounts.list.useQuery(
+    { workspaceId: serverWorkspaceId ?? "00000000-0000-0000-0000-000000000000" },
+    { enabled: serverWorkspaceId !== null },
+  );
+  const uploadUrlMutation = trpc.media.getUploadUrl.useMutation();
+  const confirmUploadMutation = trpc.media.confirmUpload.useMutation();
+  const createPostMutation = trpc.posts.create.useMutation();
+  const availableAccounts = serverWorkspaceId ? serverAccountsQuery.data ?? [] : accounts;
   const addPost = useCalendarStore((state) => state.addPost);
   const user = useAuthStore((state) => state.user);
 
@@ -67,6 +82,7 @@ export default function ComposerPage() {
   const [imageGenPrompt, setImageGenPrompt] = useState("");
   const [imageGenSize, setImageGenSize] = useState<"512" | "1024">("512");
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [isUploadingMedia, setIsUploadingMedia] = useState(false);
 
   // Preview tab selection
   const [previewPlatform, setPreviewPlatform] = useState<string>("instagram");
@@ -79,29 +95,45 @@ export default function ComposerPage() {
     }
   }, [selectedPlatforms, previewPlatform]);
 
-  // Handle Mock Media Upload
-  const handleMediaUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleMediaUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const id = Math.random().toString(36).substr(2, 9);
-      const url = URL.createObjectURL(file);
-
-      addMediaFile({ id, url, progress: 0, name: file.name });
-
-      // Simulate upload progress
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += 20;
-        updateMediaProgress(id, progress);
-        if (progress >= 100) {
-          clearInterval(interval);
+    setIsUploadingMedia(true);
+    try {
+      for (const file of Array.from(files)) {
+        const localId = Math.random().toString(36).substr(2, 9);
+        addMediaFile({ id: localId, url: URL.createObjectURL(file), progress: 0, name: file.name });
+        if (!serverWorkspaceId) {
+          updateMediaProgress(localId, 100);
+          continue;
         }
-      }, 300);
+
+        const upload = await uploadUrlMutation.mutateAsync({
+          workspaceId: serverWorkspaceId,
+          filename: file.name,
+          contentType: file.type as "image/jpeg" | "image/png" | "image/webp" | "image/gif" | "video/mp4" | "video/quicktime",
+          sizeBytes: file.size,
+        });
+        const response = await fetch(upload.uploadUrl, {
+          method: "PUT",
+          headers: { "Content-Type": file.type },
+          body: file,
+        });
+        if (!response.ok) throw new Error(`Upload failed for ${file.name}`);
+        const confirmed = await confirmUploadMutation.mutateAsync({
+          workspaceId: serverWorkspaceId,
+          id: upload.uploadId,
+        });
+        removeMediaFile(localId);
+        addMediaFile({ id: confirmed.id, url: confirmed.cdnUrl, progress: 100, name: file.name });
+      }
+      toast.success("Media file(s) uploaded successfully");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Media upload failed");
+    } finally {
+      setIsUploadingMedia(false);
     }
-    toast.success("Media file(s) added successfully");
   };
 
   // AI Caption Suggestion stream simulation
@@ -195,21 +227,38 @@ Let us know what platforms you want to build on! 👇 #socialmedia #marketing #t
       scheduledTime = new Date(customDateTime).toISOString();
     }
 
-    addPost({
-      content,
-      platforms: selectedPlatforms,
-      status: scheduleMode === "now" ? "published" : "scheduled",
-      scheduledAt: scheduledTime,
-      mediaUrls: mediaFiles.map((m) => m.url),
-      platformOverrides: overrides
-    });
+    if (serverWorkspaceId) {
+      const serverAccountIds = availableAccounts
+        .filter((account) => selectedPlatforms.includes(account.platform))
+        .map((account) => account.id);
+      if (serverAccountIds.length !== selectedPlatforms.length) {
+        toast.error("Connect an active account for each selected platform before scheduling");
+        return;
+      }
+      createPostMutation.mutate(
+        {
+          workspaceId: serverWorkspaceId,
+          content,
+          platforms: selectedPlatforms as Array<"instagram" | "facebook" | "twitter" | "linkedin" | "tiktok" | "pinterest" | "youtube" | "google_business" | "threads" | "bluesky">,
+          socialAccountIds: serverAccountIds,
+          scheduledAt: scheduledTime ?? new Date().toISOString(),
+          mediaUrls: mediaFiles.map((media) => media.url),
+          platformOverrides: overrides,
+        },
+        {
+          onSuccess: () => {
+            toast.success(scheduleMode === "now" ? "Post queued for publishing!" : "Post scheduled successfully!");
+            resetComposer();
+            router.push("/calendar");
+          },
+          onError: (error) => toast.error(error.message),
+        },
+      );
+      return;
+    }
 
-    toast.success(
-      scheduleMode === "now" 
-        ? "Post published successfully!" 
-        : "Post scheduled successfully!"
-    );
-
+    addPost({ content, platforms: selectedPlatforms, status: scheduleMode === "now" ? "published" : "scheduled", scheduledAt: scheduledTime, mediaUrls: mediaFiles.map((m) => m.url), platformOverrides: overrides });
+    toast.success(scheduleMode === "now" ? "Post published successfully!" : "Post scheduled successfully!");
     resetComposer();
     router.push("/calendar");
   };
@@ -243,6 +292,9 @@ Let us know what platforms you want to build on! 👇 #socialmedia #marketing #t
         <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
           Draft, customize, and optimize posts across your social channels.
         </p>
+        {serverWorkspaceId && serverAccountsQuery.isError && (
+          <p className="mt-2 text-sm text-[var(--color-error)]">We could not load connected accounts for this workspace.</p>
+        )}
       </div>
 
       {/* Main Composer Columns */}
@@ -254,7 +306,7 @@ Let us know what platforms you want to build on! 👇 #socialmedia #marketing #t
           <div className="glass rounded-[var(--radius-lg)] p-5">
             <h3 className="text-sm font-bold uppercase tracking-wider text-[var(--color-text-muted)] mb-3">Publish To</h3>
             <div className="flex gap-3 flex-wrap">
-              {accounts.map((acc) => {
+              {availableAccounts.map((acc) => {
                 const isSelected = selectedPlatforms.includes(acc.platform);
                 return (
                   <button
@@ -274,7 +326,7 @@ Let us know what platforms you want to build on! 👇 #socialmedia #marketing #t
                   </button>
                 );
               })}
-              {accounts.length === 0 && (
+              {availableAccounts.length === 0 && (
                 <p className="text-xs text-[var(--color-text-muted)]">
                   No channels connected yet. Go to <Link href="/settings/accounts" className="text-[var(--color-primary-light)] hover:underline">Settings</Link> to connect one.
                 </p>
@@ -400,7 +452,7 @@ Let us know what platforms you want to build on! 👇 #socialmedia #marketing #t
                   <>
                     <label className="aspect-square flex flex-col items-center justify-center rounded-[var(--radius-md)] border-2 border-dashed border-[var(--color-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-hover)] cursor-pointer transition-colors p-3 text-center">
                       <UploadCloud className="h-5 w-5 text-[var(--color-text-muted)] mb-1" />
-                      <span className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">Upload File</span>
+                      <span className="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]">{isUploadingMedia ? "Uploading..." : "Upload File"}</span>
                       <input type="file" accept="image/*" multiple onChange={handleMediaUpload} className="hidden" />
                     </label>
 
@@ -687,9 +739,10 @@ Let us know what platforms you want to build on! 👇 #socialmedia #marketing #t
           {/* Large Action Panel */}
           <button
             onClick={handlePublishOrSchedule}
-            className="w-full flex items-center justify-center gap-2 bg-[var(--color-primary)] text-[var(--color-text-inverse)] font-semibold py-3.5 px-4 rounded-[var(--radius-lg)] hover:opacity-90 active:scale-98 transition-all"
+            disabled={isUploadingMedia || createPostMutation.isPending || (serverWorkspaceId !== null && serverAccountsQuery.isLoading)}
+            className="w-full flex items-center justify-center gap-2 bg-[var(--color-primary)] text-[var(--color-text-inverse)] font-semibold py-3.5 px-4 rounded-[var(--radius-lg)] hover:opacity-90 active:scale-98 transition-all disabled:opacity-50"
           >
-            {scheduleMode === "now" ? "Publish Campaign Now" : "Schedule Content Campaign"}
+            {createPostMutation.isPending ? "Saving..." : scheduleMode === "now" ? "Publish Campaign Now" : "Schedule Content Campaign"}
           </button>
         </div>
       </div>

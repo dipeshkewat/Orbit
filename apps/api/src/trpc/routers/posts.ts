@@ -67,6 +67,7 @@ export function createPostsRouter(trpc: TrpcService, postsService: PostsService)
         })
       )
       .query(async ({ input, ctx }) => {
+        await trpc.authorizeWorkspace(ctx, input.workspaceId);
         const posts = await ctx.prisma.post.findMany({
           where: {
             workspaceId: input.workspaceId,
@@ -128,14 +129,11 @@ export function createPostsRouter(trpc: TrpcService, postsService: PostsService)
       )
       .mutation(async ({ input, ctx }) => {
         await trpc.authorizeWorkspaceMutation(ctx, input.workspaceId);
-        const post = await ctx.prisma.post.update({
-          where: { id: input.id, workspaceId: input.workspaceId },
-          data: {
-            status: "scheduled",
-            scheduledAt: new Date(input.scheduledAt),
-          },
-        });
-        return post;
+        return postsService.schedulePost(
+          input.workspaceId,
+          input.id,
+          new Date(input.scheduledAt),
+        );
       }),
 
     duplicate: trpc.protectedProcedure
