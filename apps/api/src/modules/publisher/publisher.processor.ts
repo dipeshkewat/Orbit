@@ -11,6 +11,7 @@ import { FacebookPublisher } from "./adapters/facebook.publisher";
 import { TikTokPublisher } from "./adapters/tiktok.publisher";
 import { PlatformPublisher } from "./adapters/platform-publisher.interface";
 import { isFinalAttempt, resolvePostStatus } from "./publishing-state";
+import { AnalyticsIngestService } from "../analytics/analytics-ingest.service";
 
 @Processor("post_publish")
 export class PublisherProcessor extends WorkerHost {
@@ -19,6 +20,7 @@ export class PublisherProcessor extends WorkerHost {
   constructor(
     private readonly socialAccountsService: SocialAccountsService,
     private readonly notificationsService: NotificationsService,
+    private readonly analyticsIngestService: AnalyticsIngestService,
     private readonly instagramPublisher: InstagramPublisher,
     private readonly twitterPublisher: TwitterPublisher,
     private readonly linkedInPublisher: LinkedInPublisher,
@@ -111,6 +113,12 @@ export class PublisherProcessor extends WorkerHost {
             },
           });
           
+          await this.analyticsIngestService.scheduleMetricsIngest(
+            post.id,
+            postJob.platform,
+            postJob.id,
+          );
+
           // Send real-time Socket.io workspace update
           this.notificationsService.notifyPostStatus(post.workspaceId, {
             postId: post.id,

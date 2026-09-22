@@ -14,6 +14,7 @@ vi.mock("@orbit/db", () => ({
 }));
 
 import { AnalyticsService } from "./analytics.service";
+import { AnalyticsIngestService } from "./analytics-ingest.service";
 
 describe("AnalyticsService", () => {
   const service = new AnalyticsService();
@@ -191,4 +192,19 @@ describe("AnalyticsService", () => {
       service.exportCsv("workspace-1", new Date("2026-09-01"), new Date("2026-09-30")),
     ).resolves.toContain('"post-1","linkedin","2026-09-10T00:00:00.000Z","Launch, now! ""Today"""');
   });
-});
+  test("schedules analytics ingestion after a publish succeeds", async () => {
+    const add = vi.fn().mockResolvedValue({ id: "job-1" });
+    const ingestService = new AnalyticsIngestService({ add } as any);
+
+    await ingestService.scheduleMetricsIngest("post-1", "linkedin", "job-2");
+
+    expect(add).toHaveBeenCalledWith(
+      "ingest-metrics",
+      { postId: "post-1", postJobId: "job-2", platform: "linkedin" },
+      expect.objectContaining({
+        jobId: "post-1:linkedin",
+        attempts: 3,
+        removeOnComplete: true,
+      }),
+    );
+  });});
