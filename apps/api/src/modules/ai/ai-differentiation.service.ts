@@ -43,12 +43,11 @@ export class AiDifferentiationService {
       const topicEmbedding = await generateEmbedding(topic);
       const vectorLiteral = `[${topicEmbedding.join(",")}]`;
 
+      // Cosine distance <=> ranks most-similar first; parameterized input
+      // keeps the query injection-safe.
       const rows = await prisma.$queryRaw<
         { id: string; content: string; distance: number }[]
-      >
-        // Cosine distance <=> ranks most-similar first; parameterized input
-        // keeps the query injection-safe.
-        prisma.$queryRaw`
+      >`
           SELECT id::text, content,
                  embedding <=> ${vectorLiteral}::vector AS distance
           FROM brand_voice_examples
@@ -94,7 +93,7 @@ export class AiDifferentiationService {
     const post = await prisma.post.findFirst({
       where: { id: input.postId, workspaceId: input.workspaceId },
     });
-    if (!post) {
+    if (!post?.content) {
       throw new NotFoundException(`Post '${input.postId}' not found in workspace`);
     }
 
@@ -194,11 +193,13 @@ Return a JSON object with platform names as keys. Each value should have "conten
     const worstPlatform = ranked[ranked.length - 1]?.platform ?? null;
 
     // Top formats: what the highest-engagement posts have in common
-    const topPosts = metrics.slice(0, 5);
-    const hasHashtags = topPosts.filter((m) => /#\w+/.test(m.post.content)).length;
-    const avgLength = Math.round(
-      topPosts.reduce((sum, m) => sum + m.post.content.length, 0) / topPosts.length,
-    );
+    const topPosts = metrics.slice(0, 5).filter((m) => m.post.content);
+    const hasHashtags = topPosts.filter((m) => /#\w+/.test(m.post.content ?? "")).length;
+    const avgLength = topPosts.length
+      ? Math.round(
+          topPosts.reduce((sum, m) => sum + (m.post.content?.length ?? 0), 0) / topPosts.length,
+        )
+      : 0;
     const topFormats = [
       hasHashtags >= topPosts.length / 2 ? "Posts with hashtags outperform" : "Posts without hashtags perform better",
       `Top posts average ~${avgLength} characters`,

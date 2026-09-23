@@ -1,6 +1,5 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { anthropic, CAPTION_MODEL, generateText } from "@orbit/ai";
-import { prisma } from "@orbit/db";
 import { EntitlementService } from "../billing/entitlement.service";
 import { AiDifferentiationService } from "./ai-differentiation.service";
 

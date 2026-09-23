@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { Module, MiddlewareConsumer, NestModule } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { RedisModule } from "./modules/redis/redis.module";
 import { AuthModule } from "./modules/auth/auth.module";
@@ -16,6 +16,8 @@ import { SearchModule } from "./modules/search/search.module";
 import { WebhooksModule } from "./modules/webhooks/webhooks.module";
 import { PublicApiModule } from "./modules/public-api/public-api.module";
 import { TrpcModule } from "./trpc/trpc.module";
+import { RequestIdMiddleware } from "./common/request-id.middleware";
+import { AccessLogMiddleware } from "./common/access-log.middleware";
 
 @Module({
   imports: [
@@ -46,4 +48,12 @@ import { TrpcModule } from "./trpc/trpc.module";
     TrpcModule,
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    // Correlation IDs first so the access log (and everything downstream)
+    // can include them.
+    consumer
+      .apply(RequestIdMiddleware, AccessLogMiddleware)
+      .forRoutes("*");
+  }
+}

@@ -66,8 +66,9 @@ type AnalyticsPlatform = {
 };
 
 type AnalyticsSeriesPoint = {
-  period: string;
-  [platform: string]: string | number;
+  period?: string;
+  month?: string;
+  [platform: string]: string | number | undefined;
 };
 
 function AnalyticsCard({

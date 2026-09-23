@@ -12,6 +12,7 @@
     "db:migrate:dev": "prisma migrate dev",
     "db:studio": "prisma studio",
     "db:seed": "tsx src/seed.ts",
+    "db:seed:templates": "tsx prisma/seed-templates.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src/"
   },

@@ -1,24 +1,26 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from "framer-motion";
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Sparkles,
   ArrowRight,
+  ArrowUpRight,
   Calendar as CalendarIcon,
   TrendingUp,
-  Users,
   Check,
-  ChevronRight,
   ChevronDown,
   Quote,
-  Shield,
-  Zap,
-  MessageSquare,
-  FileText,
-  Globe,
-  Share2,
-  Lock,
+  Link2,
+  PenLine,
+  BadgeCheck,
+  Rocket,
+  Hash,
+  Repeat2,
+  Clock,
+  BarChart3,
+  Lightbulb,
+  Heart,
 } from "lucide-react";
 import {
   InstagramIcon,
@@ -36,51 +38,78 @@ import {
   PLATFORM_COLORS,
 } from "@/components/social-icons";
 import Link from "next/link";
-
 import { OrbitLogo } from "@/components/logo";
 
 /* ─────────────────────────────────────────────────────────────
- * Calm palette (marketing is single-theme dark by design).
- * Dark grey + white: clean, minimal, no neon or indigo.
+ * Light editorial theme — ink on paper, black accent cards,
+ * rounded containers, doodle details. App stays untouched.
  * ───────────────────────────────────────────────────────────── */
 const C = {
-  bg: "#111111",
-  bgDeep: "#0A0A0A",
-  card: "rgba(255,255,255,0.04)",
-  border: "rgba(255,255,255,0.10)",
-  primary: "#FFFFFF",
-  primaryHover: "#E4E4E7",
-  primaryLight: "#D4D4D8",
-  accent: "#10B981", // emerald — status moments only
-  text: "#F5F5F5",
-  textSecondary: "#A1A1A1",
-  textMuted: "#6B6B6B",
+  paper: "#FAFAF8",
+  card: "#FFFFFF",
+  ink: "#111110",
+  inkSoft: "#3F3F3C",
+  muted: "#78716C",
+  line: "#E7E5E0",
+  black: "#131311",
+  accent: "#10B981",
 };
 
-// --- ANIMATION CONFIGS ---
 const fadeUp = {
   initial: { opacity: 0, y: 24 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" as const } },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true, margin: "-80px" },
+  transition: { duration: 0.55, ease: "easeOut" as const },
 };
 
-const scaleIn = {
-  initial: { opacity: 0, scale: 0.97 },
-  animate: { opacity: 1, scale: 1, transition: { duration: 0.5, ease: "easeOut" as const } },
-};
+/* ─── Doodles ─── */
+function Starburst({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 100 100" fill="none" className={className} aria-hidden>
+      <path
+        d="M50 5 L56 38 L82 18 L62 45 L95 50 L62 55 L82 82 L56 62 L50 95 L44 62 L18 82 L38 55 L5 50 L38 45 L18 18 L44 38 Z"
+        stroke="currentColor"
+        strokeWidth="4"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
-const staggerContainer = {
-  animate: { transition: { staggerChildren: 0.1 } },
-};
+function SquiggleArrow({ className = "" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 90 60" fill="none" className={className} aria-hidden>
+      <path
+        d="M6 8 C 30 4, 62 14, 66 34 C 68 46, 58 52, 50 48"
+        stroke="currentColor"
+        strokeWidth="3.5"
+        strokeLinecap="round"
+        strokeDasharray="1 8"
+      />
+      <path d="M42 40 L50 49 L60 44" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
-// --- DATA ---
-const TRUSTED_LOGOS = [
-  { name: "Vercel", icon: Zap },
-  { name: "Linear", icon: Zap },
-  { name: "Framer", icon: Share2 },
-  { name: "Supabase", icon: Shield },
-  { name: "Notion", icon: FileText },
-  { name: "Loom", icon: MessageSquare },
-];
+/* ─── Section tag pill ─── */
+function SectionTag({ children, dark = false }: { children: React.ReactNode; dark?: boolean }) {
+  return (
+    <span
+      className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold tracking-wide"
+      style={
+        dark
+          ? { border: "1px solid rgba(255,255,255,0.25)", color: "#fff" }
+          : { border: `1px solid ${C.line}`, color: C.ink, backgroundColor: C.card }
+      }
+    >
+      <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: C.accent }} />
+      {children}
+    </span>
+  );
+}
+
+/* ─── Data ─── */
+const WORDMARKS = ["northwind", "studio labs", "thorne", "helio", "march&co", "fernwood", "palo", "kestrel"];
 
 const PLATFORMS = [
   { name: "Instagram", icon: InstagramIcon, color: PLATFORM_COLORS.instagram },
@@ -97,87 +126,75 @@ const PLATFORMS = [
   { name: "Mastodon", icon: MastodonIcon, color: PLATFORM_COLORS.mastodon },
 ];
 
-const PILLARS = [
+const SERVICES = [
   {
+    n: "01",
     title: "Create with AI",
     description:
-      "Generate on-brand captions, hashtags, and post ideas tuned to each network — in your voice, in seconds.",
+      "Captions, hashtags, and full post ideas — drafted in your brand voice, tuned per platform, ready in seconds. Orbit learns from your best content, not generic templates.",
     icon: Sparkles,
+    dark: true,
   },
   {
+    n: "02",
     title: "Schedule everywhere",
     description:
-      "Write once, tailor per platform, and publish across every channel from one calm calendar.",
+      "One composer, twelve networks. Tailor each variant, pick the best time, and let the queue do the remembering.",
     icon: CalendarIcon,
+    dark: false,
   },
   {
-    title: "Understand what works",
+    n: "03",
+    title: "Know what works",
     description:
-      "One clear view of reach and engagement across accounts — with recommendations, not vanity charts.",
+      "Reach, engagement, and clear recommendations across every account — no vanity charts, just what to do next.",
     icon: TrendingUp,
+    dark: false,
   },
 ];
 
-const FEATURES = [
+const STEPS = [
   {
-    id: "compose",
-    title: "One composer, every network",
-    description:
-      "Draft a post, preview it exactly as it'll appear on each platform, and fine-tune per network without starting over.",
-    bullets: ["Per-platform previews", "First-comment & thread support", "Drafts and reusable templates"],
+    n: "01",
+    title: "Connect",
+    description: "Link your social accounts in minutes. Tokens are encrypted and refresh themselves.",
+    icon: Link2,
+    rotate: "md:-rotate-6",
+    offset: "md:mt-16",
   },
   {
-    id: "schedule",
-    title: "A calendar you can actually plan around",
-    description:
-      "Drag posts across dates, spot gaps at a glance, and let best-time suggestions fill your queue.",
-    bullets: ["Drag-and-drop scheduling", "Best-time suggestions", "Month, week, and day views"],
+    n: "02",
+    title: "Draft",
+    description: "Describe the post. Orbit writes on-brand variants for every platform you target.",
+    icon: PenLine,
+    rotate: "md:rotate-3",
+    offset: "md:-mt-6",
   },
   {
-    id: "collaborate",
-    title: "Built for teams and clients",
-    description:
-      "Separate workspaces, roles, and an approval step so nothing goes live before it's ready.",
-    bullets: ["Workspaces per brand or client", "Approval workflow", "Shareable read-only previews"],
+    n: "03",
+    title: "Approve",
+    description: "Teams review, comment, and sign off — so nothing ships before it's ready.",
+    icon: BadgeCheck,
+    rotate: "md:-rotate-3",
+    offset: "md:mt-10",
   },
   {
-    id: "analyze",
-    title: "Reporting without the noise",
-    description:
-      "Headline metrics first, depth on demand. Export clean reports your clients understand.",
-    bullets: ["Cross-account overview", "Post-level breakdown", "PDF & CSV export"],
+    n: "04",
+    title: "Publish",
+    description: "Orbit posts on time, tracks results, and suggests what to make next.",
+    icon: Rocket,
+    rotate: "md:rotate-6",
+    offset: "md:-mt-4",
   },
 ];
 
-const AI_TABS = [
-  {
-    id: "caption",
-    label: "Caption",
-    prompt: "Write a launch post for Orbit",
-    output:
-      "Meet Orbit — one calm workspace for all your social media. Plan, write with AI, schedule everywhere, and see what's actually working. Your whole team, one place. Start free today.",
-  },
-  {
-    id: "hashtags",
-    label: "Hashtags",
-    prompt: "Suggest hashtags for a SaaS launch",
-    output:
-      "#socialmedia  #marketing  #contentstrategy  #saas  #buildinpublic  #creators  #smm  #growth",
-  },
-  {
-    id: "ideas",
-    label: "Post ideas",
-    prompt: "3 content ideas for a design tool",
-    output:
-      "1. A before/after of a messy calendar → a planned week.\n2. \"3 captions, 1 prompt\" — show the AI drafting variations.\n3. A teardown of a great post and why it worked.",
-  },
-  {
-    id: "reply",
-    label: "Reply",
-    prompt: "Friendly reply to a feature request",
-    output:
-      "Love this idea — team presets are on our roadmap for next month. I'll follow up here the moment it ships. Thanks for helping shape Orbit!",
-  },
+const AI_CARDS = [
+  { title: "Captions", description: "On-brand drafts for any topic, tone, or platform.", icon: PenLine },
+  { title: "Hashtags", description: "Trending, relevant tags — suggested per post.", icon: Hash },
+  { title: "Brand voice", description: "Trained on your examples with vector retrieval.", icon: Heart },
+  { title: "Repurposing", description: "One post, platform-perfect variants in a click.", icon: Repeat2 },
+  { title: "Best times", description: "Publish when your audience is actually listening.", icon: Clock },
+  { title: "Recommendations", description: "What to double down on, based on your real metrics.", icon: Lightbulb },
 ];
 
 const TESTIMONIALS = [
@@ -185,8 +202,7 @@ const TESTIMONIALS = [
     quote:
       "Orbit replaced three tools for us. We plan, write, and review every campaign in one place — and it finally feels calm.",
     name: "Alex Rivera",
-    role: "Head of Marketing",
-    company: "Northwind",
+    role: "Head of Marketing · Northwind",
     avatar:
       "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&h=120&q=80",
   },
@@ -194,8 +210,7 @@ const TESTIMONIALS = [
     quote:
       "The AI writes captions that actually sound like us, and the approval step means nothing ships by accident.",
     name: "Elena Rostova",
-    role: "Content Director",
-    company: "Studio Labs",
+    role: "Content Director · Studio Labs",
     avatar:
       "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&h=120&q=80",
   },
@@ -203,8 +218,7 @@ const TESTIMONIALS = [
     quote:
       "Managing 12 clients used to be chaos. Separate workspaces and shareable previews changed how our agency works.",
     name: "Marcus Thorne",
-    role: "Founder",
-    company: "Thorne Agency",
+    role: "Founder · Thorne Agency",
     avatar:
       "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&h=120&q=80",
   },
@@ -259,7 +273,7 @@ const FAQS = [
   },
   {
     q: "How does the AI match my brand voice?",
-    a: "You give Orbit a few examples or a short description of your brand. It learns your tone, formatting, and hashtag style, then drafts new content that sounds like you.",
+    a: "You give Orbit a few examples of your writing. It embeds them, learns your tone and hashtag style, and retrieves the most on-brand examples every time it drafts for you.",
   },
   {
     q: "Can clients preview posts before they publish?",
@@ -271,109 +285,85 @@ const FAQS = [
   },
 ];
 
-/* ─── Hero visual: subtle mouse parallax ─── */
-function MouseParallax({ children, intensity = 12 }: { children: React.ReactNode; intensity?: number }) {
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  const springConfig = { damping: 25, stiffness: 200 };
-  const springX = useSpring(mouseX, springConfig);
-  const springY = useSpring(mouseY, springConfig);
-  const x = useTransform(springX, [-0.5, 0.5], [-intensity, intensity]);
-  const y = useTransform(springY, [-0.5, 0.5], [-intensity, intensity]);
-
+/* ─── Scattered step card (polaroid with pin) ─── */
+function StepCard({ step }: { step: (typeof STEPS)[number] }) {
+  const Icon = step.icon;
   return (
     <motion.div
-      onMouseMove={(e) => {
-        const rect = e.currentTarget.getBoundingClientRect();
-        mouseX.set((e.clientX - rect.left) / rect.width - 0.5);
-        mouseY.set((e.clientY - rect.top) / rect.height - 0.5);
-      }}
-      onMouseLeave={() => {
-        mouseX.set(0);
-        mouseY.set(0);
-      }}
-      style={{ x, y }}
-      className="w-full h-full"
+      variants={fadeUp}
+      className={`relative rounded-2xl bg-white p-6 shadow-[0_18px_40px_-18px_rgba(0,0,0,0.25)] ${step.rotate} ${step.offset}`}
+      style={{ border: `1px solid ${C.line}` }}
     >
-      {children}
+      {/* pin */}
+      <span
+        className="absolute -top-2 left-1/2 h-4 w-4 -translate-x-1/2 rounded-full border-2 border-white shadow"
+        style={{ backgroundColor: C.ink }}
+      />
+      <div className="flex items-start justify-between">
+        <span className="text-4xl font-black" style={{ color: C.line }}>
+          {step.n}
+        </span>
+        <span
+          className="flex h-10 w-10 items-center justify-center rounded-xl"
+          style={{ backgroundColor: C.paper, border: `1px solid ${C.line}`, color: C.ink }}
+        >
+          <Icon className="h-4.5 w-4.5" />
+        </span>
+      </div>
+      <h3 className="mt-4 text-xl font-extrabold tracking-tight" style={{ color: C.ink }}>
+        {step.title}
+      </h3>
+      <p className="mt-2 text-sm leading-relaxed" style={{ color: C.muted }}>
+        {step.description}
+      </p>
     </motion.div>
   );
 }
 
-// --- MAIN PAGE ---
+/* ─── Landing page ─── */
 export default function LandingPage() {
-  const [selectedFeature, setSelectedFeature] = useState(FEATURES[0].id);
-  const [aiTab, setAiTab] = useState(AI_TABS[0].id);
-  const [typedText, setTypedText] = useState("");
   const [faqOpen, setFaqOpen] = useState<number | null>(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  const currentOutput = AI_TABS.find((t) => t.id === aiTab)?.output ?? "";
-  const isTyping = typedText !== currentOutput;
-
-  // Typewriter for the AI section — setState runs only inside the timer callback
-  useEffect(() => {
-    let i = 0;
-    const timer = setInterval(() => {
-      i++;
-      setTypedText(currentOutput.slice(0, i));
-      if (i >= currentOutput.length) clearInterval(timer);
-    }, 15);
-    return () => clearInterval(timer);
-  }, [currentOutput]);
-
-  const activeFeature = FEATURES.find((f) => f.id === selectedFeature) || FEATURES[0];
 
   const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
 
   return (
-    <div
-      className="relative min-h-screen overflow-x-hidden"
-      style={{ backgroundColor: C.bg, color: C.text }}
-    >
-      {/* One restrained ambient orb behind the hero (indigo, not neon) */}
-      <div
-        className="glow-bg pointer-events-none absolute"
-        style={{ position: "absolute", top: "-8%", left: "50%", transform: "translateX(-50%)", width: "60%", height: "45%", backgroundColor: "rgba(255,255,255,0.06)" }}
-      />
-
-      {/* ── NAV ── */}
+    <div className="min-h-screen overflow-x-hidden" style={{ backgroundColor: C.paper, color: C.ink }}>
+      {/* ═══ NAV ═══ */}
       <header
-        className="fixed top-0 inset-x-0 z-50 backdrop-blur-xl"
-        style={{ backgroundColor: "rgba(11,15,25,0.72)", borderBottom: `1px solid ${C.border}` }}
+        className="fixed inset-x-0 top-0 z-50 backdrop-blur-xl"
+        style={{ backgroundColor: "rgba(250,250,248,0.85)", borderBottom: `1px solid ${C.line}` }}
       >
-        <div className="max-w-7xl mx-auto px-6 h-[var(--header-height)] flex items-center justify-between">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
           <Link href="/" className="flex items-center gap-2.5">
-            <div className="h-9 w-9 flex items-center justify-center rounded-xl" style={{ backgroundColor: C.primary }}>
-              <OrbitLogo size={20} className="text-[#111]" />
-            </div>
-            <span className="text-xl font-bold tracking-tight text-white">Orbit</span>
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl" style={{ backgroundColor: C.ink }}>
+              <OrbitLogo size={18} className="text-white" />
+            </span>
+            <span className="text-lg font-extrabold tracking-tight">Orbit</span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium" style={{ color: C.textSecondary }}>
-            <button onClick={() => scrollTo("features")} className="hover:text-white transition-colors">Features</button>
-            <button onClick={() => scrollTo("platforms")} className="hover:text-white transition-colors">Platforms</button>
-            <button onClick={() => scrollTo("pricing")} className="hover:text-white transition-colors">Pricing</button>
-            <button onClick={() => scrollTo("faq")} className="hover:text-white transition-colors">FAQ</button>
+          <nav className="hidden items-center gap-8 text-sm font-medium md:flex" style={{ color: C.inkSoft }}>
+            <button onClick={() => scrollTo("services")} className="transition-colors hover:text-black">Services</button>
+            <button onClick={() => scrollTo("how")} className="transition-colors hover:text-black">How it works</button>
+            <button onClick={() => scrollTo("platforms")} className="transition-colors hover:text-black">Platforms</button>
+            <button onClick={() => scrollTo("pricing")} className="transition-colors hover:text-black">Pricing</button>
           </nav>
 
-          <div className="hidden md:flex items-center gap-3">
-            <Link href="/login" className="text-sm font-semibold px-3 py-2 hover:text-white transition-colors" style={{ color: C.textSecondary }}>
+          <div className="hidden items-center gap-3 md:flex">
+            <Link href="/login" className="text-sm font-semibold transition-colors hover:text-black" style={{ color: C.inkSoft }}>
               Sign in
             </Link>
             <Link
               href="/signup"
-              className="px-4 py-2 rounded-xl text-sm font-semibold text-[#111] transition-colors"
-              style={{ backgroundColor: C.primary }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = C.primaryHover)}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = C.primary)}
+              className="rounded-full px-5 py-2.5 text-sm font-semibold text-white transition-transform hover:scale-[1.03] active:scale-95"
+              style={{ backgroundColor: C.ink }}
             >
-              Start free
+              Contact Sales
             </Link>
           </div>
 
-          <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden p-2 text-white/80" aria-label="Menu">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
+          <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2 md:hidden" aria-label="Menu">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="h-6 w-6">
               <path strokeLinecap="round" strokeLinejoin="round" d={mobileMenuOpen ? "M6 18 18 6M6 6l12 12" : "M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"} />
             </svg>
           </button>
@@ -388,22 +378,26 @@ export default function LandingPage() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -16 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 pt-[var(--header-height)] px-6 flex flex-col gap-6 md:hidden"
-            style={{ backgroundColor: C.bg }}
+            className="fixed inset-0 z-40 flex flex-col gap-6 px-6 pt-24 md:hidden"
+            style={{ backgroundColor: C.paper }}
           >
-            <div className="flex flex-col gap-4 pt-8 text-lg font-medium" style={{ color: C.textSecondary }}>
-              {["features", "platforms", "pricing", "faq"].map((id) => (
-                <button key={id} onClick={() => { setMobileMenuOpen(false); scrollTo(id); }} className="text-left capitalize hover:text-white transition-colors">
-                  {id}
+            <div className="flex flex-col gap-4 pt-6 text-lg font-medium" style={{ color: C.inkSoft }}>
+              {[
+                { id: "services", label: "Services" },
+                { id: "how", label: "How it works" },
+                { id: "platforms", label: "Platforms" },
+                { id: "pricing", label: "Pricing" },
+              ].map((item) => (
+                <button key={item.id} onClick={() => { setMobileMenuOpen(false); scrollTo(item.id); }} className="text-left transition-colors hover:text-black">
+                  {item.label}
                 </button>
               ))}
             </div>
-            <div className="h-px w-full" style={{ backgroundColor: C.border }} />
             <div className="flex flex-col gap-3">
-              <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="text-center py-3 rounded-xl font-semibold text-sm text-white" style={{ border: `1px solid ${C.border}` }}>
+              <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="rounded-full py-3 text-center text-sm font-semibold" style={{ border: `1px solid ${C.line}` }}>
                 Sign in
               </Link>
-              <Link href="/signup" onClick={() => setMobileMenuOpen(false)} className="block text-center py-3 rounded-xl font-semibold text-sm text-[#111]" style={{ backgroundColor: C.primary }}>
+              <Link href="/signup" onClick={() => setMobileMenuOpen(false)} className="block rounded-full py-3 text-center text-sm font-semibold text-white" style={{ backgroundColor: C.ink }}>
                 Start free
               </Link>
             </div>
@@ -411,173 +405,228 @@ export default function LandingPage() {
         )}
       </AnimatePresence>
 
-      {/* ── HERO ── */}
-      <section className="relative z-10 max-w-7xl mx-auto px-6 pt-32 md:pt-44 pb-20 md:pb-28">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          <motion.div initial="initial" animate="animate" variants={staggerContainer} className="lg:col-span-6 space-y-8 max-w-2xl">
-            <motion.div
-              variants={fadeUp}
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold"
-              style={{ backgroundColor: C.card, border: `1px solid ${C.border}`, color: C.primaryLight }}
-            >
-              <Sparkles className="h-3.5 w-3.5" />
-              <span>One calm workspace for social media</span>
-            </motion.div>
+      {/* ═══ HERO ═══ */}
+      <section className="relative mx-auto max-w-7xl px-6 pb-16 pt-28 md:pt-36">
+        <div className="grid items-center gap-12 lg:grid-cols-12">
+          <div className="space-y-7 lg:col-span-7">
+            <SectionTag>Welcome to Orbit</SectionTag>
 
-            <motion.h1 variants={fadeUp} className="text-4xl sm:text-6xl font-extrabold tracking-tight leading-[1.05] text-white">
-              Manage every social platform.
-              <span style={{ color: C.primaryLight }}> Grow with AI.</span>
-            </motion.h1>
+            <h1 className="text-5xl font-black uppercase leading-[0.98] tracking-tight sm:text-6xl lg:text-7xl">
+              We orbit your
+              <br />
+              brands &amp; social
+              <br />
+              <span className="relative inline-block">
+                experiences
+                <Starburst className="absolute -right-10 -top-6 hidden h-10 w-10 md:block" style={{ color: C.ink }} />
+              </span>
+            </h1>
 
-            <motion.p variants={fadeUp} className="text-lg leading-relaxed" style={{ color: C.textSecondary }}>
-              Plan, create, schedule, and analyze across all your channels — from one place. Powered by AI, built for teams.
-            </motion.p>
+            <p className="max-w-md text-base leading-relaxed" style={{ color: C.muted }}>
+              Plan, create with AI, schedule everywhere, and see what actually works — one calm
+              workspace for your whole social presence.
+            </p>
 
-            <motion.div variants={fadeUp} className="flex flex-wrap items-center gap-4 pt-1">
+            <div className="flex flex-wrap items-center gap-4">
               <Link
                 href="/signup"
-                className="px-6 py-3.5 rounded-xl text-[#111] font-semibold text-sm transition-colors flex items-center gap-2 group"
-                style={{ backgroundColor: C.primary }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = C.primaryHover)}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = C.primary)}
+                className="group flex items-center gap-2 rounded-full px-6 py-3.5 text-sm font-semibold text-white transition-transform hover:scale-[1.03] active:scale-95"
+                style={{ backgroundColor: C.ink }}
               >
-                Start free
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                Let&apos;s talk
+                <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
               </Link>
-              <button onClick={() => scrollTo("features")} className="px-4 py-3.5 text-sm font-semibold transition-colors hover:text-white" style={{ color: C.textSecondary }}>
-                See how it works
-              </button>
-            </motion.div>
-
-            <motion.p variants={fadeUp} className="text-xs" style={{ color: C.textMuted }}>
-              Free forever plan · No credit card required
-            </motion.p>
-          </motion.div>
-
-          {/* Product preview */}
-          <div className="lg:col-span-6 relative flex justify-center w-full min-h-[440px]">
-            <MouseParallax>
-              <div className="relative w-full h-full flex items-center justify-center">
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.96, y: 24 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 0.2 }}
-                  className="w-full max-w-[500px] rounded-2xl p-5 space-y-4 relative z-10"
-                  style={{ backgroundColor: "rgba(19,24,38,0.8)", border: `1px solid ${C.border}`, boxShadow: "var(--shadow-lg)", backdropFilter: "blur(12px)" }}
-                >
-                  <div className="flex items-center justify-between pb-3" style={{ borderBottom: `1px solid ${C.border}` }}>
-                    <span className="text-xs font-semibold" style={{ color: C.textSecondary }}>This week</span>
-                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-semibold" style={{ backgroundColor: "rgba(45,212,191,0.12)", color: C.accent }}>
-                      <Sparkles className="h-3 w-3" /> AI ready
-                    </span>
-                  </div>
-
-                  {/* mini calendar */}
-                  <div className="p-3 rounded-xl space-y-2" style={{ backgroundColor: C.card, border: `1px solid ${C.border}` }}>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold flex items-center gap-1.5" style={{ color: C.textSecondary }}>
-                        <CalendarIcon className="h-3.5 w-3.5" style={{ color: C.primaryLight }} /> Queue
-                      </span>
-                      <span className="text-xs" style={{ color: C.textMuted }}>Tue, Jul 21</span>
-                    </div>
-                    <div className="grid grid-cols-7 gap-1 text-center text-xs">
-                      {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
-                        <div key={i} className="py-1.5 rounded font-semibold" style={i === 1 ? { backgroundColor: C.primary, color: "#111" } : { color: C.textMuted }}>
-                          {d}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* upcoming post */}
-                  <div className="p-3 rounded-xl flex gap-3 items-center" style={{ backgroundColor: C.card, border: `1px solid ${C.border}` }}>
-                    <div className="flex -space-x-1">
-                      <div className="h-6 w-6 rounded-full flex items-center justify-center text-xs font-bold" style={{ backgroundColor: "rgba(225,48,108,0.18)", color: "#f0729f" }}>I</div>
-                      <div className="h-6 w-6 rounded-full flex items-center justify-center text-xs font-bold" style={{ backgroundColor: "rgba(0,119,181,0.2)", color: "#4aa3d5" }}>in</div>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-white truncate">Product launch thread</p>
-                      <span className="text-xs" style={{ color: C.textMuted }}>Scheduled · 9:15 AM</span>
-                    </div>
-                    <span className="px-2 py-0.5 rounded text-xs font-semibold" style={{ backgroundColor: "rgba(22,163,74,0.15)", color: "#4ade80" }}>Ready</span>
-                  </div>
-
-                  {/* AI suggestion */}
-                  <div className="p-3 rounded-xl space-y-1.5" style={{ backgroundColor: "rgba(45,212,191,0.06)", border: `1px solid rgba(45,212,191,0.15)` }}>
-                    <div className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: C.accent }}>
-                      <Sparkles className="h-3.5 w-3.5" /> AI suggestion
-                    </div>
-                    <p className="text-xs leading-relaxed" style={{ color: C.textSecondary }}>
-                      Posting Tuesday at 9 AM reaches ~24% more of your audience.
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="p-3 rounded-xl" style={{ backgroundColor: C.card, border: `1px solid ${C.border}` }}>
-                      <span className="text-xs font-semibold" style={{ color: C.textMuted }}>Reach</span>
-                      <p className="text-base font-bold text-white mt-0.5">124.8K</p>
-                    </div>
-                    <div className="p-3 rounded-xl" style={{ backgroundColor: C.card, border: `1px solid ${C.border}` }}>
-                      <span className="text-xs font-semibold" style={{ color: C.textMuted }}>Engagement</span>
-                      <p className="text-base font-bold mt-0.5" style={{ color: "#4ade80" }}>+14.2%</p>
-                    </div>
-                  </div>
-                </motion.div>
+              <div className="relative">
+                <button onClick={() => scrollTo("how")} className="rounded-full px-5 py-3.5 text-sm font-semibold transition-colors hover:bg-white" style={{ border: `1px solid ${C.line}` }}>
+                  See how it works
+                </button>
+                <SquiggleArrow className="absolute -right-14 -top-6 hidden h-12 w-12 md:block" style={{ color: C.ink }} />
               </div>
-            </MouseParallax>
+            </div>
           </div>
-        </div>
-      </section>
 
-      {/* ── SOCIAL PROOF (static, honest — no fake counters) ── */}
-      <section className="relative z-10 py-14 border-t" style={{ borderColor: C.border, backgroundColor: C.bgDeep }}>
-        <div className="max-w-7xl mx-auto px-6 space-y-8 text-center">
-          <span className="text-xs uppercase font-bold tracking-widest" style={{ color: C.textMuted }}>
-            Trusted by modern marketing teams
-          </span>
-          <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-6 opacity-60">
-            {TRUSTED_LOGOS.map((logo, i) => {
-              const Icon = logo.icon;
-              return (
-                <div key={i} className="flex items-center gap-2 font-semibold tracking-tight text-sm md:text-base text-white/80">
-                  <Icon className="h-4.5 w-4.5" style={{ color: C.primaryLight }} />
-                  <span>{logo.name}</span>
+          {/* Product card */}
+          <div className="lg:col-span-5">
+            <motion.div
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.15 }}
+              className="relative rounded-[2rem] p-3 shadow-[0_30px_60px_-30px_rgba(0,0,0,0.3)]"
+              style={{ backgroundColor: C.ink }}
+            >
+              <div className="rounded-3xl bg-white p-5">
+                <div className="flex items-center justify-between pb-3" style={{ borderBottom: `1px solid ${C.line}` }}>
+                  <span className="text-xs font-bold uppercase tracking-wider" style={{ color: C.muted }}>
+                    This week
+                  </span>
+                  <span
+                    className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold"
+                    style={{ backgroundColor: "rgba(16,185,129,0.12)", color: "#047857" }}
+                  >
+                    <Sparkles className="h-3 w-3" /> AI ready
+                  </span>
                 </div>
-              );
-            })}
+
+                <div className="mt-4 grid grid-cols-7 gap-1 text-center text-xs font-semibold">
+                  {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => (
+                    <div
+                      key={i}
+                      className="rounded-lg py-2"
+                      style={i === 1 ? { backgroundColor: C.ink, color: "#fff" } : { color: C.muted, backgroundColor: C.paper }}
+                    >
+                      {d}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-4 flex items-center gap-3 rounded-2xl p-3" style={{ backgroundColor: C.paper, border: `1px solid ${C.line}` }}>
+                  <div className="flex -space-x-1.5">
+                    <span className="flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-bold" style={{ backgroundColor: "rgba(225,48,108,0.15)", color: "#e1306c" }}>I</span>
+                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-[10px] font-bold" style={{ border: `1px solid ${C.line}` }}>𝕏</span>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-xs font-bold">Product launch thread</p>
+                    <span className="text-xs" style={{ color: C.muted }}>Scheduled · 9:15 AM</span>
+                  </div>
+                  <span className="rounded-full px-2 py-0.5 text-[10px] font-bold" style={{ backgroundColor: "rgba(16,185,129,0.12)", color: "#047857" }}>
+                    Ready
+                  </span>
+                </div>
+
+                <div className="mt-3 grid grid-cols-2 gap-3">
+                  <div className="rounded-2xl p-3" style={{ backgroundColor: C.paper, border: `1px solid ${C.line}` }}>
+                    <span className="text-xs font-semibold" style={{ color: C.muted }}>Reach</span>
+                    <p className="mt-0.5 text-lg font-black">124.8K</p>
+                  </div>
+                  <div className="rounded-2xl p-3" style={{ backgroundColor: C.paper, border: `1px solid ${C.line}` }}>
+                    <span className="text-xs font-semibold" style={{ color: C.muted }}>Engagement</span>
+                    <p className="mt-0.5 text-lg font-black" style={{ color: "#047857" }}>+14.2%</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* floating pill on the frame */}
+              <span
+                className="absolute -bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full px-4 py-2 text-xs font-bold text-white shadow-lg"
+                style={{ backgroundColor: C.ink }}
+              >
+                Solutions for social teams
+              </span>
+            </motion.div>
           </div>
         </div>
       </section>
 
-      {/* ── PILLARS ── */}
-      <section className="relative z-10 py-24 md:py-32 px-6 max-w-7xl mx-auto space-y-16">
-        <div className="text-center max-w-2xl mx-auto space-y-4">
-          <span className="text-xs uppercase font-bold tracking-wider" style={{ color: C.primaryLight }}>Why Orbit</span>
-          <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-white">Everything social, in one calm place</h2>
-          <p className="text-base" style={{ color: C.textSecondary }}>
-            Skip the tab-juggling. Orbit brings creation, scheduling, and analytics into a single, focused workspace.
-          </p>
+      {/* ═══ WORDMARK STRIP ═══ */}
+      <section className="border-y py-8" style={{ borderColor: C.line }}>
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-6 gap-y-4 px-6 text-lg font-black lowercase tracking-tight" style={{ color: C.ink }}>
+          {WORDMARKS.map((name, i) => (
+            <React.Fragment key={name}>
+              {i > 0 && <span className="text-base font-normal" style={{ color: C.muted }}>+</span>}
+              <span className="opacity-70 transition-opacity hover:opacity-100">{name}</span>
+            </React.Fragment>
+          ))}
+        </div>
+      </section>
+
+      {/* ═══ BLACK STATS BANNER ═══ */}
+      <section className="mx-auto max-w-7xl px-6 py-20 md:py-28">
+        <motion.div
+          variants={fadeUp}
+          initial="initial"
+          whileInView="whileInView"
+          viewport={{ once: true, margin: "-80px" }}
+          className="relative overflow-hidden rounded-[2.5rem] px-8 py-12 md:px-14 md:py-16"
+          style={{ backgroundColor: C.black }}
+        >
+          {/* wavy texture */}
+          <div
+            className="pointer-events-none absolute inset-0 opacity-[0.12]"
+            style={{
+              backgroundImage:
+                "repeating-radial-gradient(circle at 85% 120%, transparent 0px, transparent 14px, rgba(255,255,255,0.5) 15px, transparent 16px)",
+            }}
+          />
+          <div className="relative grid items-center gap-10 lg:grid-cols-2">
+            <div className="space-y-8 text-white">
+              <p className="text-5xl font-black tracking-tight md:text-6xl">
+                12+
+                <span className="mt-2 block text-lg font-semibold" style={{ color: "rgba(255,255,255,0.6)" }}>
+                  platforms connected in one calendar
+                </span>
+              </p>
+              <p className="text-5xl font-black tracking-tight md:text-6xl">
+                5 min
+                <span className="mt-2 block text-lg font-semibold" style={{ color: "rgba(255,255,255,0.6)" }}>
+                  from signup to your first scheduled post
+                </span>
+              </p>
+              <p className="text-5xl font-black tracking-tight md:text-6xl">
+                1 place
+                <span className="mt-2 block text-lg font-semibold" style={{ color: "rgba(255,255,255,0.6)" }}>
+                  for creation, approvals, and analytics
+                </span>
+              </p>
+            </div>
+
+            {/* floating chips panel */}
+            <div className="relative flex min-h-[280px] flex-wrap content-center items-center justify-center gap-3">
+              {PLATFORMS.slice(0, 8).map((p, i) => {
+                const rotations = ["-rotate-3", "rotate-2", "-rotate-2", "rotate-3", "rotate-1", "-rotate-1", "rotate-2", "-rotate-3"];
+                return (
+                  <span
+                    key={p.name}
+                    className={`rounded-full px-4 py-2 text-sm font-semibold text-white shadow-lg ${rotations[i % rotations.length]}`}
+                    style={{ backgroundColor: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.18)" }}
+                  >
+                    {p.name}
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* ═══ SERVICES (numbered cards) ═══ */}
+      <section id="services" className="mx-auto max-w-7xl space-y-12 px-6 pb-20 md:pb-28">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <SectionTag>What we do</SectionTag>
+          <h2 className="max-w-2xl text-4xl font-black tracking-tight md:text-5xl">
+            Everything social, in one calm place
+          </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {PILLARS.map((card, i) => {
-            const Icon = card.icon;
+        <div className="grid gap-6 md:grid-cols-3">
+          {SERVICES.map((s) => {
+            const Icon = s.icon;
+            const dark = s.dark;
             return (
               <motion.div
-                key={i}
-                initial="initial"
-                whileInView="animate"
-                viewport={{ once: true, margin: "-80px" }}
+                key={s.n}
                 variants={fadeUp}
-                className="p-8 rounded-2xl space-y-5"
-                style={{ backgroundColor: C.card, border: `1px solid ${C.border}` }}
+                initial="initial"
+                whileInView="whileInView"
+                viewport={{ once: true, margin: "-80px" }}
+                className="flex min-h-[320px] flex-col justify-between rounded-[2rem] p-8"
+                style={dark ? { backgroundColor: C.black, color: "#fff" } : { backgroundColor: C.card, border: `1px solid ${C.line}` }}
               >
-                <div className="h-12 w-12 rounded-xl flex items-center justify-center" style={{ backgroundColor: "rgba(255,255,255,0.06)", color: C.primaryLight }}>
-                  <Icon className="h-6 w-6" />
+                <div className="flex items-start justify-between">
+                  <span
+                    className="flex h-11 w-11 items-center justify-center rounded-xl"
+                    style={dark ? { backgroundColor: "rgba(255,255,255,0.12)", color: "#fff" } : { backgroundColor: C.paper, border: `1px solid ${C.line}` }}
+                  >
+                    <Icon className="h-5 w-5" />
+                  </span>
+                  <span className="text-4xl font-black" style={dark ? { color: "rgba(255,255,255,0.25)" } : { color: C.line }}>
+                    {s.n}
+                  </span>
                 </div>
-                <div className="space-y-2">
-                  <h3 className="text-lg font-bold text-white">{card.title}</h3>
-                  <p className="text-sm leading-relaxed" style={{ color: C.textSecondary }}>{card.description}</p>
+                <div className="space-y-3">
+                  <h3 className="text-2xl font-extrabold tracking-tight">{s.title}</h3>
+                  <p className="text-sm leading-relaxed" style={dark ? { color: "rgba(255,255,255,0.65)" } : { color: C.muted }}>
+                    {s.description}
+                  </p>
                 </div>
               </motion.div>
             );
@@ -585,238 +634,234 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── FEATURE EXPLORER (clean product panel — no terminal gimmick) ── */}
-      <section id="features" className="relative z-10 py-24 md:py-32 px-6 max-w-7xl mx-auto border-t space-y-16" style={{ borderColor: C.border }}>
-        <div className="text-center max-w-2xl mx-auto space-y-4">
-          <span className="text-xs uppercase font-bold tracking-wider" style={{ color: C.primaryLight }}>Features</span>
-          <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-white">A tool for every part of the workflow</h2>
+      {/* ═══ HOW IT WORKS (scattered polaroids) ═══ */}
+      <section id="how" className="mx-auto max-w-7xl space-y-14 px-6 pb-20 md:pb-28">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <SectionTag>How it works</SectionTag>
+          <h2 className="max-w-2xl text-4xl font-black tracking-tight md:text-5xl">
+            Let us show you how we drive your brand to new heights
+          </h2>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Tabs */}
-          <div className="lg:col-span-5 flex flex-col gap-2">
-            {FEATURES.map((feat) => {
-              const active = selectedFeature === feat.id;
-              return (
-                <button
-                  key={feat.id}
-                  onClick={() => setSelectedFeature(feat.id)}
-                  className="w-full text-left p-4 rounded-xl transition-colors flex items-start justify-between gap-4"
-                  style={{
-                    backgroundColor: active ? "rgba(99,102,241,0.08)" : C.card,
-                    border: `1px solid ${active ? "rgba(99,102,241,0.3)" : C.border}`,
-                  }}
-                >
-                  <div>
-                    <h4 className="text-sm font-semibold" style={{ color: active ? "#fff" : C.textSecondary }}>{feat.title}</h4>
-                    <p className="text-xs mt-1.5 leading-relaxed" style={{ color: C.textMuted }}>{feat.description}</p>
-                  </div>
-                  <ChevronRight className="h-4 w-4 shrink-0 mt-0.5 transition-transform" style={{ color: active ? C.primaryLight : C.textMuted, transform: active ? "translateX(2px)" : "none" }} />
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Preview */}
-          <div className="lg:col-span-7 rounded-2xl p-8 min-h-[340px] flex flex-col justify-between" style={{ backgroundColor: C.bgDeep, border: `1px solid ${C.border}` }}>
-            <div className="space-y-5">
-              <h3 className="text-2xl font-bold text-white">{activeFeature.title}</h3>
-              <p className="text-sm leading-relaxed" style={{ color: C.textSecondary }}>{activeFeature.description}</p>
-              <ul className="space-y-3 pt-2">
-                {activeFeature.bullets.map((b, i) => (
-                  <li key={i} className="flex items-center gap-3 text-sm" style={{ color: C.text }}>
-                    <span className="h-5 w-5 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: "rgba(255,255,255,0.08)", color: C.primaryLight }}>
-                      <Check className="h-3 w-3" />
-                    </span>
-                    {b}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <Link href="/signup" className="self-start mt-6 text-sm font-semibold flex items-center gap-1.5 transition-colors" style={{ color: C.primaryLight }}>
-              Try it free <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-          </div>
+        <div className="relative grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          {STEPS.map((step) => (
+            <StepCard key={step.n} step={step} />
+          ))}
         </div>
+
+        <p className="text-center text-lg font-bold italic" style={{ color: C.inkSoft, transform: "rotate(-2deg)" }}>
+          — ready to be delivered!
+        </p>
       </section>
 
-      {/* ── AI MOMENT (teal accent, no terminal framing) ── */}
-      <section className="relative z-10 py-24 md:py-32 px-6 max-w-7xl mx-auto border-t" style={{ borderColor: C.border }}>
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-          <div className="lg:col-span-5 space-y-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold" style={{ backgroundColor: "rgba(45,212,191,0.1)", border: `1px solid rgba(45,212,191,0.2)`, color: C.accent }}>
-              <Sparkles className="h-3.5 w-3.5" /> Orbit AI
+      {/* ═══ DARK AI SECTION ═══ */}
+      <section className="mx-auto max-w-7xl px-6 pb-20 md:pb-28">
+        <motion.div
+          variants={fadeUp}
+          initial="initial"
+          whileInView="whileInView"
+          viewport={{ once: true, margin: "-80px" }}
+          className="rounded-[2.5rem] p-8 md:p-14"
+          style={{ backgroundColor: C.black }}
+        >
+          <div className="grid gap-12">
+            <div className="grid items-start gap-8 lg:grid-cols-2">
+              <div className="space-y-6">
+                <SectionTag dark>Orbit AI</SectionTag>
+                <h2 className="text-3xl font-black tracking-tight text-white md:text-4xl">
+                  We craft meaningful content, not just quick impressions
+                </h2>
+              </div>
+              <p className="max-w-md self-end text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.6)" }}>
+                Orbit AI learns your voice from your own examples, drafts every variant, and turns
+                your real performance data into your next content plan. Six skills, one workspace.
+              </p>
             </div>
-            <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-white leading-tight">Draft a week of content in minutes</h2>
-            <p className="leading-relaxed" style={{ color: C.textSecondary }}>
-              Describe what you need. Orbit writes captions, hashtags, replies, and ideas in your brand voice — ready to schedule.
-            </p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2">
-              {AI_TABS.map((tab) => {
-                const active = aiTab === tab.id;
+
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {AI_CARDS.map((card) => {
+                const Icon = card.icon;
                 return (
-                  <button
-                    key={tab.id}
-                    onClick={() => setAiTab(tab.id)}
-                    className="px-3 py-2 rounded-lg text-xs font-semibold transition-colors"
-                    style={active ? { backgroundColor: C.accent, color: "#04201c" } : { backgroundColor: C.card, border: `1px solid ${C.border}`, color: C.textSecondary }}
+                  <div
+                    key={card.title}
+                    className="space-y-3 rounded-2xl p-6 transition-colors"
+                    style={{ backgroundColor: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}
                   >
-                    {tab.label}
-                  </button>
+                    <Icon className="h-5 w-5" style={{ color: "#6EE7B7" }} />
+                    <h3 className="font-bold text-white">{card.title}</h3>
+                    <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.55)" }}>
+                      {card.description}
+                    </p>
+                  </div>
                 );
               })}
             </div>
           </div>
+        </motion.div>
+      </section>
 
-          <div className="lg:col-span-7">
-            <div className="rounded-2xl overflow-hidden flex flex-col min-h-[340px]" style={{ backgroundColor: C.bgDeep, border: `1px solid ${C.border}` }}>
-              <div className="px-5 py-3 flex items-center gap-2" style={{ borderBottom: `1px solid ${C.border}` }}>
-                <Sparkles className="h-3.5 w-3.5" style={{ color: C.accent }} />
-                <span className="text-xs font-medium" style={{ color: C.textSecondary }}>
-                  {AI_TABS.find((t) => t.id === aiTab)?.prompt}
+      {/* ═══ PLATFORMS ═══ */}
+      <section id="platforms" className="mx-auto max-w-7xl space-y-12 px-6 pb-20 md:pb-28">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <SectionTag>Integrations</SectionTag>
+          <h2 className="max-w-2xl text-4xl font-black tracking-tight md:text-5xl">Every platform, one workspace</h2>
+          <p className="max-w-xl text-sm" style={{ color: C.muted }}>
+            Connect your accounts and publish everywhere from a single calendar.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-6">
+          {PLATFORMS.map((plat) => {
+            const Icon = plat.icon;
+            const isBlackLogo = plat.color === "#000000" || plat.color === "#000";
+            return (
+              <motion.div
+                key={plat.name}
+                variants={fadeUp}
+                initial="initial"
+                whileInView="whileInView"
+                viewport={{ once: true, margin: "-40px" }}
+                className="flex flex-col items-center justify-center gap-3 rounded-2xl p-5 text-center"
+                style={{ backgroundColor: C.card, border: `1px solid ${C.line}` }}
+              >
+                <span
+                  className="flex h-10 w-10 items-center justify-center rounded-full"
+                  style={{
+                    backgroundColor: isBlackLogo ? C.ink : C.paper,
+                    border: isBlackLogo ? "none" : `1px solid ${C.line}`,
+                  }}
+                >
+                  <Icon className="h-4.5 w-4.5" color={isBlackLogo ? "#FFFFFF" : plat.color} />
                 </span>
-              </div>
-              <div className="p-6 flex-1 flex flex-col">
-                <span className="text-xs uppercase font-bold tracking-wider mb-3" style={{ color: C.textMuted }}>Generated</span>
-                <div className="p-4 rounded-xl text-sm leading-relaxed whitespace-pre-wrap flex-1" style={{ backgroundColor: C.card, border: `1px solid ${C.border}`, color: C.text }}>
-                  {typedText}
-                  {isTyping && <span className="inline-block w-1.5 h-4 ml-1 align-middle animate-pulse" style={{ backgroundColor: C.accent }} />}
-                </div>
-                <div className="flex items-center justify-end gap-2 mt-4">
-                  <button className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors" style={{ backgroundColor: C.card, border: `1px solid ${C.border}`, color: C.textSecondary }}>
-                    Regenerate
-                  </button>
-                  <Link href="/signup" className="px-3 py-1.5 rounded-lg text-xs font-semibold text-[#111] transition-colors" style={{ backgroundColor: C.primary }}>
-                    Use this
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
+                <span className="text-xs font-bold" style={{ color: C.inkSoft }}>{plat.name}</span>
+              </motion.div>
+            );
+          })}
         </div>
       </section>
 
-      {/* ── PLATFORMS ── */}
-      <section id="platforms" className="relative z-10 py-24 md:py-32 border-t" style={{ borderColor: C.border, backgroundColor: C.bgDeep }}>
-        <div className="max-w-7xl mx-auto px-6 space-y-14">
-          <div className="text-center max-w-2xl mx-auto space-y-4">
-            <span className="text-xs uppercase font-bold tracking-wider" style={{ color: C.primaryLight }}>Integrations</span>
-            <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-white">Every platform, one workspace</h2>
-            <p className="text-base" style={{ color: C.textSecondary }}>Connect your accounts and publish everywhere from a single calendar.</p>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
-            {PLATFORMS.map((plat, i) => {
-              const Icon = plat.icon;
-              const isBlackLogo = plat.color === "#000000" || plat.color === "#000";
-              return (
-                <div key={i} className="p-5 rounded-xl flex flex-col items-center justify-center text-center gap-3 transition-colors" style={{ backgroundColor: C.card, border: `1px solid ${C.border}` }}>
-                  <div 
-                    className="h-10 w-10 rounded-full flex items-center justify-center" 
-                    style={{ 
-                      backgroundColor: isBlackLogo ? "#FFFFFF" : "rgba(255,255,255,0.05)", 
-                      border: isBlackLogo ? "none" : `1px solid ${C.border}` 
-                    }}
-                  >
-                    <Icon className="h-5 w-5" color={plat.color} />
-                  </div>
-                  <span className="text-xs font-semibold" style={{ color: C.textSecondary }}>{plat.name}</span>
-                </div>
-              );
-            })}
-          </div>
+      {/* ═══ TESTIMONIALS ═══ */}
+      <section className="mx-auto max-w-7xl space-y-12 px-6 pb-20 md:pb-28">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <SectionTag>Testimonials</SectionTag>
+          <h2 className="max-w-2xl text-4xl font-black tracking-tight md:text-5xl">Satisfied clients speak</h2>
         </div>
-      </section>
 
-      {/* ── TESTIMONIALS ── */}
-      <section className="relative z-10 py-24 md:py-32 px-6 max-w-7xl mx-auto border-t space-y-16" style={{ borderColor: C.border }}>
-        <div className="text-center max-w-2xl mx-auto space-y-4">
-          <span className="text-xs uppercase font-bold tracking-wider" style={{ color: C.primaryLight }}>Testimonials</span>
-          <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-white">Loved by teams that ship content</h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid gap-6 md:grid-cols-3">
           {TESTIMONIALS.map((t, i) => (
-            <div key={i} className="p-8 rounded-2xl flex flex-col justify-between gap-8 relative" style={{ backgroundColor: C.card, border: `1px solid ${C.border}` }}>
-              <Quote className="h-8 w-8 absolute top-6 right-6" style={{ color: "rgba(255,255,255,0.10)" }} />
-              <div className="space-y-4 relative z-10">
-                <div className="flex gap-0.5" style={{ color: "#f5b301" }}>
-                  {[...Array(5)].map((_, idx) => <span key={idx}>★</span>)}
-                </div>
-                <p className="text-sm leading-relaxed" style={{ color: C.textSecondary }}>“{t.quote}”</p>
+            <motion.div
+              key={t.name}
+              variants={fadeUp}
+              initial="initial"
+              whileInView="whileInView"
+              viewport={{ once: true, margin: "-80px" }}
+              className={`flex flex-col justify-between gap-8 rounded-[2rem] p-8 ${i % 2 === 1 ? "md:-rotate-1" : "md:rotate-1"}`}
+              style={{ backgroundColor: C.card, border: `1px solid ${C.line}` }}
+            >
+              <div className="space-y-4">
+                <Quote className="h-7 w-7" style={{ color: C.line }} />
+                <p className="text-sm leading-relaxed" style={{ color: C.inkSoft }}>
+                  &ldquo;{t.quote}&rdquo;
+                </p>
               </div>
-              <div className="flex items-center gap-3.5 pt-4 relative z-10" style={{ borderTop: `1px solid ${C.border}` }}>
-                <img src={t.avatar} alt={t.name} className="h-10 w-10 rounded-full object-cover mt-4" style={{ border: `1px solid ${C.border}` }} />
-                <div className="mt-4">
-                  <h4 className="text-sm font-semibold text-white">{t.name}</h4>
-                  <span className="text-xs" style={{ color: C.textMuted }}>{t.role} · {t.company}</span>
+              <div className="flex items-center gap-3.5 pt-4" style={{ borderTop: `1px solid ${C.line}` }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={t.avatar} alt={t.name} className="h-10 w-10 rounded-full object-cover" style={{ border: `1px solid ${C.line}` }} />
+                <div>
+                  <h4 className="text-sm font-bold">{t.name}</h4>
+                  <span className="text-xs" style={{ color: C.muted }}>{t.role}</span>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </section>
 
-      {/* ── PRICING ── */}
-      <section id="pricing" className="relative z-10 py-24 md:py-32 px-6 max-w-7xl mx-auto border-t space-y-16" style={{ borderColor: C.border }}>
-        <div className="text-center max-w-2xl mx-auto space-y-4">
-          <span className="text-xs uppercase font-bold tracking-wider" style={{ color: C.primaryLight }}>Pricing</span>
-          <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-white">Start free, upgrade as you grow</h2>
-          <p className="text-base" style={{ color: C.textSecondary }}>Simple, transparent pricing. No surprises.</p>
+      {/* ═══ PRICING ═══ */}
+      <section id="pricing" className="mx-auto max-w-7xl space-y-12 px-6 pb-20 md:pb-28">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <SectionTag>Pricing</SectionTag>
+          <h2 className="max-w-2xl text-4xl font-black tracking-tight md:text-5xl">Start free, upgrade as you grow</h2>
+          <p className="text-sm" style={{ color: C.muted }}>Simple, transparent pricing. No surprises.</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto items-stretch">
+        <div className="mx-auto grid max-w-5xl items-stretch gap-6 md:grid-cols-3">
           {PRICING.map((plan) => (
-            <div
+            <motion.div
               key={plan.name}
-              className="p-8 rounded-2xl flex flex-col justify-between gap-8 relative"
-              style={{
-                backgroundColor: plan.highlighted ? "rgba(99,102,241,0.06)" : C.card,
-                border: `1px solid ${plan.highlighted ? "rgba(99,102,241,0.4)" : C.border}`,
-              }}
+              variants={fadeUp}
+              initial="initial"
+              whileInView="whileInView"
+              viewport={{ once: true, margin: "-80px" }}
+              className="relative flex flex-col justify-between gap-8 rounded-[2rem] p-8"
+              style={
+                plan.highlighted
+                  ? { backgroundColor: C.black, color: "#fff" }
+                  : { backgroundColor: C.card, border: `1px solid ${C.line}` }
+              }
             >
-              {plan.highlighted && (
-                <div className="absolute top-4 right-4 px-2 py-0.5 rounded-full text-xs font-bold uppercase" style={{ backgroundColor: "rgba(255,255,255,0.10)", color: C.primaryLight }}>
-                  Most popular
-                </div>
-              )}
               <div className="space-y-4">
-                <span className="text-xs font-bold uppercase" style={{ color: plan.highlighted ? C.primaryLight : C.textMuted }}>{plan.name}</span>
-                <p className="text-3xl font-extrabold text-white">{plan.price}<span className="text-xs font-normal" style={{ color: C.textMuted }}> {plan.cadence}</span></p>
-                <p className="text-xs leading-relaxed" style={{ color: C.textSecondary }}>{plan.blurb}</p>
-                <div className="h-px my-3" style={{ backgroundColor: C.border }} />
-                <ul className="space-y-2.5 text-xs" style={{ color: C.textSecondary }}>
-                  {plan.features.map((f, i) => (
-                    <li key={i} className="flex items-center gap-2">
-                      <Check className="h-3.5 w-3.5" style={{ color: C.primaryLight }} /> {f}
+                <span
+                  className="text-xs font-bold uppercase tracking-wider"
+                  style={plan.highlighted ? { color: "rgba(255,255,255,0.6)" } : { color: C.muted }}
+                >
+                  {plan.name}
+                </span>
+                <p className="text-4xl font-black tracking-tight">
+                  {plan.price}
+                  <span className="text-xs font-normal" style={plan.highlighted ? { color: "rgba(255,255,255,0.5)" } : { color: C.muted }}>
+                    {" "}
+                    {plan.cadence}
+                  </span>
+                </p>
+                <p className="text-xs" style={plan.highlighted ? { color: "rgba(255,255,255,0.6)" } : { color: C.muted }}>
+                  {plan.blurb}
+                </p>
+                <div className="my-3 h-px" style={plan.highlighted ? { backgroundColor: "rgba(255,255,255,0.15)" } : { backgroundColor: C.line }} />
+                <ul className="space-y-2.5 text-xs" style={plan.highlighted ? { color: "rgba(255,255,255,0.75)" } : { color: C.inkSoft }}>
+                  {plan.features.map((f) => (
+                    <li key={f} className="flex items-center gap-2">
+                      <Check className="h-3.5 w-3.5" style={{ color: plan.highlighted ? "#6EE7B7" : "#047857" }} /> {f}
                     </li>
                   ))}
                 </ul>
               </div>
               <Link
                 href="/signup"
-                className="block w-full py-2.5 rounded-xl text-xs font-semibold transition-colors text-center"
-                style={plan.highlighted ? { backgroundColor: C.primary, color: "#111" } : { backgroundColor: "transparent", border: `1px solid ${C.border}`, color: C.text }}
+                className="block w-full rounded-full py-3 text-center text-xs font-bold transition-transform hover:scale-[1.02] active:scale-95"
+                style={
+                  plan.highlighted
+                    ? { backgroundColor: "#fff", color: C.ink }
+                    : { border: `1px solid ${C.line}`, color: C.ink }
+                }
               >
                 {plan.cta}
               </Link>
-            </div>
+            </motion.div>
           ))}
         </div>
       </section>
 
-      {/* ── FAQ ── */}
-      <section id="faq" className="relative z-10 py-24 md:py-32 px-6 max-w-4xl mx-auto border-t space-y-12" style={{ borderColor: C.border }}>
-        <div className="text-center space-y-4">
-          <span className="text-xs uppercase font-bold tracking-wider" style={{ color: C.primaryLight }}>FAQ</span>
-          <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-white">Questions, answered</h2>
+      {/* ═══ FAQ ═══ */}
+      <section id="faq" className="mx-auto max-w-3xl space-y-10 px-6 pb-20 md:pb-28">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <SectionTag>FAQ</SectionTag>
+          <h2 className="text-4xl font-black tracking-tight md:text-5xl">Questions, answered</h2>
         </div>
         <div className="space-y-3">
           {FAQS.map((faq, idx) => {
             const isOpen = faqOpen === idx;
             return (
-              <div key={idx} className="rounded-xl overflow-hidden" style={{ backgroundColor: C.card, border: `1px solid ${C.border}` }}>
-                <button onClick={() => setFaqOpen(isOpen ? null : idx)} className="w-full px-6 py-5 text-left flex justify-between items-center gap-4 text-sm font-semibold text-white">
+              <div key={idx} className="overflow-hidden rounded-2xl" style={{ backgroundColor: C.card, border: `1px solid ${C.line}` }}>
+                <button
+                  onClick={() => setFaqOpen(isOpen ? null : idx)}
+                  className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left text-sm font-bold"
+                >
                   <span>{faq.q}</span>
-                  <ChevronDown className="h-4 w-4 shrink-0 transition-transform" style={{ color: C.textSecondary, transform: isOpen ? "rotate(180deg)" : "none" }} />
+                  <ChevronDown
+                    className="h-4 w-4 shrink-0 transition-transform"
+                    style={{ color: C.muted, transform: isOpen ? "rotate(180deg)" : "none" }}
+                  />
                 </button>
                 <AnimatePresence initial={false}>
                   {isOpen && (
@@ -825,10 +870,11 @@ export default function LandingPage() {
                       animate={{ height: "auto", opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
                       transition={{ duration: 0.2 }}
-                      className="px-6 pb-5 text-sm leading-relaxed"
-                      style={{ color: C.textSecondary, borderTop: `1px solid ${C.border}`, paddingTop: "0.75rem" }}
+                      className="overflow-hidden"
                     >
-                      {faq.a}
+                      <p className="px-6 pb-5 text-sm leading-relaxed" style={{ color: C.muted }}>
+                        {faq.a}
+                      </p>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -838,94 +884,92 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── FINAL CTA ── */}
-      <section className="relative z-10 py-24 md:py-32 px-6 max-w-7xl mx-auto">
+      {/* ═══ FINAL CTA (black banner) ═══ */}
+      <section className="mx-auto max-w-7xl px-6 pb-24">
         <motion.div
+          variants={fadeUp}
           initial="initial"
-          whileInView="animate"
-          viewport={{ once: true, margin: "-100px" }}
-          variants={scaleIn}
-          className="relative p-12 md:p-20 rounded-3xl text-center space-y-8 max-w-4xl mx-auto overflow-hidden"
-          style={{ backgroundColor: C.card, border: `1px solid ${C.border}` }}
+          whileInView="whileInView"
+          viewport={{ once: true, margin: "-80px" }}
+          className="relative overflow-hidden rounded-[2.5rem] px-8 py-16 text-center md:py-20"
+          style={{ backgroundColor: C.black }}
         >
-          <div className="glow-bg" style={{ top: "50%", left: "50%", transform: "translate(-50%,-50%)", width: "60%", height: "80%", backgroundColor: "rgba(255,255,255,0.06)" }} />
-          <div className="relative z-10 space-y-6 max-w-2xl mx-auto">
-            <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">Ready to simplify your social media?</h2>
-            <p className="text-sm leading-relaxed" style={{ color: C.textSecondary }}>
-              Join the teams and creators planning their whole social presence in Orbit. Start free — no credit card required.
+          <Starburst className="pointer-events-none absolute -left-8 -top-8 h-28 w-28 opacity-20" />
+          <Starburst className="pointer-events-none absolute -bottom-10 -right-10 h-36 w-36 opacity-20" />
+          <div className="relative z-10 mx-auto max-w-2xl space-y-7">
+            <h2 className="text-4xl font-black uppercase tracking-tight text-white md:text-5xl">
+              Let&apos;s get your brand orbiting
+            </h2>
+            <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.6)" }}>
+              Join the teams and creators planning their whole social presence in Orbit.
+              Start free — no credit card required.
             </p>
-            <div className="flex justify-center pt-2">
-              <Link
-                href="/signup"
-                className="px-6 py-3.5 rounded-xl text-[#111] font-semibold text-sm transition-colors flex items-center gap-2 group"
-                style={{ backgroundColor: C.primary }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = C.primaryHover)}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = C.primary)}
-              >
-                Start free <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-              </Link>
-            </div>
+            <Link
+              href="/signup"
+              className="group inline-flex items-center gap-2 rounded-full bg-white px-7 py-3.5 text-sm font-bold transition-transform hover:scale-[1.03] active:scale-95"
+              style={{ color: C.ink }}
+            >
+              Start free
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+            </Link>
           </div>
         </motion.div>
       </section>
 
-      {/* ── FOOTER ── */}
-      <footer className="relative z-10 border-t py-16 md:py-20 px-6" style={{ borderColor: C.border, backgroundColor: C.bgDeep }}>
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12">
-          <div className="md:col-span-4 space-y-6">
+      {/* ═══ FOOTER (black) ═══ */}
+      <footer className="px-6 py-16 md:py-20" style={{ backgroundColor: C.black }}>
+        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-10 md:grid-cols-12">
+          <div className="space-y-5 md:col-span-5">
             <Link href="/" className="flex items-center gap-2.5">
-              <div className="h-9 w-9 flex items-center justify-center rounded-xl" style={{ backgroundColor: C.primary }}>
-                <OrbitLogo size={20} className="text-[#111]" />
-              </div>
-              <span className="text-xl font-bold tracking-tight text-white">Orbit</span>
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white">
+                <OrbitLogo size={18} className="text-black" />
+              </span>
+              <span className="text-lg font-extrabold tracking-tight text-white">orbit.</span>
             </Link>
-            <p className="text-xs leading-relaxed max-w-sm" style={{ color: C.textSecondary }}>
-              One calm workspace for social media. Plan, create with AI, schedule everywhere, and see what works.
+            <p className="max-w-sm text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.55)" }}>
+              One calm workspace for social media. Plan, create with AI, schedule everywhere, and
+              see what works.
             </p>
           </div>
 
           {[
-            { title: "Product", links: ["Features", "Platforms", "Pricing", "Changelog"] },
+            { title: "Product", links: ["Services", "How it works", "Platforms", "Pricing"] },
             { title: "Resources", links: ["Blog", "Help center", "API docs", "Status"] },
             { title: "Company", links: ["About", "Careers", "Brand", "Contact"] },
           ].map((col) => (
-            <div key={col.title} className="md:col-span-2 space-y-4">
-              <span className="text-xs uppercase font-bold tracking-wider text-white block">{col.title}</span>
-              <ul className="space-y-2 text-xs" style={{ color: C.textSecondary }}>
+            <div key={col.title} className="space-y-4 md:col-span-2">
+              <span className="block text-xs font-bold uppercase tracking-wider text-white">{col.title}</span>
+              <ul className="space-y-2 text-xs" style={{ color: "rgba(255,255,255,0.55)" }}>
                 {col.links.map((l) => (
-                  <li key={l}><a href="#" className="hover:text-white transition-colors">{l}</a></li>
+                  <li key={l}>
+                    <a href="#" className="transition-colors hover:text-white">{l}</a>
+                  </li>
                 ))}
               </ul>
             </div>
           ))}
 
-          <div className="md:col-span-2 space-y-4">
-            <span className="text-xs uppercase font-bold tracking-wider text-white block">Connect</span>
-            <div className="flex gap-2">
+          <div className="space-y-4 md:col-span-1">
+            <span className="block text-xs font-bold uppercase tracking-wider text-white">Social</span>
+            <div className="flex flex-wrap gap-2">
               {[
                 { Icon: InstagramIcon, color: PLATFORM_COLORS.instagram },
-                { Icon: LinkedInIcon, color: PLATFORM_COLORS.linkedin },
                 { Icon: XIcon, color: PLATFORM_COLORS.twitter },
-              ].map((item, i) => {
-                const isBlackLogo = item.color === "#000000" || item.color === "#000";
-                return (
-                  <a 
-                    key={i} 
-                    href="#" 
-                    className="h-8 w-8 rounded-lg flex items-center justify-center transition-colors hover:opacity-80" 
-                    style={{ 
-                      backgroundColor: isBlackLogo ? "#FFFFFF" : C.card, 
-                      border: isBlackLogo ? "none" : `1px solid ${C.border}` 
-                    }}
-                  >
-                    <item.Icon className="h-4 w-4" color={item.color} />
-                  </a>
-                );
-              })}
+                { Icon: LinkedInIcon, color: PLATFORM_COLORS.linkedin },
+              ].map((item, i) => (
+                <a
+                  key={i}
+                  href="#"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg transition-transform hover:scale-105"
+                  style={{ backgroundColor: "rgba(255,255,255,0.08)" }}
+                >
+                  <item.Icon className="h-4 w-4" color="#FFFFFF" />
+                </a>
+              ))}
             </div>
-            <div className="pt-2 flex items-center gap-1.5 text-xs" style={{ color: C.textMuted }}>
-              <Lock className="h-3 w-3" /> © 2026 Orbit Inc.
-            </div>
+            <p className="pt-2 text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>
+              © 2026 Orbit Inc.
+            </p>
           </div>
         </div>
       </footer>

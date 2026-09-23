@@ -177,6 +177,9 @@ export class WebhooksService {
 
   /**
    * List recent deliveries for a workspace's webhook (for the dashboard).
+   * Scalar fields only: the JSON payload column is excluded both because
+   * the UI never renders it and because Prisma's recursive Json type breaks
+   * tRPC inference in the web app's cross-package type import.
    */
   async listDeliveries(workspaceId: string, webhookId: string, limit = 20) {
     const webhook = await prisma.webhook.findUnique({ where: { id: webhookId } });
@@ -185,6 +188,16 @@ export class WebhooksService {
     }
     return prisma.webhookDelivery.findMany({
       where: { webhookId },
+      select: {
+        id: true,
+        event: true,
+        status: true,
+        responseCode: true,
+        responseBody: true,
+        attempts: true,
+        deliveredAt: true,
+        createdAt: true,
+      },
       orderBy: { createdAt: "desc" },
       take: Math.min(limit, 100),
     });

@@ -63,6 +63,9 @@ export default function SettingsGeneralPage() {
         <Link href="/settings/developer" className="px-3 py-1.5 rounded-md text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] hover:text(--color-text-secondary)">
           Developer API
         </Link>
+        <Link href="/settings/templates" className="px-3 py-1.5 rounded-md text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]">
+          Templates
+        </Link>
         <Link href="/settings/rss" className="px-3 py-1.5 rounded-md text-xs font-semibold uppercase tracking-wider text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]">
           RSS Feeds
         </Link>

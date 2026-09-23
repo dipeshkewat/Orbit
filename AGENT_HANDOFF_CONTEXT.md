@@ -18,13 +18,13 @@ Monorepo shape:
 The project is no longer a static mock UI. It has been built toward a real SaaS product with workspace isolation, scheduled publishing, encrypted tokens, analytics storage, collaboration flows, and server-backed dashboard data.
 
 Current best estimate:
-- Overall product completion: ~80%
-- Remaining work: later roadmap slices (AI differentiation, ecosystem growth, launch hardening, live-provider verification of the billing and ingestion slices)
+- Overall product completion: ~95%
+- Remaining work: launch hardening only — live sandbox verification (Stripe, providers, embeddings), observability, and operational runbooks
 
 The authoritative roadmap is:
 - Orbit/docs/ORBIT_GAP_CLOSING_ROADMAP.md
 
-The roadmap explicitly states that provider metric ingestion and monetization are now implemented; AI differentiation is the next active implementation slice.
+The roadmap explicitly states that provider metric ingestion, monetization, AI differentiation, and ecosystem features are all implemented; only launch hardening remains.
 
 ## 3) Important constraints and delivery rules
 
@@ -259,15 +259,37 @@ What remains for this slice:
 - Stripe Customer Portal configuration and webhook endpoint registration in the Stripe dashboard.
 - Optional: proration handling for mid-cycle plan switches (currently portal-driven).
 
-### 5.3 AI differentiation
+### 5.3 AI differentiation (implemented 2026-09-23, live embedding verification remains)
 
-This is still a planned later-phase deliverable.
+- Brand voice: examples embedded (OpenAI text-embedding-3-small with deterministic local fallback in @orbit/ai) and persisted to pgvector via parameterized raw SQL (the vector column is Prisma-Unsupported). Retrieval ranks by cosine distance (<=>) with recency fallback.
+- Content repurposing: AiDifferentiationService.repurposePost turns any workspace post into platform-optimized variants, conditioned on retrieved brand voice; JSON parse failure falls back to truncated source.
+- Performance recommendations: getRecommendations aggregates 30 days of PostMetrics, ranks platforms by engagement rate, and returns concrete actions; graceful onboarding response when no data.
+- The AI tRPC router previously returned hardcoded mocks — it now wires the real AiService and AiDifferentiationService with workspace authorization and atomic credit metering on every generation.
 
-Planned work:
-- Branded voice generation
-- Content repurposing and multi-channel variants
-- Performance-based recommendation engine
-- AI-assisted planning and optimization
+Files:
+- Orbit/packages/ai/src/embeddings.ts (+ re-export in index.ts; run `pnpm build` in packages/ai after pulling)
+- Orbit/apps/api/src/modules/ai/ai-differentiation.service.ts (+ spec)
+- Orbit/apps/api/src/trpc/routers/ai.ts (real implementations)
+
+What remains for this slice:
+- Verify embedding quality with a real OPENAI_API_KEY (fallback embeddings are consistent but crude).
+
+### 5.4 Ecosystem and growth features (implemented 2026-09-23)
+
+- Outbound webhooks: HMAC-SHA256 signed, event-filtered, concurrent dispatch with 3-attempt exponential backoff (1s/2s) and per-attempt delivery logging; new deliveries listing endpoint. The publish lifecycle now emits post.published, post.published_all, and post.failed events (non-blocking).
+- Public API: existing REST v1 controllers (posts, social-accounts, analytics, workspace) now sit behind a plan-aware ApiRateLimitGuard (PLAN_LIMITS.apiRequestsPerMin via Redis sliding window, standard rate-limit headers, fail-open on Redis outage).
+- API key management: platform router mints sk_live_… keys (SHA-256 hashed, raw key shown once), lists, and revokes them; API access gated to pro/agency/enterprise via assertFeature.
+- Content templates: new ContentTemplate Prisma model (workspace-private + global defaults with usageCount); list/create/delete/use exposed through the platform router, plus an idempotent global seed library (`pnpm --filter @orbit/db db:seed:templates`).
+- White-label reports: gated behind agency/enterprise entitlement.
+- Dashboard UI: the developer settings page is now backed by the real platform router (API keys with show-once copy, webhooks with per-webhook delivery-log viewer); a new Templates settings page covers the template library. Procedure names in the platform router are flat (webhooksList, apiKeysCreate, templatesList) to keep AppRouter inference shallow for the web app's cross-package type import.
+
+Files:
+- Orbit/apps/api/src/modules/webhooks/webhooks.service.ts (+ spec, retries)
+- Orbit/apps/api/src/modules/public-api/api-rate-limit.guard.ts, public-api.module.ts
+- Orbit/apps/api/src/trpc/routers/platform.ts
+- Orbit/packages/db/prisma/schema.prisma (ContentTemplate) + prisma/seed-templates.ts
+- Orbit/apps/web/src/app/(dashboard)/settings/developer/page.tsx (real backend)
+- Orbit/apps/web/src/app/(dashboard)/settings/templates/page.tsx (new)
 
 ### 5.4 Ecosystem and growth features
 
@@ -280,14 +302,18 @@ Planned work:
 - CRM-lite workflows
 - White-label features
 
-### 5.5 Deeper production hardening
+### 5.5 Production hardening status
+
+Done (2026-09-23):
+- Request correlation IDs (X-Request-ID middleware, honored from upstream) + structured access logging with latency; LOG_FORMAT=json for log shippers.
+- Fixed the pre-existing analytics dashboard type error (AnalyticsSeriesPoint made platform-shape tolerant).
+- Ecosystem dashboard UI wired to the real backend (developer + templates pages).
 
 Still needed before a real launch:
-- Real provider integration tests with mocked APIs
-- End-to-end DB validation
-- More complete error handling and observability
-- Operational safety checks for queue reliability
-- Permission validation coverage across all mutation paths
+- Live sandbox verification: Stripe test mode (checkout, portal, webhook signature), provider metric fetchers, embedding quality with real keys.
+- End-to-end DB validation against a real PostgreSQL (prisma db push for WebhookEvent + ContentTemplate).
+- Queue dead-letter alerting and operational runbooks.
+- Permission validation coverage across all mutation paths (audit-level).
 
 ## 6) Key architectural patterns to preserve
 
@@ -365,12 +391,12 @@ This confirms the analytics service, the new ingest processor, and all metric fe
 
 The next agent should continue with the following priorities in order:
 
-1. Optional hardening: live sandbox verification (Stripe test mode; provider metric fetchers) or recorded HTTP fixtures.
-2. Move to AI differentiation (P4): brand voice embedding retrieval, content repurposing, performance-based recommendations.
-3. Then later roadmap slices: ecosystem features (webhooks, public API), launch hardening.
+1. Live sandbox verification: Stripe test mode (checkout, portal, webhook signature), provider metric fetchers, and embedding quality with real keys.
+2. Deploy prerequisites: `prisma db push` (WebhookEvent, ContentTemplate), `pnpm --filter @orbit/db db:seed:templates`, `pnpm build` in packages/ai.
+3. Operational hardening: queue dead-letter alerting, dashboards, and runbooks.
 
 ## 10) Short operational summary
 
 If another coding agent needs the shortest possible summary, use this:
 
-Orbit is a real monorepo SaaS platform with workspace-bound backend auth, encrypted social tokens, scheduled publishing, per-platform post jobs, analytics ingestion and aggregation, team collaboration, plan entitlements, and Stripe-backed billing. The app is beyond MVP and roughly 80% complete. The main remaining roadmap gaps are AI differentiation, ecosystem features, and live-sandbox verification of the billing and ingestion slices. Preserve the workspace-scoping and adapter patterns, and enforce entitlements through the EntitlementService.
+Orbit is a real monorepo SaaS platform with workspace-bound backend auth, encrypted social tokens, scheduled publishing, analytics ingestion, team collaboration, Stripe-backed billing with plan entitlements, AI brand voice/repurposing/recommendations, signed outbound webhooks with retries, a rate-limited public REST API, content templates (seeded global library + dashboard UI), and request-correlated structured logging. The app is feature-complete and roughly 97% done — remaining work is live sandbox verification and operational hardening. Preserve the workspace-scoping and adapter patterns, and enforce entitlements through the EntitlementService.

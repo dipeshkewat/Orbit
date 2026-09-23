@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 
 const prismaMock = vi.hoisted(() => ({
   brandVoiceExample: {
-    createMany: vi.fn(),
     findMany: vi.fn(),
   },
   post: {
@@ -11,6 +10,8 @@ const prismaMock = vi.hoisted(() => ({
   postMetric: {
     findMany: vi.fn(),
   },
+  $executeRaw: vi.fn(),
+  $queryRaw: vi.fn(),
 }));
 
 vi.mock("@orbit/db", () => ({
@@ -22,11 +23,10 @@ vi.mock("@orbit/ai", () => ({
   CAPTION_MODEL: "claude-sonnet-4-6",
   generateText: vi.fn(),
   generateEmbedding: vi.fn(),
-  cosineSimilarity: vi.fn(),
 }));
 
 import { AiDifferentiationService } from "./ai-differentiation.service";
-import { generateEmbedding, cosineSimilarity, generateText } from "@orbit/ai";
+import { generateEmbedding, generateText } from "@orbit/ai";
 
 describe("AiDifferentiationService", () => {
   const service = new AiDifferentiationService();
@@ -35,19 +35,9 @@ describe("AiDifferentiationService", () => {
     vi.clearAllMocks();
   });
 
-  describe("trainBrandVoice", () => createTrainTests(service));
-
-  describe("retrieveBrandVoiceExamples", () => createRetrievalTests(service));
-
-  describe("repurposePost", () => createRepurposeTests(service));
-
-  describe("getRecommendations", () => createRecommendationTests(service));
-});
-
-function createTrainTests(service: AiDifferentiationService) {
-  return () => {
-    test("embeds and persists every example", async () => {
-      prismaMock.brandVoiceExample.createMany.mockResolvedValue({ count: 2 });
+  describe("trainBrandVoice", () => {
+    test("embeds and persists every example via parameterized raw SQL", async () => {
+      prismaMock.$executeRaw.mockResolvedValue(1);
       (generateEmbedding as ReturnType<typeof vi.fn>)
         .mockResolvedValueOnce(new Array(1536).fill(0.1))
         .mockResolvedValueOnce(new Array(1536).fill(0.2));
@@ -55,57 +45,51 @@ function createTrainTests(service: AiDifferentiationService) {
       const result = await service.trainBrandVoice("ws-1", ["post a", "post b"]);
 
       expect(result).toEqual({ trained: 2 });
-      expect(prismaMock.brandVoiceExample.createMany).toHaveBeenCalledWith({
-        data: [
-          { workspaceId: "ws-1", content: "post a", embedding: expect.any(Array) },
-          { workspaceId: "ws-1", content: "post b", embedding: expect.any(Array) },
-        ],
-      });
+      expect(prismaMock.$executeRaw).toHaveBeenCalledTimes(2);
     });
 
-    test("succeeds with zero examples", async () => {
+    test("succeeds with zero examples without touching the database", async () => {
       const result = await service.trainBrandVoice("ws-1", []);
-      expect(result).toEqual({ trained: 0 });
-      expect(prismaMock.brandVoiceExample.createMany).not.toHaveBeenCalled();
-    });
-  };
-}
 
-function createRetrievalTests(service: AiDifferentiationService) {
-  return () => {
-    test("ranks examples by cosine similarity to the topic", async () => {
+      expect(result).toEqual({ trained: 0 });
+      expect(prismaMock.$executeRaw).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("retrieveBrandVoiceExamples", () => {
+    test("ranks examples by pgvector cosine distance", async () => {
       (generateEmbedding as ReturnType<typeof vi.fn>).mockResolvedValue([1, 0, 0]);
-      prismaMock.brandVoiceExample.findMany.mockResolvedValue([
-        { id: "a", content: "alpha", embedding: [1, 0, 0] },
-        { id: "b", content: "beta", embedding: [0, 1, 0] },
-        { id: "c", content: "gamma", embedding: [0.7, 0.7, 0] },
+      prismaMock.$queryRaw.mockResolvedValue([
+        { id: "a", content: "alpha", distance: 0.05 },
+        { id: "c", content: "gamma", distance: 0.4 },
       ]);
-      (cosineSimilarity as ReturnType<typeof vi.fn>).mockImplementation(
-        (a: number[], b: number[]) => a[0] * b[0] + a[1] * b[1],
-      );
 
       const results = await service.retrieveBrandVoiceExamples("ws-1", "topic", 2);
 
-      expect(results.map((r: { id: string }) => r.id)).toEqual(["a", "c"]);
+      expect(results).toEqual([
+        { id: "a", content: "alpha", score: 0.95 },
+        { id: "c", content: "gamma", score: 0.6 },
+      ]);
     });
 
-    test("falls back to recency when embedding retrieval throws", async () => {
+    test("falls back to recency when the vector query throws", async () => {
       (generateEmbedding as ReturnType<typeof vi.fn>).mockRejectedValue(
         new Error("embedder down"),
       );
-      prismaMock.brandVoiceExample.findMany
-        .mockResolvedValueOnce([{ id: "z", content: "recent", }])
-        .mockResolvedValueOnce([{ id: "z", content: "recent" }]);
+      prismaMock.brandVoiceExample.findMany.mockResolvedValue([
+        { id: "z", content: "recent" },
+      ]);
 
       const results = await service.retrieveBrandVoiceExamples("ws-1", "topic");
 
       expect(results).toEqual([{ id: "z", content: "recent", score: 0 }]);
+      expect(prismaMock.brandVoiceExample.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ orderBy: { createdAt: "desc" }, take: 5 }),
+      );
     });
-  };
-}
+  });
 
-function createRepurposeTests(service: AiDifferentiationService) {
-  return () => {
+  describe("repurposePost", () => {
     test("generates per-platform variants from the source post", async () => {
       prismaMock.post.findFirst.mockResolvedValue({
         id: "p1",
@@ -113,7 +97,7 @@ function createRepurposeTests(service: AiDifferentiationService) {
         content: "Big launch announcement!",
       });
       (generateEmbedding as ReturnType<typeof vi.fn>).mockResolvedValue([1, 0, 0]);
-      prismaMock.brandVoiceExample.findMany.mockResolvedValue([]);
+      prismaMock.$queryRaw.mockResolvedValue([]);
       (generateText as ReturnType<typeof vi.fn>).mockResolvedValue({
         text: JSON.stringify({
           twitter: { content: "Big launch! 🚀", characterCount: 15 },
@@ -150,7 +134,7 @@ function createRepurposeTests(service: AiDifferentiationService) {
         content: "x".repeat(3000),
       });
       (generateEmbedding as ReturnType<typeof vi.fn>).mockResolvedValue([1, 0, 0]);
-      prismaMock.brandVoiceExample.findMany.mockResolvedValue([]);
+      prismaMock.$queryRaw.mockResolvedValue([]);
       (generateText as ReturnType<typeof vi.fn>).mockResolvedValue({
         text: "not json at all",
       });
@@ -163,11 +147,9 @@ function createRepurposeTests(service: AiDifferentiationService) {
 
       expect(variants.twitter.characterCount).toBe(2200);
     });
-  };
-}
+  });
 
-function createRecommendationTests(service: AiDifferentiationService) {
-  return () => {
+  describe("getRecommendations", () => {
     test("returns the onboarding message when there is no metric data", async () => {
       prismaMock.postMetric.findMany.mockResolvedValue([]);
 
@@ -199,5 +181,5 @@ function createRecommendationTests(service: AiDifferentiationService) {
       expect(result.actions[0]).toContain("instagram");
       expect(result.actions.some((a: string) => a.includes("twitter"))).toBe(true);
     });
-  };
-}
+  });
+});

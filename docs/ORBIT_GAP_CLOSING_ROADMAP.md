@@ -93,3 +93,28 @@ The next active implementation slice is monetization (P3): Stripe webhook reconc
 The next active implementation slice is AI differentiation (P4): brand voice embedding
    retrieval, content repurposing, and performance-based recommendations, preceded by
    optional live-sandbox verification of the billing and ingestion slices.
+- **P4 AI differentiation:** brand-voice examples are embedded (OpenAI with a
+   deterministic local fallback) into pgvector via raw SQL and retrieved by cosine
+   distance with recency fallback; caption generation conditions on the most on-brand
+   examples. repurposePost produces platform-optimized variants of any workspace post,
+   and getRecommendations mines 30 days of PostMetrics into platform rankings and
+   concrete actions. The AI tRPC router now calls the real services with authorization
+   and credit metering instead of returning hardcoded mocks.
+- **P5 ecosystem:** outbound webhooks are HMAC-signed with event filtering, 3-attempt
+   exponential-backoff retries, and a delivery log; the publish lifecycle emits
+   post.published / post.published_all / post.failed. The public REST API is now rate
+   limited per plan (PLAN_LIMITS.apiRequestsPerMin, Redis sliding window). A platform
+   router adds API key minting/revocation (pro+ gate), content templates (new
+   ContentTemplate model), and a white-label entitlement gate. Dashboard UI for these
+   endpoints is pending; requires `prisma db push` for the template model.
+
+The roadmap's implementation slices are complete. Remaining work is launch hardening:
+   live sandbox verification (Stripe, providers, embeddings), dashboard UI for the
+   ecosystem endpoints, and operational observability.
+- **Ecosystem UI + hardening:** the developer settings page now runs on the real
+   platform router (API keys with show-once copy, webhooks with per-webhook delivery
+   logs) and a new Templates settings page covers the content-template library backed
+   by an idempotent global seed script. Request correlation IDs (X-Request-ID) and
+   structured access logging with latency are applied globally; LOG_FORMAT=json
+   produces log-shipper-ready output. The pre-existing analytics dashboard type error
+   was fixed; both apps typecheck clean.
