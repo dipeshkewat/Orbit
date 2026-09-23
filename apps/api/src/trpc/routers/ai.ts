@@ -1,78 +1,96 @@
 import { z } from "zod";
 import { TrpcService } from "../trpc.service";
 import { GenerateCaptionSchema, PlatformSchema } from "@orbit/types";
+import { AiService } from "../../modules/ai/ai.service";
+import { AiDifferentiationService } from "../../modules/ai/ai-differentiation.service";
 
-export function createAiRouter(trpc: TrpcService) {
+export function createAiRouter(
+  trpc: TrpcService,
+  aiService: AiService,
+  aiDifferentiation: AiDifferentiationService,
+) {
   return trpc.router({
     generateCaption: trpc.protectedProcedure
-      .input(GenerateCaptionSchema)
-      .mutation(async ({ input }) => {
-        // Simple mock caption output
-        return {
-          captions: input.platforms.reduce((acc: Record<string, any>, platform: string) => {
-            acc[platform] = {
-              content: `Here is a platform-optimized caption for ${platform} about: ${input.topic} #awesome #ai`,
-              characterCount: 100,
-              platformLimit: 2200,
-              hashtagsIncluded: 2,
-            };
-            return acc;
-          }, {} as Record<string, any>),
-          creditsUsed: input.platforms.length,
-          creditsRemaining: 950,
-        };
+      .input(GenerateCaptionSchema.extend({ workspaceId: z.string().uuid() }))
+      .mutation(async ({ ctx, input }) => {
+        await trpc.authorizeWorkspaceMutation(ctx, input.workspaceId);
+        return aiService.generateCaption({
+          workspaceId: input.workspaceId,
+          topic: input.topic,
+          tone: input.tone,
+          platforms: input.platforms,
+          brandVoiceEnabled: input.brandVoice,
+        });
       }),
 
     generateImage: trpc.protectedProcedure
       .input(
         z.object({
-          prompt: z.string(),
-          aspectRatio: z.enum(["1:1", "16:9", "9:16", "4:5"]).default("1:1"),
+          workspaceId: z.string().uuid(),
+          prompt: z.string().min(1),
+          size: z.enum(["512", "1024"]).default("512"),
         })
       )
-      .mutation(async ({ input }) => {
-        void input;
-        return {
-          imageUrl: "https://cdn.orbit.com/media/ai_mock_generated.png",
-          creditsUsed: 10,
-        };
+      .mutation(async ({ ctx, input }) => {
+        await trpc.authorizeWorkspaceMutation(ctx, input.workspaceId);
+        return aiService.generateImage({
+          workspaceId: input.workspaceId,
+          prompt: input.prompt,
+          size: input.size,
+        });
       }),
 
     trainBrandVoice: trpc.protectedProcedure
       .input(
         z.object({
           workspaceId: z.string().uuid(),
-          examples: z.array(z.string().min(5)).min(5).max(20),
+          examples: z.array(z.string().min(5)).min(1).max(20),
         })
       )
-      .mutation(async () => {
-        return { success: true };
+      .mutation(async ({ ctx, input }) => {
+        await trpc.authorizeWorkspaceMutation(ctx, input.workspaceId);
+        return aiDifferentiation.trainBrandVoice(input.workspaceId, input.examples);
       }),
 
-    suggestHashtags: trpc.protectedProcedure
+    getBrandVoiceExamples: trpc.protectedProcedure
       .input(
         z.object({
-          topic: z.string(),
+          workspaceId: z.string().uuid(),
+          topic: z.string().min(1),
+          limit: z.number().int().min(1).max(20).default(5),
         })
       )
-      .query(async ({ input }) => {
-        void input;
-        return {
-          hashtags: ["#orbit", "#marketing", "#contentcreator", "#socialmedia"],
-        };
+      .query(async ({ ctx, input }) => {
+        await trpc.authorizeWorkspace(ctx, input.workspaceId);
+        return aiDifferentiation.retrieveBrandVoiceExamples(
+          input.workspaceId,
+          input.topic,
+          input.limit,
+        );
       }),
 
-    suggestBestTime: trpc.protectedProcedure
+    repurposePost: trpc.protectedProcedure
       .input(
         z.object({
-          platform: PlatformSchema,
+          workspaceId: z.string().uuid(),
+          postId: z.string().uuid(),
+          targetPlatforms: z.array(PlatformSchema).min(1),
         })
       )
-      .query(async ({ input }) => {
-        void input;
-        return {
-          suggestedTimes: ["2026-07-18T09:00:00Z", "2026-07-18T18:00:00Z"],
-        };
+      .mutation(async ({ ctx, input }) => {
+        await trpc.authorizeWorkspaceMutation(ctx, input.workspaceId);
+        return aiDifferentiation.repurposePost(input);
+      }),
+
+    getRecommendations: trpc.protectedProcedure
+      .input(
+        z.object({
+          workspaceId: z.string().uuid(),
+        })
+      )
+      .query(async ({ ctx, input }) => {
+        await trpc.authorizeWorkspace(ctx, input.workspaceId);
+        return aiDifferentiation.getRecommendations(input.workspaceId);
       }),
   });
 }

@@ -7,9 +7,10 @@ import { OAuthStateService } from "./oauth-state.service";
 import { OAuthConnectionService } from "./oauth-connection.service";
 import { OAuthCallbackController } from "./oauth-callback.controller";
 import { RedisModule } from "../redis/redis.module";
+import { BillingModule } from "../billing/billing.module";
 
 @Module({
-  imports: [RedisModule],
+  imports: [RedisModule, BillingModule],
   controllers: [OAuthCallbackController],
   providers: [
     TokenEncryptionService,

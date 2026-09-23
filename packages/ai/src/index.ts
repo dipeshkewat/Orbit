@@ -68,3 +68,4 @@ export async function generateText(
 }
 
 export { streamText } from "ai";
+export { generateEmbedding, cosineSimilarity, EMBEDDING_DIMENSIONS } from "./embeddings";

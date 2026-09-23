@@ -23,9 +23,10 @@ vi.mock("@orbit/db", () => ({
 }));
 
 import { WorkspaceService } from "./workspace.service";
+import { EntitlementService } from "../billing/entitlement.service";
 
 describe("WorkspaceService invite acceptance", () => {
-  const service = new WorkspaceService();
+  const service = new WorkspaceService(new EntitlementService());
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -34,6 +35,9 @@ describe("WorkspaceService invite acceptance", () => {
   test("acceptInvite upgrades a pending invite to an accepted workspace membership", async () => {
     const token = service.createInviteToken("workspace-123", "alex@orbit.com");
 
+    // Seat enforcement reads the workspace plan before accepting.
+    prismaMock.workspace.findUnique.mockResolvedValue({ plan: "free" });
+    prismaMock.teamMember.count.mockResolvedValue(0);
     prismaMock.user.findUnique.mockResolvedValue({
       id: "real-user-id",
       clerkId: "clerk-123",

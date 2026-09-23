@@ -1,14 +1,22 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { anthropic, CAPTION_MODEL, generateText } from "@orbit/ai";
 import { prisma } from "@orbit/db";
+import { EntitlementService } from "../billing/entitlement.service";
+import { AiDifferentiationService } from "./ai-differentiation.service";
 
 @Injectable()
 export class AiService {
   private readonly logger = new Logger(AiService.name);
 
+  constructor(
+    private readonly entitlements: EntitlementService,
+    private readonly differentiation: AiDifferentiationService,
+  ) {}
+
   /**
    * Generate platform-optimized captions for a given topic.
-   * Deducts AI credits from the workspace's monthly allocation.
+   * Atomically reserves AI credits before calling the provider and refunds
+   * them if generation fails, so concurrent requests can never over-spend.
    */
   async generateCaption(input: {
     workspaceId: string;
@@ -21,24 +29,25 @@ export class AiService {
     creditsUsed: number;
     creditsRemaining: number;
   }> {
-    // Check credits
-    const credits = await this.getOrCreateCredits(input.workspaceId);
     const cost = input.platforms.length; // 1 credit per platform
-    if (credits.creditsUsed + cost > credits.planAllowance) {
-      throw new Error(
-        `Insufficient AI credits. Used: ${credits.creditsUsed}/${credits.planAllowance}. Required: ${cost}`
-      );
-    }
 
-    // Build brand voice context if enabled
+    // Atomic reservation — throws ForbiddenException when over budget.
+    const { creditsUsed, creditsRemaining } = await this.entitlements.consumeAiCredits(
+      input.workspaceId,
+      cost,
+    );
+
+    // Build brand voice context if enabled — semantically retrieve the most
+    // on-brand examples for this topic instead of a blind "take 5".
     let brandVoiceContext = "";
     if (input.brandVoiceEnabled) {
-      const examples = await prisma.brandVoiceExample.findMany({
-        where: { workspaceId: input.workspaceId },
-        take: 5,
-      });
+      const examples = await this.differentiation.retrieveBrandVoiceExamples(
+        input.workspaceId,
+        input.topic,
+        5,
+      );
       if (examples.length > 0) {
-        brandVoiceContext = `\n\nBrand voice examples to emulate:\n${examples.map((e: { content: string }) => `- "${e.content}"`).join("\n")}`;
+        brandVoiceContext = `\n\nBrand voice examples to emulate (most on-brand first):\n${examples.map((e: { content: string }) => `- "${e.content}"`).join("\n")}`;
       }
     }
 
@@ -93,18 +102,14 @@ Rules:
         }
       }
 
-      // Deduct credits
-      await prisma.aiCredit.update({
-        where: { id: credits.id },
-        data: { creditsUsed: credits.creditsUsed + cost },
-      });
-
       return {
         captions,
-        creditsUsed: cost,
-        creditsRemaining: credits.planAllowance - credits.creditsUsed - cost,
+        creditsUsed,
+        creditsRemaining,
       };
     } catch (err) {
+      // Provider failed after reservation — give the credits back.
+      await this.entitlements.refundAiCredits(input.workspaceId, cost);
       this.logger.error(`AI caption generation failed: ${(err as Error).message}`);
       throw err;
     }
@@ -162,7 +167,8 @@ Rules:
 
   /**
    * Generate an image using fal.ai Flux models.
-   * Deducts AI credits: 10 for 512x512, 20 for 1024x1024.
+   * Deducts AI credits: 10 for 512x512, 20 for 1024x1024 — reserved
+   * atomically before the provider call and refunded on failure.
    */
   async generateImage(input: {
     workspaceId: string;
@@ -173,14 +179,12 @@ Rules:
     creditsUsed: number;
     creditsRemaining: number;
   }> {
-    const credits = await this.getOrCreateCredits(input.workspaceId);
     const cost = input.size === "512" ? 10 : 20;
 
-    if (credits.creditsUsed + cost > credits.planAllowance) {
-      throw new Error(
-        `Insufficient AI credits. Used: ${credits.creditsUsed}/${credits.planAllowance}. Required: ${cost}`
-      );
-    }
+    const { creditsUsed, creditsRemaining } = await this.entitlements.consumeAiCredits(
+      input.workspaceId,
+      cost,
+    );
 
     try {
       let imageUrl = "";
@@ -212,59 +216,15 @@ Rules:
         imageUrl = `https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=${input.size}&q=80&sig=${Math.floor(Math.random() * 1000)}`;
       }
 
-      // Deduct credits
-      await prisma.aiCredit.update({
-        where: { id: credits.id },
-        data: { creditsUsed: credits.creditsUsed + cost },
-      });
-
       return {
         imageUrl,
-        creditsUsed: cost,
-        creditsRemaining: credits.planAllowance - credits.creditsUsed - cost,
+        creditsUsed,
+        creditsRemaining,
       };
     } catch (err) {
+      await this.entitlements.refundAiCredits(input.workspaceId, cost);
       this.logger.error(`AI image generation failed: ${(err as Error).message}`);
       throw err;
     }
-  }
-
-  /**
-   * Get or create the AI credits record for the current billing period
-   */
-  private async getOrCreateCredits(workspaceId: string) {
-    const now = new Date();
-    const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-
-    let credits = await prisma.aiCredit.findUnique({
-      where: {
-        workspaceId_month: { workspaceId, month },
-      },
-    });
-
-    if (!credits) {
-      // Get workspace plan to determine credit limit
-      const workspace = await prisma.workspace.findUnique({
-        where: { id: workspaceId },
-      });
-
-      const planLimits: Record<string, number> = {
-        free: 20,
-        creator: 200,
-        pro: 1000,
-        agency: 5000,
-      };
-
-      credits = await prisma.aiCredit.create({
-        data: {
-          workspaceId,
-          month,
-          creditsUsed: 0,
-          planAllowance: planLimits[workspace?.plan || "free"] || 20,
-        },
-      });
-    }
-
-    return credits;
   }
 }

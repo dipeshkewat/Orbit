@@ -1,11 +1,14 @@
 import { Injectable, ConflictException, NotFoundException, ForbiddenException, BadRequestException } from "@nestjs/common";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { prisma } from "@orbit/db";
+import { EntitlementService } from "../billing/entitlement.service";
 
 const INVITE_TOKEN_TTL_MS = 1000 * 60 * 60 * 24 * 7;
 
 @Injectable()
 export class WorkspaceService {
+  constructor(private readonly entitlements: EntitlementService) {}
+
   private getInviteSecret() {
     return process.env.APP_SECRET || process.env.CLERK_SECRET_KEY || "orbit-dev-invite-secret";
   }
@@ -155,27 +158,9 @@ export class WorkspaceService {
    * Invite a new member by email (creates team_members with pending status)
    */
   async inviteMember(workspaceId: string, email: string, role: string) {
-    const workspace = await prisma.workspace.findUnique({
-      where: { id: workspaceId },
-      select: { plan: true },
-    });
-
-    if (!workspace) {
-      throw new NotFoundException(`Workspace with ID '${workspaceId}' not found`);
-    }
-
-    if (workspace.plan === "free") {
-      const memberCount = await prisma.teamMember.count({
-        where: {
-          workspaceId,
-          inviteStatus: "accepted",
-        },
-      });
-
-      if (memberCount >= 1) {
-        throw new ConflictException("Free plan invites are limited to one active member");
-      }
-    }
+    // Enforce the plan's seat limit server-side (throws 404 for unknown
+    // workspaces and 409 when the plan's seat budget is exhausted).
+    await this.entitlements.assertCanInviteSeat(workspaceId);
 
     // Check if user already exists in db by email
     let user = await prisma.user.findUnique({
@@ -260,6 +245,10 @@ export class WorkspaceService {
     if (existingAcceptedMember) {
       return { success: true, workspaceId, memberId: existingAcceptedMember.id };
     }
+
+    // Accepting consumes a seat — enforce the plan limit at the last
+    // possible moment so pending invites cannot be used to bypass it.
+    await this.entitlements.assertCanInviteSeat(workspaceId);
 
     const updatedMember = await prisma.teamMember.update({
       where: { id: member.id },

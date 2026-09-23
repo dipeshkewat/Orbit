@@ -63,12 +63,33 @@ identity and workspace isolation.
    removal, signed invite acceptance, seat-limit enforcement, approvals, comments, post
    assignments, and workspace activity history are now workspace-scoped server operations.
    Assignment mutations require owner/admin access, validate active members, and atomically
-   record audit events. Richer collaboration UI and notification delivery remain pending.
-- **P2 analytics:** workspace overview aggregation, platform breakdown, and top-post queries
+   record audit events. Richer collaboration UI and notification delivery remain pending.- **P2 analytics:** workspace overview aggregation, platform breakdown, and top-post queries
    now use the real PostgreSQL metrics service through authorized tRPC procedures. The
    analytics dashboard summary cards, monthly reach chart, platform spread, and top-post
-   table and CSV export consume those server-backed results. Follower growth and live
-   provider metric ingestion remain.
+   table and CSV export consume those server-backed results.
+- **P2 provider metric ingestion:** the analytics_ingest queue now has a worker processor
+   plus per-platform metric fetch adapters (Instagram, LinkedIn, X/Twitter, Facebook,
+   TikTok) behind a shared PlatformMetricFetcher contract. The processor resolves the
+   published PostJob, decrypts the account token, fetches live metrics, and upserts
+   PostMetric rows; retryable (rate limit, network) and non-retryable (missing platform
+   post, bad token) failures are handled explicitly. Sixteen mocked-provider tests cover
+   the processor and every fetcher. Follower-growth account snapshots and live-provider
+   verification remain.
 
-The next active implementation slice is provider metric ingestion, followed by integration
-tests against a test database and mocked provider APIs.
+The next active implementation slice is monetization (P3): Stripe webhook reconciliation,
+   entitlement enforcement, and AI credit metering, preceded by optional ingest hardening
+   against live provider sandboxes.
+- **P3 monetization:** a central EntitlementService now enforces plan limits server-side
+   (channels, seats, AI credits) from the workspace's persisted plan. Stripe webhook
+   reconciliation is idempotent via a WebhookEvent ledger with price→plan mapping,
+   subscription lifecycle sync, invoice success → AI ledger refresh, and a 7-day grace
+   period on payment failure. The AI credit race is fixed with atomic compare-and-set
+   reservation plus refund-on-provider-failure, and the billing router performs real
+   checkout/portal/cancel behind workspace authorization. Seat limits now cover invite
+   acceptance on all plans (previously bypassable) and channel limits apply to new
+   connections. A WebhookEvent Prisma model was added (requires `prisma db push`).
+   Live Stripe test-mode verification and portal configuration remain.
+
+The next active implementation slice is AI differentiation (P4): brand voice embedding
+   retrieval, content repurposing, and performance-based recommendations, preceded by
+   optional live-sandbox verification of the billing and ingestion slices.

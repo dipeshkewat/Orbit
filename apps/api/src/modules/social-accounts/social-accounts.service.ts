@@ -2,10 +2,14 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { prisma } from "@orbit/db";
 import type { Prisma } from "@prisma/client";
 import { TokenEncryptionService } from "./token-encryption.service";
+import { EntitlementService } from "../billing/entitlement.service";
 
 @Injectable()
 export class SocialAccountsService {
-  constructor(private readonly encryptionService: TokenEncryptionService) {}
+  constructor(
+    private readonly encryptionService: TokenEncryptionService,
+    private readonly entitlements: EntitlementService,
+  ) {}
 
   /**
    * Save a newly connected social media account with encrypted tokens
@@ -22,6 +26,22 @@ export class SocialAccountsService {
     expiresInSeconds?: number;
     metadata?: Prisma.InputJsonValue;
   }) {
+    // Enforce the plan's channel limit for *new* connections; re-connecting
+    // an existing account must stay allowed even when the plan is full.
+    const existingAccount = await prisma.socialAccount.findUnique({
+      where: {
+        workspaceId_platform_platformUserId: {
+          workspaceId: data.workspaceId,
+          platform: data.platform,
+          platformUserId: data.platformUserId,
+        },
+      },
+      select: { id: true },
+    });
+    if (!existingAccount) {
+      await this.entitlements.assertCanConnectChannel(data.workspaceId);
+    }
+
     const encryptedAccessToken = new Uint8Array(this.encryptionService.encrypt(data.accessToken));
     const encryptedRefreshToken = data.refreshToken
       ? new Uint8Array(this.encryptionService.encrypt(data.refreshToken))

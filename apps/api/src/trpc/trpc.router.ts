@@ -5,6 +5,8 @@ import { createPostsRouter } from "./routers/posts";
 import { createSocialAccountsRouter } from "./routers/social-accounts";
 import { createAnalyticsRouter } from "./routers/analytics";
 import { createAiRouter } from "./routers/ai";
+import { AiService } from "../modules/ai/ai.service";
+import { AiDifferentiationService } from "../modules/ai/ai-differentiation.service";
 import { createMediaRouter } from "./routers/media";
 import { createBillingRouter } from "./routers/billing";
 import { createNotificationsRouter } from "./routers/notifications";
@@ -16,6 +18,8 @@ import { MediaService } from "../modules/media/media.service";
 import { WorkspaceService } from "../modules/workspace/workspace.service";
 import { NotificationsService } from "../modules/notifications/notifications.service";
 import { AnalyticsService } from "../modules/analytics/analytics.service";
+import { BillingService } from "../modules/billing/billing.service";
+import { EntitlementService } from "../modules/billing/entitlement.service";
 
 @Injectable()
 export class TrpcRouter {
@@ -31,15 +35,19 @@ export class TrpcRouter {
     workspaceService: WorkspaceService,
     notificationsService: NotificationsService,
     analyticsService: AnalyticsService,
+    billingService: BillingService,
+    entitlementService: EntitlementService,
+    aiService: AiService,
+    aiDifferentiation: AiDifferentiationService,
   ) {
     this.appRouter = this.trpc.router({
       workspace: createWorkspaceRouter(this.trpc, workspaceService, notificationsService),
       posts: createPostsRouter(this.trpc, postsService, notificationsService),
       socialAccounts: createSocialAccountsRouter(this.trpc, socialAccounts, oauthState, oauthConnection),
       analytics: createAnalyticsRouter(this.trpc, analyticsService),
-      ai: createAiRouter(this.trpc),
+      ai: createAiRouter(this.trpc, aiService, aiDifferentiation),
       media: createMediaRouter(this.trpc, mediaService),
-      billing: createBillingRouter(this.trpc),
+      billing: createBillingRouter(this.trpc, billingService, entitlementService),
       notifications: createNotificationsRouter(this.trpc),
     });
   }

@@ -215,6 +215,19 @@ model AiCredit {
   @@map("ai_credits")
 }
 
+// ─── Webhook Events ──────────────────────────────────────
+// Idempotency ledger for provider webhook deliveries (Stripe first).
+// One row per processed event ID; unique constraint makes replays no-ops.
+model WebhookEvent {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  eventId   String   @unique @map("event_id")
+  eventType String   @map("event_type")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@index([createdAt])
+  @@map("webhook_events")
+}
+
 // ─── Brand Voice Examples ─────────────────────────────────────
 // Training posts for brand voice AI with pgvector embeddings.
 model BrandVoiceExample {
