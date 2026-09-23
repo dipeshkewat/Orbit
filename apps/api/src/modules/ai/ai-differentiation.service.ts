@@ -1,6 +1,6 @@
 import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { prisma } from "@orbit/db";
-import { anthropic, CAPTION_MODEL, generateText, generateEmbedding, cosineSimilarity } from "@orbit/ai";
+import { anthropic, CAPTION_MODEL, generateText, generateEmbedding } from "@orbit/ai";
 
 /**
  * P4 AI differentiation:
@@ -17,41 +17,51 @@ export class AiDifferentiationService {
 
   /**
    * Train brand voice: persist examples with embeddings for later retrieval.
+   * The embedding column is Prisma-Unsupported (pgvector), so inserts go
+   * through parameterized raw SQL.
    */
   async trainBrandVoice(workspaceId: string, examples: string[]) {
-    const rows = [];
+    let trained = 0;
     for (const content of examples) {
       const embedding = await generateEmbedding(content);
-      rows.push({ workspaceId, content, embedding });
+      await prisma.$executeRaw`
+        INSERT INTO brand_voice_examples (workspace_id, content, embedding)
+        VALUES (${workspaceId}::uuid, ${content}, ${`[${embedding.join(",")}]`}::vector)
+      `;
+      trained += 1;
     }
-    await prisma.brandVoiceExample.createMany({ data: rows });
-    return { trained: rows.length };
+    return { trained };
   }
 
   /**
-   * Retrieve the most on-brand examples for a topic using cosine similarity
-   * over stored embeddings. Falls back to the most recent examples when the
-   * extension is unavailable.
+   * Retrieve the most on-brand examples for a topic using pgvector cosine
+   * distance. Falls back to the most recent examples when the extension or
+   * embedding backend is unavailable.
    */
   async retrieveBrandVoiceExamples(workspaceId: string, topic: string, limit = 5) {
     try {
       const topicEmbedding = await generateEmbedding(topic);
-      const all = await prisma.brandVoiceExample.findMany({
-        where: { workspaceId },
-        select: { id: true, content: true, embedding: true },
-      });
+      const vectorLiteral = `[${topicEmbedding.join(",")}]`;
 
-      return all
-        .map((e: { id: string; content: string; embedding: unknown }) => ({
-          id: e.id,
-          content: e.content,
-          score: cosineSimilarity(
-            topicEmbedding,
-            (e.embedding as number[] | null) ?? [],
-          ),
-        }))
-        .sort((a: { score: number }, b: { score: number }) => b.score - a.score)
-        .slice(0, limit);
+      const rows = await prisma.$queryRaw<
+        { id: string; content: string; distance: number }[]
+      >
+        // Cosine distance <=> ranks most-similar first; parameterized input
+        // keeps the query injection-safe.
+        prisma.$queryRaw`
+          SELECT id::text, content,
+                 embedding <=> ${vectorLiteral}::vector AS distance
+          FROM brand_voice_examples
+          WHERE workspace_id = ${workspaceId}::uuid
+          ORDER BY distance ASC
+          LIMIT ${limit}
+        `;
+
+      return rows.map((row) => ({
+        id: row.id,
+        content: row.content,
+        score: 1 - row.distance,
+      }));
     } catch (err) {
       this.logger.warn(
         `Brand voice retrieval fell back to recency: ${(err as Error).message}`,

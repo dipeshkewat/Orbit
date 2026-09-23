@@ -12,6 +12,7 @@ import { TikTokPublisher } from "./adapters/tiktok.publisher";
 import { PlatformPublisher } from "./adapters/platform-publisher.interface";
 import { isFinalAttempt, resolvePostStatus } from "./publishing-state";
 import { AnalyticsIngestService } from "../analytics/analytics-ingest.service";
+import { WebhooksService } from "../webhooks/webhooks.service";
 
 @Processor("post_publish")
 export class PublisherProcessor extends WorkerHost {
@@ -21,6 +22,7 @@ export class PublisherProcessor extends WorkerHost {
     private readonly socialAccountsService: SocialAccountsService,
     private readonly notificationsService: NotificationsService,
     private readonly analyticsIngestService: AnalyticsIngestService,
+    private readonly webhooksService: WebhooksService,
     private readonly instagramPublisher: InstagramPublisher,
     private readonly twitterPublisher: TwitterPublisher,
     private readonly linkedInPublisher: LinkedInPublisher,
@@ -125,6 +127,16 @@ export class PublisherProcessor extends WorkerHost {
             status: "published",
             platform: postJob.platform,
           });
+
+          // Fire outbound webhooks (non-blocking, errors logged inside)
+          void this.webhooksService
+            .dispatchEvent(post.workspaceId, "post.published", {
+              postId: post.id,
+              platform: postJob.platform,
+              platformPostId: result.platformPostId,
+              platformUrl: result.platformUrl,
+            })
+            .catch(() => undefined);
         } else {
           const errorMsg = result.errorMessage || "Unknown error";
           errors.push(`${postJob.platform}: ${errorMsg}`);
@@ -194,12 +206,24 @@ export class PublisherProcessor extends WorkerHost {
         title: "Post Published Successfully 🎉",
         body: `Your content has been published to all targeted social channels.`,
       });
+      void this.webhooksService
+        .dispatchEvent(post.workspaceId, "post.published_all", {
+          postId: post.id,
+          platforms: post.platforms,
+        })
+        .catch(() => undefined);
     } else {
       this.notificationsService.notifyWorkspace(post.workspaceId, {
         id: `pub_err_${postId}`,
         title: "Post Publication Failed ⚠️",
         body: `Failed to deliver post. Details: ${errors.join(", ")}`,
       });
+      void this.webhooksService
+        .dispatchEvent(post.workspaceId, "post.failed", {
+          postId: post.id,
+          errors,
+        })
+        .catch(() => undefined);
       if (hasRetryableFailure) {
         throw new Error(`Publishing failed: ${errors.join("; ")}`);
       }

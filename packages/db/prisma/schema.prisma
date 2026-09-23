@@ -58,6 +58,7 @@ model Workspace {
   mediaFiles       MediaFile[]
   aiCredits        AiCredit[]
   brandVoices      BrandVoiceExample[]
+  contentTemplates ContentTemplate[]
   activityLogs     ActivityLog[]
   webhooks         Webhook[]
   apiKeys          ApiKey[]
@@ -342,6 +343,29 @@ model RssFeed {
 
   @@index([workspaceId])
   @@map("rss_feeds")
+}
+
+// ─── Content Templates ────────────────────────────────────
+// Reusable post scaffolds. Workspace templates are private; system templates
+// (workspaceId null) are global defaults seeded per deployment.
+model ContentTemplate {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId String?  @map("workspace_id") @db.Uuid
+  name        String
+  description String?
+  category    String   @default("general") // announcement, promo, engagement, general
+  content     String   @db.Text
+  platforms   String[] @default([])
+  usageCount  Int      @default(0) @map("usage_count")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([category])
+  @@map("content_templates")
 }
 
 // ─── Post Metrics ─────────────────────────────────────────────
