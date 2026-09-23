@@ -80,18 +80,40 @@ export class WebhooksService {
       w.events.includes(eventType) || w.events.includes("*")
     );
 
-    for (const webhook of matchingWebhooks) {
-      const body = JSON.stringify({
-        event: eventType,
-        timestamp: new Date().toISOString(),
-        data: payload,
-      });
+    await Promise.all(
+      matchingWebhooks.map((webhook) =>
+        this.deliverWithRetries(webhook, eventType, payload),
+      ),
+    );
+  }
 
-      const signature = crypto
-        .createHmac("sha256", webhook.secretHash)
-        .update(body)
-        .digest("hex");
+  /**
+   * Deliver an event with up to MAX_ATTEMPTS tries and exponential backoff
+   * (1s, 2s, 4s). A delivery succeeds on any 2xx response; 4xx/5xx and
+   * network failures are retried. Every attempt is recorded on the final
+   * delivery log row.
+   */
+  private async deliverWithRetries(
+    webhook: { id: string; url: string; secretHash: string },
+    eventType: string,
+    payload: Record<string, any>,
+    maxAttempts = 3,
+  ) {
+    const body = JSON.stringify({
+      event: eventType,
+      timestamp: new Date().toISOString(),
+      data: payload,
+    });
 
+    const signature = crypto
+      .createHmac("sha256", webhook.secretHash)
+      .update(body)
+      .digest("hex");
+
+    let lastError = "";
+    let lastCode = 0;
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
       try {
         const response = await fetch(webhook.url, {
           method: "POST",
@@ -104,37 +126,67 @@ export class WebhooksService {
           signal: AbortSignal.timeout(10000), // 10s timeout
         });
 
-        await prisma.webhookDelivery.create({
-          data: {
-            webhookId: webhook.id,
-            event: eventType,
-            payload: JSON.parse(body),
-            status: "success",
-            responseCode: response.status,
-            responseBody: await response.text().catch(() => ""),
-            attempts: 1,
-            deliveredAt: new Date(),
-          },
-        });
+        if (response.ok) {
+          await prisma.webhookDelivery.create({
+            data: {
+              webhookId: webhook.id,
+              event: eventType,
+              payload: JSON.parse(body),
+              status: "success",
+              responseCode: response.status,
+              responseBody: await response.text().catch(() => ""),
+              attempts: attempt,
+              deliveredAt: new Date(),
+            },
+          });
+          this.logger.log(
+            `Webhook ${webhook.id} dispatched ${eventType}: ${response.status} (attempt ${attempt})`,
+          );
+          return;
+        }
 
-        this.logger.log(`Webhook ${webhook.id} dispatched ${eventType}: ${response.status}`);
+        lastCode = response.status;
+        lastError = await response.text().catch(() => "");
       } catch (err) {
-        await prisma.webhookDelivery.create({
-          data: {
-            webhookId: webhook.id,
-            event: eventType,
-            payload: JSON.parse(body),
-            status: "failed",
-            responseCode: 0,
-            responseBody: (err as Error).message,
-            attempts: 1,
-          },
-        });
+        lastCode = 0;
+        lastError = (err as Error).message;
+      }
 
-        this.logger.error(
-          `Webhook ${webhook.id} dispatch failed for ${eventType}: ${(err as Error).message}`
-        );
+      // Backoff before the next attempt (skip after the final one).
+      if (attempt < maxAttempts) {
+        await new Promise((resolve) => setTimeout(resolve, 1000 * 2 ** (attempt - 1)));
       }
     }
+
+    await prisma.webhookDelivery.create({
+      data: {
+        webhookId: webhook.id,
+        event: eventType,
+        payload: JSON.parse(body),
+        status: "failed",
+        responseCode: lastCode,
+        responseBody: lastError.slice(0, 2000),
+        attempts: maxAttempts,
+      },
+    });
+
+    this.logger.error(
+      `Webhook ${webhook.id} dispatch failed after ${maxAttempts} attempts for ${eventType}: ${lastError}`,
+    );
+  }
+
+  /**
+   * List recent deliveries for a workspace's webhook (for the dashboard).
+   */
+  async listDeliveries(workspaceId: string, webhookId: string, limit = 20) {
+    const webhook = await prisma.webhook.findUnique({ where: { id: webhookId } });
+    if (!webhook || webhook.workspaceId !== workspaceId) {
+      throw new Error("Webhook not found");
+    }
+    return prisma.webhookDelivery.findMany({
+      where: { webhookId },
+      orderBy: { createdAt: "desc" },
+      take: Math.min(limit, 100),
+    });
   }
 }
